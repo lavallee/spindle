@@ -1,0 +1,22 @@
+[project]
+name = "spindle-sample"
+version = "0.1.0"
+description = "Spindle sample distribution with a small public planning workflow"
+requires-python = ">=3.11"
+dependencies = [
+    "sample-planning==0.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["spindle_sample_dist"]
+
+[tool.spindle.distribution]
+display_name = "Spindle Sample"
+description = "Reference distribution: clarify -> design -> tasks -> review."
+source_dir = "../../"
+preempt_snippet = "distributions/spindle-sample/preempt.md"
+home_url = "https://github.com/lavallee/spindle/tree/main/examples/spindle-sample"

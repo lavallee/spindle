@@ -1,0 +1,5 @@
+[[surface]]
+name = "example-repo"
+path = "/path/to/example-repo"
+harness = "claude"
+autonomy = "deterministic"

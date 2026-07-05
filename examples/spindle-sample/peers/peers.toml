@@ -1,0 +1,11 @@
+# Spindle Sample peer registry — sources we learned from
+# edit by hand or via `spindle peers add/remove`
+
+[[peer]]
+slug = "anthropic-skills"
+name = "Anthropic Agent Skills"
+url = "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview"
+kind = "blog"
+last_seen = "2026-07-05"
+our_take = "Reference format for SKILL.md packaging."
+notes = "Replace or extend this peer list in your own distribution."

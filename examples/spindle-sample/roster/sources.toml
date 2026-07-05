@@ -1,0 +1,6 @@
+[[source]]
+slug = "local"
+name = "Local skill catalog"
+kind = "local"
+enabled = false
+notes = "Placeholder source for downstream projects to replace with their own marketplace provider."

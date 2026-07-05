@@ -1,0 +1,35 @@
+version = "0.1.0"
+
+[[preference]]
+id = "P1"
+scope = "system"
+favor = "clear acceptance evidence"
+over = "performative process"
+note = "Every composed workflow should preserve verifiable completion criteria."
+provenance = ["spindle-sample"]
+
+[[preference]]
+id = "P2"
+scope = "system"
+favor = "local project conventions"
+over = "generic advice"
+note = "Skills should adapt to the consuming surface."
+provenance = ["spindle-sample"]
+
+[[absolute]]
+id = "A1"
+scope = "system"
+mode = "ALWAYS"
+statement = "preserve explicit user constraints"
+provenance = ["spindle-sample"]
+
+[[absolute]]
+id = "A2"
+scope = "system"
+mode = "NEVER"
+statement = "fabricate missing facts"
+provenance = ["spindle-sample"]
+
+[[meta_principle]]
+id = "M1"
+statement = "Spindle composes source skills into surface-specific blends."

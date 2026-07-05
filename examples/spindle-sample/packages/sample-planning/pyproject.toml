@@ -1,0 +1,30 @@
+[project]
+name = "sample-planning"
+version = "0.1.0"
+description = "Reference planning skills for the Spindle sample distribution"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sample_planning"]
+
+[tool.spindle.package]
+name = "sample-planning"
+version = "0.1.0"
+distribution = "spindle-sample"
+skills = ["clarify", "design", "tasks", "review"]
+capabilities = [
+  "requirements-clarification",
+  "technical-design",
+  "task-decomposition",
+  "plan-review",
+]
+
+[[tool.spindle.package.sources]]
+peer = "spindle-sample"
+url = "https://github.com/lavallee/spindle/tree/main/examples/spindle-sample"
+transposed_at = "2026-07-05"
+notes = "Public reference package showing Spindle metadata, skill layout, and capability provenance."

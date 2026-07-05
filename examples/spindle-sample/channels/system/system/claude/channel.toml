@@ -1,0 +1,15 @@
+version = "0.1.0"
+absolutes = ["A1", "A2"]
+
+skills = [
+  "clarify",
+  "design",
+  "tasks",
+  "review",
+]
+
+[tiers]
+clarify = "judgment"
+design = "judgment"
+tasks = "judgment"
+review = "judgment"

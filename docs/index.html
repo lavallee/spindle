@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spindle</title>
+  <style>
+    body {
+      margin: 0;
+      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1f2933;
+      background: #f7f8f5;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 44px;
+      line-height: 1.05;
+    }
+    p {
+      margin: 0 0 18px;
+    }
+    code {
+      background: #e7ebe3;
+      border-radius: 4px;
+      padding: 2px 5px;
+    }
+    pre {
+      overflow: auto;
+      background: #182027;
+      color: #eef5ea;
+      border-radius: 8px;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Spindle</h1>
+    <p>Spindle composes source skills into surface-specific blends.</p>
+    <pre><code>uv sync --extra dev
+spindle dist install examples/spindle-sample/distributions/spindle-sample
+spindle dist activate spindle-sample
+spindle bind /path/to/repo --harness claude</code></pre>
+    <p>See the repository README and <code>examples/spindle-sample</code> for the reference package and distribution layout.</p>
+  </main>
+</body>
+</html>
