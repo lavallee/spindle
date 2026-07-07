@@ -33,6 +33,35 @@ lints the blend for coherence, renders through the active harness/model profiles
 and materializes the selected skills into the surface's harness-native skills
 directory.
 
+## Harnesses
+
+Most harnesses discover project skills repo-locally, so `bind` symlinks into a
+directory inside the target repo:
+
+| Harness | Materialization target |
+| --- | --- |
+| `claude` | `<repo>/.claude/skills/` |
+| `codex` | `<repo>/.codex/skills/` |
+| `pi` | `<repo>/.pi/skills/` |
+| `hermes` | `~/.hermes/skills/spindle/` (global) |
+
+### Hermes
+
+Hermes only discovers skills by recursively walking its global
+`~/.hermes/skills/` tree (following symlinks); it does not read repo-local
+`.hermes/skills` directories. `spindle bind <repo> --harness hermes` therefore
+symlinks the blend into a dedicated, spindle-owned category directory —
+`~/.hermes/skills/spindle/` by default, overridable with
+`SPINDLE_HERMES_SKILLS_DIR` — so hand-curated Hermes categories are never
+touched. The repo argument still names the binding surface; only the target
+directory is global, and reconcile/unbind semantics are identical to the other
+harnesses (only spindle-owned symlinks are ever removed).
+
+Caveat: because the target is one shared directory, skills from different
+surfaces bound with `--harness hermes` share a namespace there. And there is no
+hermes dialect profile yet — skills land in their claude-reference dialect;
+rendering/profile transforms for hermes are future work.
+
 ## Concepts
 
 | Term | Meaning |
