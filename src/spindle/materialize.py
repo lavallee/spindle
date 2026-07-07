@@ -7,6 +7,10 @@ per-harness skills directory (D8) — `<repo>/.claude/skills` for claude — so
 composition is genuinely per-surface and the harness's own project-skill
 discovery finds them. It stays orthogonal to the global install flow.
 
+Harnesses without repo-local discovery (hermes) instead get a dedicated,
+spindle-owned directory inside their global skills tree — same symlink and
+reconcile semantics, just a global target (see ``GLOBAL_HARNESS_DIR``).
+
 Safety: it only ever removes symlinks it is told it previously owned (``previous``
 = the prior binding's skill names). It never deletes real files or symlinks it
 doesn't recognize, so a hand-added project skill is safe.
@@ -16,6 +20,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from . import paths as paths_mod
 from .composition import Composition
 
 # Where each harness discovers project-local skills.
@@ -25,8 +30,20 @@ HARNESS_SUBDIR = {
     "pi": ".pi/skills",
 }
 
+# Harnesses that only discover skills from a single global directory. Hermes
+# walks ~/.hermes/skills recursively (following symlinks) and ignores
+# repo-local .hermes dirs, so its bindings land in a dedicated, spindle-owned
+# category dir there (see ``paths.hermes_skills_dir``). The repo argument still
+# names the binding *surface*; only the materialization target is global.
+GLOBAL_HARNESS_DIR = {
+    "hermes": paths_mod.hermes_skills_dir,
+}
+
 
 def target_dir(repo_path: str | Path, harness: str) -> Path:
+    global_dir = GLOBAL_HARNESS_DIR.get(harness)
+    if global_dir is not None:
+        return global_dir().expanduser()
     sub = HARNESS_SUBDIR.get(harness, f".{harness}/skills")
     return Path(repo_path) / sub
 

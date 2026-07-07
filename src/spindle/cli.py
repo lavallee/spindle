@@ -1224,7 +1224,9 @@ def main(argv=None) -> int:
     sp = sub.add_parser("bind", help="compose + materialize a surface's skills (channel binder)")
     sp.add_argument("repo", help="path to the target repo/surface checkout")
     sp.add_argument("--name", help="surface name (defaults to repo dir name)")
-    sp.add_argument("--harness", default="claude", help="claude | codex | pi (default claude)")
+    sp.add_argument("--harness", default="claude",
+                    help="claude | codex | pi | hermes (default claude); hermes "
+                         "materializes into the global ~/.hermes/skills/spindle dir")
     sp.add_argument("--model", default=None,
                     help="model/tier to tune render density for (e.g. frontier); "
                          "None = no model tuning")

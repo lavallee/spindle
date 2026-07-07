@@ -44,6 +44,20 @@ def claude_md_path() -> Path:
     return Path(os.environ.get("CLAUDE_MD_PATH", str(Path.home() / ".claude" / "CLAUDE.md")))
 
 
+def hermes_skills_dir() -> Path:
+    """Spindle-owned category inside the global Hermes skills tree.
+
+    Hermes discovers skills by recursively walking ``~/.hermes/skills``
+    (following symlinks) — it does not read repo-local ``.hermes/skills``
+    directories. Spindle therefore materializes hermes-harness bindings into a
+    dedicated ``spindle`` category dir so it never touches hand-curated
+    categories. Override with ``SPINDLE_HERMES_SKILLS_DIR``.
+    """
+    return _env_path(
+        "SPINDLE_HERMES_SKILLS_DIR", Path.home() / ".hermes" / "skills" / "spindle"
+    )
+
+
 def feedback_dir() -> Path:
     return spindle_home() / "feedback"
 
