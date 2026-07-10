@@ -129,3 +129,55 @@ skills = ["demo"]
     monkeypatch.setattr(packages, "read_package_metadata", lambda name: fake_meta)
     dirs = packages.package_skill_dirs("sample-demo")
     assert dirs == [skill]
+
+
+def test_package_skill_dirs_resolves_src_layout(tmp_path, monkeypatch):
+    """src-layout packages (src/<importable>/skills/<name>/) resolve too."""
+    skill = tmp_path / "src" / "sample_demo" / "skills" / "demo"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text("---\nname: demo\n---\n")
+
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+name = "sample-demo"
+version = "0.1.0"
+
+[tool.spindle.package]
+name = "sample-demo"
+version = "0.1.0"
+skills = ["demo"]
+"""
+    )
+
+    fake_meta = packages._parse_package_metadata(pyproject)
+    assert fake_meta is not None
+
+    monkeypatch.setattr(packages, "read_package_metadata", lambda name: fake_meta)
+    assert packages.package_skill_dirs("sample-demo") == [skill]
+
+
+def test_read_package_metadata_falls_back_to_spindle_name(tmp_path, monkeypatch):
+    """The spindle-package name may differ from the pip distribution name
+    (e.g. spindle package `flip` shipped by the `flip-notebook` distribution);
+    lookup falls back to scanning installed packages by spindle name."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+name = "sample-demo-dist"
+version = "0.2.0"
+
+[tool.spindle.package]
+name = "sample-demo"
+version = "0.2.0"
+skills = []
+"""
+    )
+    fake_meta = packages._parse_package_metadata(pyproject)
+    assert fake_meta is not None
+
+    monkeypatch.setattr(packages, "list_installed_packages", lambda: [fake_meta])
+    meta = packages.read_package_metadata("sample-demo")
+    assert meta is not None and meta.name == "sample-demo"

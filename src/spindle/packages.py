@@ -108,27 +108,46 @@ def list_installed_packages() -> list[PackageMetadata]:
 
 
 def read_package_metadata(name: str) -> PackageMetadata | None:
-    """Look up a single installed package by name."""
+    """Look up a single installed package by its spindle-package name.
+
+    The spindle-package name (`[tool.spindle.package] name`) need not equal
+    the pip distribution name — e.g. the `flip` spindle package ships in the
+    `flip-notebook` distribution because the bare name was taken on PyPI. Try
+    the fast path (distribution named `name`) first, then fall back to
+    scanning every installed distribution for a matching spindle name.
+    """
     try:
         dist = importlib.metadata.distribution(name)
     except importlib.metadata.PackageNotFoundError:
-        return None
-    pyproject = _resolve_pyproject(dist)
-    if pyproject is None:
-        return None
-    return _parse_package_metadata(pyproject)
+        dist = None
+    if dist is not None:
+        pyproject = _resolve_pyproject(dist)
+        if pyproject is not None:
+            meta = _parse_package_metadata(pyproject)
+            if meta is not None and meta.name == name:
+                return meta
+    for meta in list_installed_packages():
+        if meta.name == name:
+            return meta
+    return None
 
 
 def package_skill_dirs(name: str) -> list[Path]:
-    """Absolute directories (each containing SKILL.md) for skills shipped by `name`."""
+    """Absolute directories (each containing SKILL.md) for skills shipped by `name`.
+
+    Candidate layouts, in order: flat module (`<pkg>/skills/<skill>`),
+    src layout (`src/<pkg>/skills/<skill>`), and the two legacy spots at the
+    project root.
+    """
     meta = read_package_metadata(name)
     if meta is None:
         return []
-    importable_root = meta.package_dir / meta.name.replace("-", "_")
+    module = meta.name.replace("-", "_")
     dirs: list[Path] = []
     for skill in meta.skills:
         candidates = [
-            importable_root / "skills" / skill,
+            meta.package_dir / module / "skills" / skill,
+            meta.package_dir / "src" / module / "skills" / skill,
             meta.package_dir / skill,
             meta.package_dir / "skills" / skill,
         ]
