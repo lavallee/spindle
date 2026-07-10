@@ -23,6 +23,9 @@ def _skill_dir(tmp_path, name, text=SOURCE):
     d.mkdir()
     (d / "SKILL.md").write_text(text)
     (d / "extra.txt").write_text("aux\n")
+    refs = d / "references"
+    refs.mkdir()
+    (refs / "guide.md").write_text("nested aux\n")
     return d
 
 
@@ -73,6 +76,7 @@ def test_render_skill_writes_store_and_copies_aux(tmp_path):
     out = render.render_skill(src, profile, "0.1.0+abc", store_root=store)
     assert (out / "SKILL.md").exists()
     assert (out / "extra.txt").read_text() == "aux\n"  # aux files copied verbatim
+    assert (out / "references" / "guide.md").read_text() == "nested aux\n"
     assert out.parent.parent == store
 
 

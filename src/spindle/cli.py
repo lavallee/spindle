@@ -498,6 +498,13 @@ def cmd_bind(args) -> int:
                 tiers[s.tier] = tiers.get(s.tier, 0) + 1
         if tiers:
             print("  P10 tiers: " + ", ".join(f"{t}={n}" for t, n in sorted(tiers.items())))
+    if result.composition is not None and not result.composition.skills:
+        print(
+            "warning: composition resolved 0 skills — the subscribed channels list "
+            "skills but no installed package ships them (check `spindle package list`; "
+            "wheel installs need a bundled spindle-package.toml)",
+            file=sys.stderr,
+        )
     if args.dry_run:
         print("(dry-run — nothing written)")
     else:

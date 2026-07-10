@@ -136,6 +136,8 @@ def render_skill(skill_dir: str | Path, profile: Profile, doctrine_coordinate: s
         for f in skill_dir.iterdir():
             if f.is_file() and f.name != "SKILL.md":
                 shutil.copy2(f, out / f.name)
+            elif f.is_dir():
+                shutil.copytree(f, out / f.name, dirs_exist_ok=True)
         (out / "SKILL.md").write_text(rendered, encoding="utf-8")
     return out
 

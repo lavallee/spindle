@@ -91,15 +91,67 @@ def _parse_package_metadata(pyproject_path: Path) -> PackageMetadata | None:
     )
 
 
+DATA_FILE = "spindle-package.toml"
+
+
+def _data_file_metadata(dist: importlib.metadata.Distribution) -> PackageMetadata | None:
+    """Wheel-friendly discovery: a `<module>/spindle-package.toml` data file.
+
+    Wheels do not ship pyproject.toml, so packages installed from an index
+    (PyPI) are invisible to the pyproject strategies. A package can instead
+    ship the same `[tool.spindle.package]` table as a data file inside its
+    importable module — it travels in every wheel/sdist with no site-packages
+    pollution. name/version fall back to the distribution's own metadata.
+    """
+    files = dist.files or []
+    for f in files:
+        parts = f.parts
+        if len(parts) == 2 and parts[1] == DATA_FILE:
+            located = dist.locate_file(f)
+            path = Path(str(located))
+            if not path.is_file():
+                continue
+            try:
+                data = tomllib.loads(path.read_text())
+            except (OSError, tomllib.TOMLDecodeError):
+                return None
+            tool = data.get("tool", {})
+            spindle = tool.get("spindle", {}) if isinstance(tool, dict) else {}
+            pkg = spindle.get("package") if isinstance(spindle, dict) else None
+            if not isinstance(pkg, dict):
+                return None
+            name = pkg.get("name") or dist.metadata["Name"]
+            version = pkg.get("version") or dist.version
+            if not name or not version:
+                return None
+            sources_raw = pkg.get("sources", []) or []
+            return PackageMetadata(
+                name=str(name),
+                version=str(version),
+                distribution=pkg.get("distribution"),
+                skills=list(pkg.get("skills", []) or []),
+                capabilities=list(pkg.get("capabilities", []) or []),
+                sources=[_parse_source(s) for s in sources_raw if isinstance(s, dict)],
+                # parent of the module dir (site-packages), so the standard
+                # <package_dir>/<module>/skills/<skill> candidate resolves.
+                package_dir=path.parent.parent,
+            )
+    return None
+
+
 def list_installed_packages() -> list[PackageMetadata]:
-    """All installed distributions that declare `[tool.spindle.package]`."""
+    """All installed distributions that declare `[tool.spindle.package]`
+    (via pyproject.toml for source/editable installs, or a bundled
+    spindle-package.toml data file for wheel installs)."""
     results: list[PackageMetadata] = []
     seen: set[str] = set()
     for dist in importlib.metadata.distributions():
+        meta = None
         pyproject = _resolve_pyproject(dist)
-        if pyproject is None:
-            continue
-        meta = _parse_package_metadata(pyproject)
+        if pyproject is not None:
+            meta = _parse_package_metadata(pyproject)
+        if meta is None:
+            meta = _data_file_metadata(dist)
         if meta is None or meta.name in seen:
             continue
         seen.add(meta.name)

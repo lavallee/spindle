@@ -181,3 +181,39 @@ skills = []
     monkeypatch.setattr(packages, "list_installed_packages", lambda: [fake_meta])
     meta = packages.read_package_metadata("sample-demo")
     assert meta is not None and meta.name == "sample-demo"
+
+
+def test_data_file_discovery_for_wheel_installs(tmp_path):
+    """Wheels don't ship pyproject.toml; a <module>/spindle-package.toml data
+    file keeps PyPI-installed packages discoverable (found onboarding flip)."""
+    site = tmp_path / "site-packages"
+    module = site / "demo_pkg"
+    module.mkdir(parents=True)
+    (module / "spindle-package.toml").write_text(
+        """
+[tool.spindle.package]
+name = "demo"
+version = "1.0.0"
+skills = ["s1"]
+"""
+    )
+    skill = module / "skills" / "s1"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text("---\nname: s1\n---\n")
+
+    class FakePath:
+        def __init__(self, parts):
+            self.parts = tuple(parts)
+
+    class FakeDist:
+        files = [FakePath(["demo_pkg", "spindle-package.toml"])]
+        version = "1.0.0"
+        metadata = {"Name": "demo-dist"}
+
+        def locate_file(self, f):
+            return site / "/".join(f.parts)
+
+    meta = packages._data_file_metadata(FakeDist())
+    assert meta is not None
+    assert meta.name == "demo" and meta.skills == ["s1"]
+    assert meta.package_dir == site  # <package_dir>/<module>/skills/<skill> resolves
