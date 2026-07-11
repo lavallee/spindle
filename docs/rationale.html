@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Spindle exists — the case against the skill pile</title>
+<meta name="description" content="Skills multiply, and an unvetted pile is expensive: context budget, silent conflicts, one-size-fits-all bloat, wrong-surface phrasing, and eroded guardrails. The argument for composing skills per surface — and why the extra step pays for itself.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+<link rel="stylesheet" href="lib/artoo-kit/base.css">
+<link rel="stylesheet" href="lib/artoo-kit/article.css">
+<link rel="stylesheet" href="lib/artoo-kit/components.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Rationale</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">rationale</div>
+    <h1 class="article-title">Why compose skills at all?</h1>
+    <p class="article-dek">Skills are easy to add and quietly expensive to carry.
+    The default — a global pile that every repo inherits — has five hidden costs.
+    Composition is what turns a pile into a <em>tight, vetted set</em>.</p>
+  </header>
+
+  <p class="lead">Agent skills are one of the best ideas to arrive in coding
+  agents: a small file of hard-won instructions that makes the agent reliably good
+  at a task. The trouble starts not with any one skill but with the twentieth.
+  Skills accumulate the way dependencies do — and, like dependencies, an
+  unmanaged pile carries costs that don't show up until they compound.</p>
+
+  <p>The instinct is to install every useful skill globally so it's always
+  available. It's the right instinct and the wrong result. A global pile is never
+  vetted as a <em>set</em>: it was assembled one convenient addition at a time, by
+  different authors, for different situations. Below is what that costs, and what
+  composition buys instead.</p>
+
+  <div class="ledger">
+    <div>
+      <span class="tag">the default</span>
+      <h4>The pile</h4>
+      <ul>
+        <li>Every repo gets every skill.</li>
+        <li>Instructions crowd the context window.</li>
+        <li>Skills from different authors collide.</li>
+        <li>Each skill grows to cover every case.</li>
+        <li>Guardrails can be edited or crowded out.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">with spindle</span>
+      <h4>The blend</h4>
+      <ul>
+        <li>Each surface gets the subset it justifies.</li>
+        <li>Only relevant skills spend context.</li>
+        <li>The set is linted for coherence before it lands.</li>
+        <li>Skills stay small; coherence lives in composition.</li>
+        <li>Guardrails accumulate and can't be dropped.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Cost 1 — context budget</h2>
+  <div class="article-mrow">
+    <p>Every skill an agent loads is instruction it reads before it does any work.
+    A pile of forty skills is forty skills' worth of preamble competing with the
+    task for attention and tokens — most of it irrelevant to the repo in front of
+    it. A React app doesn't need the database-migration skill; a data pipeline
+    doesn't need the accessibility-audit skill. Loading them anyway is pure
+    overhead, and the overhead is worst exactly when the task is hardest and the
+    context is fullest.</p>
+    <aside class="article-marginnote article-marginnote--callout">
+      <span class="term">the subset is the product</span>
+      Spindle's materializer installs the <em>resolved subset</em> for a surface —
+      not every skill of a distribution. Fewer, sharper skills beat more, vaguer
+      ones.
+    </aside>
+  </div>
+
+  <h2>Cost 2 — incoherent blends</h2>
+  <p>Skills authored independently combine in ways no author ever tested. Two
+  skills both bind the <code>/review</code> command. One assumes the output format
+  another produces. A planning skill says "always write tasks to the tracker"
+  while a lightweight skill says "never leave the working directory." When you pour
+  many upstreams into one agent, you get a <b>pidgin</b>: a combination that no
+  single upstream ever vetted as a whole.</p>
+
+  <p class="article-pullquote">Blending sources risks a combination no single
+  upstream ever vetted. Coherence has to be checked where the blend is
+  made.<cite>The anti-pidgin guard, from Spindle's composition layer.</cite></p>
+
+  <div class="article-mrow">
+    <p>Spindle resolves a blend as a first-class object and <em>lints it</em>
+    before anything is written: it catches command collisions and duplicate skills,
+    records every override as a shadow, and refuses to materialize an incoherent
+    set unless you force it. The check runs at the one place that has the whole
+    picture — the surface where the skills will actually run together.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">shadow</span>
+      When a more-specific channel overrides a skill from a broader one, Spindle
+      records the override rather than silently dropping it — so the blend is
+      auditable.
+    </aside>
+  </div>
+
+  <h2>Cost 3 — one-size-fits-all skills</h2>
+  <p>There's a tempting way to make a skill "just work everywhere": keep adding
+  caveats and special cases until it covers every situation. The result is a skill
+  that is long, generic, and slightly worse for every specific surface — it spends
+  its words hedging instead of helping. And it never fully succeeds, because the
+  situations genuinely conflict.</p>
+
+  <p>Spindle takes the opposite position, and it is the load-bearing idea:</p>
+
+  <p class="article-pullquote">Coherence belongs at the composition layer — not
+  inside ever-larger skills.</p>
+
+  <p>Keep each skill small and canonical: write it once, for the case it's actually
+  good at. Let <em>composition</em> — which skills travel together, in what order,
+  phrased for which surface — carry the burden of making them work as a set. A
+  small skill that's right for this surface beats a big skill that's adequate for
+  all of them.</p>
+
+  <h2>Cost 4 — the wrong surface</h2>
+  <div class="article-mrow">
+    <p>"The right skills" is surface-relative in three independent ways, and a flat
+    global pile can express none of them:</p>
+    <aside class="article-marginnote">
+      <span class="term">three axes</span>
+      What to include, how to phrase it, and how much scaffolding to keep — each
+      is a different surface property.
+    </aside>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h3>App type</h3>
+      <p>A Python network service and a React frontend want different skills.
+      Spindle classifies the repo and resolves per-cluster channels
+      accordingly.</p></div>
+    <div class="card"><h3>Harness</h3>
+      <p>A Claude harness and a Codex harness phrase and locate skills
+      differently. The harness is both a selection key and a rendering
+      dialect.</p></div>
+    <div class="card"><h3>Model</h3>
+      <p>A frontier model reads faster without restated context and worked
+      examples a smaller model relies on. Rendering trims scaffolding by
+      model tier.</p></div>
+  </div>
+  <p>Same source skill, three surfaces, three different materialized results —
+  computed, not hand-maintained. <a href="how-it-works.html#render">Rendering</a>
+  is how one canonical skill becomes the right text for each target.</p>
+
+  <h2>Cost 5 — guardrails you can't accidentally drop</h2>
+  <div class="article-mrow">
+    <p>The moment an agent can recompose its own skills, it can — in principle —
+    compose away its own safety rules. Spindle makes that structurally impossible
+    in two places. Absolutes (the <code>ALWAYS</code>/<code>NEVER</code> rules a
+    channel puts in force) are <em>unioned</em> across every layer and are never
+    dropped by precedence: guardrails only accumulate. And at render time, every
+    guardrail clause present in a skill's source must survive, word for word, in
+    the rendered output — if a paraphrase or an LLM rewrite drops one, the bind
+    fails closed and materializes nothing.</p>
+    <aside class="article-marginnote article-marginnote--source">
+      <span class="term">fails closed</span>
+      A dropped guardrail or an incoherent blend stops the bind. Nothing lands
+      unless the whole set checks out. See
+      <a href="how-it-works.html#safety">the safety floor</a>.
+    </aside>
+  </div>
+
+  <h2>"But it adds a step"</h2>
+  <p>It does — one command, <code>spindle bind</code>, between installing skills
+  and using them. That's a fair objection, so here's the honest accounting of why
+  the step earns its place.</p>
+
+  <div class="article-mrow">
+    <p>First, it's cheap and it's amortized. A bind is deterministic and cached;
+    re-binding an unchanged surface is nearly free. The <b>advance team</b> can
+    precompute the blend for every known surface ahead of time, so a repo is
+    already composed before anyone opens it — the step disappears into a warm
+    cache.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">advance team</span>
+      <code>spindle advance run</code> binds every configured surface up front, so
+      the common case is precomputed rather than paid for on demand.
+    </aside>
+  </div>
+
+  <div class="article-mrow">
+    <p>Second, the step is where the value is created. It's the one moment that has
+    enough context to make the pile coherent, sized, phrased, and safe. Skip it and
+    you haven't saved work — you've pushed that work onto the agent at runtime,
+    where it's slower, less reliable, and unverifiable. And when a surface needs
+    something ad-hoc, the <b>liaison</b> logs the request as a demand signal, so
+    today's one-off becomes tomorrow's precomputed skill.</p>
+    <aside class="article-marginnote">
+      <span class="term">liaison</span>
+      The in-repo edge that owns the <em>what</em> and defers the <em>how</em> to
+      Spindle, capturing needs as a per-surface demand stream.
+    </aside>
+  </div>
+
+  <p>Third — and this is what makes the step more than bookkeeping — binding proves
+  a skill is <em>present and coherent</em>, but never that it's <em>good</em>.
+  Spindle separates those questions on purpose and answers the second one with
+  real evidence.</p>
+
+  <p class="article-pullquote">Rendering proves a skill is available. Only a
+  held-out evaluation proves it helped.</p>
+
+  <p>That's the payoff a pile can never give you: a skill set that is not just
+  present but sized, coherent, surface-fit, guardrail-safe, and — where it
+  matters — <a href="evaluation.html">measured</a>.</p>
+
+  <nav class="pagenav">
+    <a class="prev" href="index.html">
+      <span class="dir">← Back</span>
+      <span class="ttl">Overview</span>
+    </a>
+    <a class="next" href="how-it-works.html">
+      <span class="dir">Next →</span>
+      <span class="ttl">How it works</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    An open toolchain for composing agent skills · built with
+    <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
+</body>
+</html>

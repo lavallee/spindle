@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Spindle works — the data model and the bind pipeline</title>
+<meta name="description" content="The Spindle vocabulary — package, distribution, channel, surface, profile, blend, doctrine — and the six-stage bind pipeline that classifies a repo, resolves a coherent blend, renders it per harness and model, and materializes it where the runtime loads it.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+<link rel="stylesheet" href="lib/artoo-kit/base.css">
+<link rel="stylesheet" href="lib/artoo-kit/article.css">
+<link rel="stylesheet" href="lib/artoo-kit/components.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Rationale</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">how it works</div>
+    <h1 class="article-title">From source skills to materialized blend.</h1>
+    <p class="article-dek">Spindle is an assembly line. Authored skills become
+    packages; packages ship in distributions; channels select them per surface;
+    resolution merges them into a blend; profiles render it; a lint gates it; and
+    materialization writes it where the agent loads it.</p>
+  </header>
+
+  <div class="toc">
+    <b>On this page</b>
+    <ol>
+      <li><a href="#vocabulary">The vocabulary</a></li>
+      <li><a href="#pipeline">The <code>bind</code> pipeline</a></li>
+      <li><a href="#render">Rendering &amp; profiles</a></li>
+      <li><a href="#doctrine">Doctrine</a></li>
+      <li><a href="#safety">The safety floor</a></li>
+      <li><a href="#determinism">Determinism &amp; caching</a></li>
+    </ol>
+  </div>
+
+  <h2 id="vocabulary">The vocabulary</h2>
+  <p>Seven nouns carry the whole system. They stack from what an author writes to
+  what an agent loads:</p>
+
+  <div class="article-breakout">
+    <div class="chain">
+      <span class="node">skill</span><span class="sep">→</span>
+      <span class="node">package</span><span class="sep">→</span>
+      <span class="node">distribution</span><span class="sep">→</span>
+      <span class="node">channel</span><span class="sep">→</span>
+      <span class="node">blend</span><span class="sep">→</span>
+      <span class="node">profile</span><span class="sep">→</span>
+      <span class="node">surface</span>
+    </div>
+  </div>
+
+  <dl class="defs">
+    <div><dt>skill</dt><dd>A directory with a <code>SKILL.md</code> (YAML frontmatter
+      <code>name</code>/<code>description</code> + a Markdown body). The canonical,
+      authored-once unit. Kept small on purpose.</dd></div>
+    <div><dt>package</dt><dd>A pip-installable project that ships skills and
+      advertises capabilities, declared with <code>[tool.spindle.package]</code>.
+      Spindle discovers installed packages through that metadata.</dd></div>
+    <div><dt>distribution</dt><dd>A pip-installable bundle that groups packages (as
+      ordinary dependencies) and carries surface-wide assets — doctrine, channels,
+      profiles — declared with <code>[tool.spindle.distribution]</code>.</dd></div>
+    <div><dt>channel</dt><dd>A versioned <code>(scope × harness)</code> manifest
+      listing which skills a surface should receive at that scope, plus the
+      absolutes in force and optional routing tiers.</dd></div>
+    <div><dt>surface</dt><dd>A repo or agent that consumes a blend. Carries a name,
+      a harness, an autonomy mode, one or more app-class clusters, and a target
+      model.</dd></div>
+    <div><dt>profile</dt><dd>A data-driven, versioned renderer. A <em>harness</em>
+      profile sets dialect; a <em>model</em> profile sets density. Each names a
+      transform: <code>identity</code>, <code>terse</code>, <code>trim</code>, or
+      <code>llm</code>.</dd></div>
+    <div><dt>blend</dt><dd>The resolved skill subset for one surface — the
+      composition — together with the absolutes in force and a record of every
+      override (shadow). The thing that actually lands.</dd></div>
+    <div><dt>doctrine</dt><dd>The versioned first-principles set (preferences,
+      absolutes, meta-principles) that skills are checked against. One coherent
+      frame per distribution.</dd></div>
+  </dl>
+
+  <div class="callout">
+    <span class="callout-title">Scope</span>
+    A channel or doctrine entry has a <b>scope</b>: <code>system</code>,
+    <code>cluster</code>, or <code>repo</code>. Scope drives both the order in
+    which channels are selected (broad to narrow) and which layer wins when two
+    define the same skill (narrow wins). Guardrails are the exception — they
+    accumulate across all scopes.
+  </div>
+
+  <h2 id="pipeline">The <code>bind</code> pipeline</h2>
+  <p><code>spindle bind &lt;repo&gt; --harness claude</code> runs six stages. It is
+  a <b>fail-closed</b> pipeline: if rendering drops a guardrail or the lint finds a
+  problem, nothing is materialized (unless you pass <code>--force</code>).</p>
+
+  <div class="article-breakout">
+    <div class="pipeline">
+      <div class="stage"><span class="n">01</span><h4>Classify</h4>
+        <p>Read the checkout's <code>pyproject.toml</code>/<code>package.json</code>
+        into a signal; derive an app-class cluster key.</p>
+        <span class="mod">appclass.py</span></div>
+      <div class="stage"><span class="n">02</span><h4>Select</h4>
+        <p>Subscribe to channels broad → narrow: system, per-cluster, repo — for
+        this harness.</p>
+        <span class="mod">channels.py</span></div>
+      <div class="stage"><span class="n">03</span><h4>Resolve</h4>
+        <p>Merge the channel layers into one blend; narrow overrides broad; record
+        shadows; union absolutes.</p>
+        <span class="mod">composition.py</span></div>
+      <div class="stage"><span class="n">04</span><h4>Render</h4>
+        <p>Rewrite each skill for the harness dialect, then the model density.
+        Verify guardrails survived.</p>
+        <span class="mod">render.py</span></div>
+      <div class="stage"><span class="n">05</span><h4>Lint</h4>
+        <p>Check the blend for coherence — command collisions, duplicates, unsafe
+        irreversibles. Gate.</p>
+        <span class="mod">composition.py</span></div>
+      <div class="stage"><span class="n">06</span><h4>Materialize</h4>
+        <p>Symlink the resolved skills into the harness's native skills dir; touch
+        only spindle-owned links.</p>
+        <span class="mod">materialize.py</span></div>
+    </div>
+  </div>
+
+  <h3 id="classify">01 · Classify</h3>
+  <div class="article-mrow">
+    <p>Spindle reads the repo's manifests (<code>pyproject.toml</code>,
+    <code>package.json</code>) into a <code>RepoSignal</code> — language,
+    dependencies, notable files — and classifies it into an app-class with a
+    single stable <b>cluster key</b> like
+    <code>lang:python|network-service|uses-llms</code>. The surface's clusters come
+    from that key; a repo that changes shape gets re-clustered on the next bind.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">cluster key</span>
+      A stable string describing the kind of repo. It's how a channel says "these
+      skills are for Python services" without naming any specific repo.
+    </aside>
+  </div>
+
+  <h3 id="select">02 · Select</h3>
+  <p>The surface subscribes to an ordered list of channels, least- to
+  most-specific: <code>(system, system)</code>, then one
+  <code>(cluster, &lt;key&gt;)</code> per cluster, then
+  <code>(repo, &lt;name&gt;)</code>. Each resolves to a file on disk under the
+  active distribution's <code>source_dir</code>:</p>
+
+<pre><code>channels/&lt;scope&gt;/&lt;name&gt;/&lt;harness&gt;/channel.toml</code></pre>
+
+  <p>The harness is applied <em>here</em>: a Claude surface only ever reads the
+  <code>claude/</code> manifests. Missing manifests are simply skipped — a surface
+  legitimately has only a system channel. A channel manifest is small:</p>
+
+<pre><code><span class="c"># channels/system/system/claude/channel.toml</span>
+version = "0.1.0"
+absolutes = ["A1", "A2"]        <span class="c"># doctrine ids in force at this scope</span>
+skills = ["clarify", "design", "tasks", "review"]
+
+[tiers]                         <span class="c"># optional routing hints (advisory)</span>
+clarify = "judgment"
+design  = "judgment"
+tasks   = "judgment"
+review  = "judgment"</code></pre>
+
+  <div class="article-mrow">
+    <p>Skill names are resolved through an index built from the installed packages.
+    A name with no installed package is dropped — which is exactly why a bind that
+    finds nothing prints <code>resolved 0 skills</code>: the channel named skills
+    that aren't installed.</p>
+    <aside class="article-marginnote article-marginnote--callout">
+      <span class="term">version matters</span>
+      A channel's <code>version</code> feeds the binding coordinate, so bumping it
+      is how you signal that a surface's blend has meaningfully changed.
+    </aside>
+  </div>
+
+  <h3 id="resolve">03 · Resolve</h3>
+  <p>Resolution merges the selected layers into one <code>Composition</code>. Each
+  skill occupies a <b>slot</b> keyed by its command (falling back to its name); a
+  more-specific layer overrides a less-specific one for the same slot, and every
+  override is recorded as a <b>shadow</b> rather than silently dropped. Absolutes
+  are <em>unioned</em> across all layers and never lost to precedence — the
+  guardrail floor only rises. The default precedence is
+  <code>system → cluster → repo</code>.</p>
+
+  <h3 id="lintstage">05 · Lint</h3>
+  <p>With the blend assembled (and already rendered), the linter runs pure
+  coherence checks over its metadata: no two skills may claim the same command, no
+  skill may appear twice, and a genuinely irreversible skill must carry the
+  matching absolute. Problems stop the bind unless forced. The linter inspects
+  <em>structure</em>, not prose — which is why the guardrail check lives in
+  rendering (<a href="#safety">below</a>), not here.</p>
+
+  <h3 id="materialize">06 · Materialize</h3>
+  <div class="article-mrow">
+    <p>Finally, Spindle symlinks each resolved skill into the harness's native
+    location and reports a per-skill action —
+    <code>linked · updated · kept · removed · skipped</code>. It reads the
+    surface's previous binding to know which links it owns, and removes only those:
+    a file you added by hand is never touched.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">install location</span>
+      <code>claude → .claude/skills</code>,
+      <code>codex → .codex/skills</code>,
+      <code>pi → .pi/skills</code> (fallback <code>.&lt;harness&gt;/skills</code>).
+    </aside>
+  </div>
+  <p>Then it <b>records</b> the binding: a stable coordinate over the skills, the
+  doctrine, and the channel versions, appended to a per-surface history so any
+  prior coordinate is a rollback target. <code>spindle unbind</code> reverses it,
+  removing exactly the links Spindle owns.</p>
+
+  <h2 id="render">Rendering &amp; profiles</h2>
+  <p>Selection decides <em>which</em> skills; rendering decides <em>what text</em>
+  each one becomes for this surface. Because rendering produces new text, its
+  output can't be a symlink — it's written to a content-addressed store and the
+  blend is repointed at it. Two profile axes compose, dialect then density:</p>
+
+  <div class="ledger">
+    <div>
+      <span class="tag">axis 1 · harness</span>
+      <h4>Dialect</h4>
+      <ul>
+        <li><code>identity</code> — verbatim (Claude is the reference dialect).</li>
+        <li><code>terse</code> — deterministic whitespace collapse; content-preserving by construction.</li>
+        <li><code>llm</code> — an actual model rewrite into the harness dialect; skipped if no client is configured.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">axis 2 · model</span>
+      <h4>Density</h4>
+      <ul>
+        <li><code>identity</code> — keep all scaffolding (what weaker models want).</li>
+        <li><code>trim</code> — strip author-marked scaffold fences, then <code>terse</code>.</li>
+        <li><code>llm</code> — model-driven densification.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Profiles are tiny, versioned TOML files:</p>
+<pre><code><span class="c"># profiles/claude/profile.toml — harness dialect</span>
+version = "1"
+transform = "identity"
+
+<span class="c"># profiles/models/frontier/profile.toml — model density</span>
+version = "1"
+transform = "trim"
+tier = "frontier"</code></pre>
+
+  <div class="article-mrow">
+    <p>The <code>trim</code> transform is the "optimize things <em>out</em>" half
+    of tuning. An author marks a passage that only smaller models need, and a
+    frontier profile removes it — the same canonical skill, rendered denser for a
+    model that reads faster without it:</p>
+    <aside class="article-marginnote">
+      <span class="term">author once, render many</span>
+      One <code>SKILL.md</code> serves every model tier. The scaffolding is written
+      once and trimmed per surface, never duplicated.
+    </aside>
+  </div>
+<pre><code>&lt;!-- scaffold:examples --&gt;
+Worked example a smaller model benefits from…
+&lt;!-- /scaffold --&gt;</code></pre>
+
+  <h2 id="doctrine">Doctrine</h2>
+  <p>Doctrine is the coherent first-principles frame, kept as a versioned,
+  hand-editable, machine-readable TOML artifact. It has three entry kinds:</p>
+  <ul>
+    <li><b>preferences</b> — "favor X over Y," scoped, with a note and provenance.</li>
+    <li><b>absolutes</b> — <code>ALWAYS</code>/<code>NEVER</code> hard rules, scoped
+      and rare; densest at system scope.</li>
+    <li><b>meta-principles</b> — rules about how the other principles are written.</li>
+  </ul>
+
+<pre><code><span class="c"># doctrine/doctrine.toml (excerpt)</span>
+version = "0.1.0"
+
+[[preference]]
+id = "P1"
+scope = "system"
+favor = "clear acceptance evidence"
+over  = "performative process"
+
+[[absolute]]
+id = "A2"
+scope = "system"
+mode = "NEVER"
+statement = "fabricate missing facts"</code></pre>
+
+  <div class="article-mrow">
+    <p>Doctrine matters because it makes "coherence" a defined, versioned, testable
+    property instead of a vibe. Its <b>coordinate</b> —
+    <code>&lt;version&gt;+&lt;hash&gt;</code> — is pinned into every render cache key
+    and every binding record, so a rollback can re-fetch the exact doctrine that
+    produced a blend. <code>spindle doctrine validate</code> refuses a malformed
+    doctrine before it can ever render into skills.</p>
+    <aside class="article-marginnote article-marginnote--source">
+      <span class="term">shared vocabulary</span>
+      The absolute <em>ids</em> (A1, A2, …) are the shared language between
+      channels (<code>absolutes = […]</code>) and doctrine — one place defines
+      them, the other puts them in force.
+    </aside>
+  </div>
+
+  <h2 id="safety">The safety floor</h2>
+  <p>Two mechanisms make it structurally hard to compose away safety. First,
+  absolutes accumulate: because <a href="#resolve">resolve</a> unions them across
+  every layer, a narrow channel can add a guardrail but never remove one. Second,
+  rendering verifies preservation:</p>
+
+  <p class="article-pullquote">Every guardrail clause in a skill's source must
+  survive, normalized, in the rendered output — or the bind fails
+  closed.<cite>render.verify_preserved</cite></p>
+
+  <p>Guardrail clauses are lines matching <code>ALWAYS</code>, <code>NEVER</code>,
+  <code>MUST NOT</code>, or <code>DO NOT</code>. The coherence linter reads
+  metadata and can't catch a paraphrase that quietly drops one — so this
+  deterministic check is the backstop, and it holds even when an
+  <code>llm</code> profile ignores its instructions. A dropped clause raises an
+  error and the binder materializes nothing.</p>
+
+  <h2 id="determinism">Determinism &amp; caching</h2>
+  <div class="article-mrow">
+    <p>Everything is content-addressed, which is what makes the "extra step" cheap
+    to repeat. A rendered skill is cached under
+    <code>sha256(doctrine × harness-profile version × model-profile version ×
+    skill content)</code>; change any input and the cache invalidates, change
+    nothing and the render is reused. A binding's coordinate is
+    <code>sha256(skills + doctrine + channel versions)</code>. Re-binding an
+    unchanged surface is nearly free, and every past coordinate is a precise
+    rollback target.</p>
+    <aside class="article-marginnote article-marginnote--callout">
+      <span class="term">warm cache</span>
+      This is why <code>spindle advance run</code> can precompute every surface
+      ahead of time — see the <a href="rationale.html">rationale</a> and
+      <a href="guide.html">guide</a>.
+    </aside>
+  </div>
+
+  <nav class="pagenav">
+    <a class="prev" href="rationale.html">
+      <span class="dir">← Back</span>
+      <span class="ttl">Why Spindle exists</span>
+    </a>
+    <a class="next" href="evaluation.html">
+      <span class="dir">Next →</span>
+      <span class="ttl">Does the skill help?</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    An open toolchain for composing agent skills · built with
+    <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
+</body>
+</html>

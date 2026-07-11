@@ -1,0 +1,85 @@
+# Spindle
+
+> Spindle composes source skills into tight, surface-specific blends. It installs
+> skill packages, groups them into distributions, resolves the right subset for a
+> repo or agent surface, renders that subset for a harness/model profile, lints it
+> for coherence, and materializes it where the agent runtime loads it — then proves
+> a skill actually improves behavior (not merely that it loaded) with paired,
+> held-out behavioral evaluations. Open-core Python toolchain; MIT licensed.
+
+For the whole documentation in one file, read the bundle:
+[bundle.md](bundle.md).
+
+## Core idea
+
+- A global "pile" of agent skills is never vetted as a set. It costs context
+  budget, produces incoherent blends (a "pidgin" no upstream tested), pushes each
+  skill toward one-size-fits-all bloat, ignores that different surfaces want
+  different skills phrased differently, and lets guardrails erode.
+- Spindle keeps each skill small and canonical, and puts coherence at the
+  **composition layer**: it resolves a tight subset per surface, renders it for the
+  target harness and model, and checks it before anything lands.
+- `spindle bind <repo> --harness claude` is the whole idea in one command:
+  **classify → select → resolve → render → lint → materialize → record**. It fails
+  closed: an incoherent blend or a dropped guardrail materializes nothing.
+
+## Pages
+
+- [Overview](index.html): what Spindle is, the two-minute quickstart, and the
+  concept map.
+- [Rationale](rationale.html): the five hidden costs of the skill pile (context
+  budget, incoherent blends, one-size-fits-all skills, wrong-surface phrasing,
+  guardrail erosion) and why the extra `bind` step pays for itself.
+- [How it works](how-it-works.html): the vocabulary (skill, package, distribution,
+  channel, surface, profile, blend, doctrine) and the six-stage bind pipeline,
+  rendering profiles, doctrine, the safety floor, and determinism/caching.
+- [Evaluation](evaluation.html): why availability ≠ improvement; paired
+  baseline/variant cases, seeded order randomization, the held-out promotion gate,
+  the argv runner contract, and durable hash-pinned receipts.
+- [Guide](guide.html): install/activate a distribution, bind a repo, precompute
+  with advance/liaison, build your own packages/distributions/channels/profiles,
+  evaluate skills, and the env-var seams for plugging in your own sinks.
+
+## Vocabulary (quick reference)
+
+- **skill**: a directory with a `SKILL.md` (frontmatter `name`/`description` + body);
+  the canonical authored-once unit, kept small.
+- **package**: pip project shipping skills, declared with `[tool.spindle.package]`.
+- **distribution**: pip bundle grouping packages + carrying doctrine, channels,
+  profiles; declared with `[tool.spindle.distribution]`.
+- **channel**: versioned `(scope × harness)` manifest listing which skills a surface
+  gets at that scope, plus the absolutes in force.
+- **surface**: a repo or agent consuming a blend (name, harness, autonomy, clusters,
+  model).
+- **profile**: a versioned renderer; a *harness* profile sets dialect, a *model*
+  profile sets density. Transforms: `identity`, `terse`, `trim`, `llm`.
+- **blend / composition**: the resolved subset for one surface + absolutes in force
+  + recorded overrides (shadows).
+- **doctrine**: the versioned first-principles set (preferences, absolutes,
+  meta-principles) skills are checked against.
+- **scope**: `system | cluster | repo` — drives selection order and precedence
+  (narrow wins), except absolutes, which accumulate.
+
+## Key invariants
+
+- Guardrails only accumulate: absolutes are unioned across all channel layers and
+  never dropped by precedence.
+- Every `ALWAYS`/`NEVER`/`MUST NOT`/`DO NOT` clause in a skill's source must survive
+  rendering, or the bind fails closed (`render.verify_preserved`).
+- Rendering and binding prove availability; only a held-out evaluation proves
+  improvement. Development eval cases never make a run promotion-eligible.
+- Everything is content-addressed: rendered skills and binding coordinates are
+  hashes of their inputs, so re-binding an unchanged surface is nearly free and
+  every past coordinate is a rollback target.
+
+## Source
+
+- Repository: https://github.com/lavallee/spindle
+- Reference distribution: `examples/spindle-sample` in the repo.
+- License: MIT. An open toolchain for composing agent skills.
+
+## Provenance
+
+This site is an [artoo](https://github.com/lavallee/artoo) artifact, built with the
+artoo-kit design system and hand-authored from the Spindle source. It describes
+Spindle v0.1; treat it as a point-in-time snapshot of a young, evolving toolchain.

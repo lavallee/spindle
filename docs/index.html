@@ -1,52 +1,175 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Spindle</title>
-  <style>
-    body {
-      margin: 0;
-      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #1f2933;
-      background: #f7f8f5;
-    }
-    main {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 56px 24px;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: 44px;
-      line-height: 1.05;
-    }
-    p {
-      margin: 0 0 18px;
-    }
-    code {
-      background: #e7ebe3;
-      border-radius: 4px;
-      padding: 2px 5px;
-    }
-    pre {
-      overflow: auto;
-      background: #182027;
-      color: #eef5ea;
-      border-radius: 8px;
-      padding: 16px;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spindle — the right skills, composed for each surface</title>
+<meta name="description" content="Spindle composes source skills into tight, surface-specific blends: resolved for the repo, rendered for the harness and model, materialized where the agent runtime loads them — and proven to help before they stay.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+<link rel="stylesheet" href="lib/artoo-kit/base.css">
+<link rel="stylesheet" href="lib/artoo-kit/article.css">
+<link rel="stylesheet" href="lib/artoo-kit/components.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <h1>Spindle</h1>
-    <p>Spindle composes source skills into surface-specific blends.</p>
-    <pre><code>uv sync --extra dev
-spindle dist install examples/spindle-sample/distributions/spindle-sample
-spindle dist activate spindle-sample
-spindle bind /path/to/repo --harness claude</code></pre>
-    <p>See the repository README and <code>examples/spindle-sample</code> for the reference package and distribution layout.</p>
-  </main>
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Rationale</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">skill composition for coding agents <span class="badge badge--accent">v0.1</span></div>
+    <h1 class="article-title">The right skills, composed for each surface.</h1>
+    <p class="article-dek">A pile of skills is cheap to add and expensive to carry.
+    Spindle composes <em>source skills</em> into tight, surface-specific
+    <em>blends</em> — resolved for the repo, rendered for the harness and model,
+    and materialized exactly where the agent runtime loads them.</p>
+    <div class="meta-row">
+      <span>Python toolchain</span>
+      <span>MIT licensed</span>
+      <span><b>pip</b>-installable packages</span>
+      <span>harness-native output</span>
+    </div>
+  </header>
+
+  <p class="lead">Agent "skills" — the reusable instruction files a coding agent
+  loads to do a job well — multiply fast. Left unmanaged, every repository inherits
+  the same growing pile: skills it will never use, skills that quietly contradict
+  each other, and a context budget spent on instructions instead of work. Spindle
+  treats a surface's skill set as something you <em>compose</em> and
+  <em>verify</em>, not something you accumulate.</p>
+
+  <div class="article-mrow">
+    <p>The everyday workflow is one command. <code>spindle bind</code> looks at a
+    repo, figures out what kind of surface it is, resolves the exact subset of
+    skills it should receive, checks that subset for coherence, renders each skill
+    for the target harness and model, and writes the result into the harness's
+    native skills directory. The agent simply finds the right skills already there.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">surface</span>
+      A repo or agent that consumes a skill blend. Different surfaces want
+      different skills, phrased differently.
+    </aside>
+  </div>
+
+  <h2>Two minutes in</h2>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="c"># install the toolchain and a reference distribution of skills</span>
+<span class="p">$</span> uv sync --extra dev
+<span class="p">$</span> spindle dist install examples/spindle-sample/distributions/spindle-sample
+<span class="p">$</span> spindle dist activate spindle-sample
+
+<span class="c"># see what you've got</span>
+<span class="p">$</span> spindle doctrine show
+<span class="p">$</span> spindle skill list
+
+<span class="c"># compose + render + materialize the right blend for a repo</span>
+<span class="p">$</span> spindle bind /path/to/repo --harness claude
+<span class="o">resolved 4 skills · lint ok · rendered (identity) · linked → .claude/skills/</span></code></pre>
+  </div>
+
+  <p>That last command is the whole idea in miniature: <b>classify</b> the repo,
+  <b>select</b> the channels it subscribes to, <b>resolve</b> them into one blend,
+  <b>render</b> through the harness/model profiles, <b>lint</b> for coherence, and
+  <b>materialize</b> the selected skills where the runtime can load them —
+  <a href="how-it-works.html">failing closed</a> if the blend isn't coherent.</p>
+
+  <h2>The shape of the idea</h2>
+  <div class="card-grid">
+    <a class="card" href="rationale.html">
+      <h3>Why it exists →</h3>
+      <p>The case against the skill pile: context budget, silent conflicts,
+      one-size-fits-all phrasing, and eroded guardrails. Why the extra step pays
+      for itself.</p>
+    </a>
+    <a class="card" href="how-it-works.html">
+      <h3>How it works →</h3>
+      <p>The data model — package, distribution, channel, surface, profile,
+      blend, doctrine — and the six-stage <code>bind</code> pipeline that turns
+      sources into materialized skills.</p>
+    </a>
+    <a class="card" href="evaluation.html">
+      <h3>Does it actually help? →</h3>
+      <p>Binding proves a skill is <em>available</em>, not that it's <em>better</em>.
+      Spindle runs paired, held-out behavioral evaluations and gates promotion on
+      the result.</p>
+    </a>
+    <a class="card" href="guide.html">
+      <h3>Use it →</h3>
+      <p>Install a distribution, bind a repo, and build your own packages,
+      distributions, and channels. Plug in your own task, gate, and scout sinks.</p>
+    </a>
+  </div>
+
+  <h2>What it is, precisely</h2>
+  <p>Spindle is a small, dependency-light Python toolchain for a specific loop:
+  install skill <b>packages</b>, group them into <b>distributions</b>, resolve the
+  right subset for a repo or agent surface, render that subset for a harness/model
+  <b>profile</b>, and materialize the result where the agent runtime loads it.
+  Packages and distributions are ordinary pip-installable projects that declare
+  themselves with <code>[tool.spindle.package]</code> and
+  <code>[tool.spindle.distribution]</code> metadata, so the whole ecosystem grows
+  through packaging you already understand.</p>
+
+  <div class="article-mrow">
+    <p>The public base ships a minimal reference distribution under
+    <code>examples/spindle-sample</code>. Everything private — an organization's
+    own packages, project registries, task sinks, marketplace providers — lives in
+    separate adapter packages that depend on Spindle, never inside its core.</p>
+    <aside class="article-marginnote article-marginnote--source">
+      <span class="term">open core</span>
+      Core is the renderer and the contracts. Swap the sinks, keep the machinery.
+      See the <a href="guide.html#extending">Guide</a>.
+    </aside>
+  </div>
+
+  <p class="article-pullquote">Rendering proves a skill is present. Only a
+  held-out evaluation proves it helped.<cite>The distinction Spindle is built
+  around.</cite></p>
+
+  <h2>Built for humans and agents</h2>
+  <div class="article-mrow">
+    <p>This site reads as prose for people and ships a machine surface for agents:
+    an <a href="llms.txt">llms.txt</a> index and a single-file
+    <a href="bundle.md">bundle.md</a> you can paste straight into an LLM's context.
+    Point your agent at either when you want it to reason about how Spindle works.</p>
+    <aside class="article-marginnote">
+      <span class="term">for your agent</span>
+      <code>curl</code> the bundle, or add the llms.txt URL to your agent's
+      reading list — same content, machine-shaped.
+    </aside>
+  </div>
+
+  <nav class="pagenav">
+    <a class="prev" href="https://github.com/lavallee/spindle">
+      <span class="dir">Source</span>
+      <span class="ttl">github.com/lavallee/spindle</span>
+    </a>
+    <a class="next" href="rationale.html">
+      <span class="dir">Next →</span>
+      <span class="ttl">Why Spindle exists</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    Spindle is an open toolchain for composing agent skills. This site is an
+    <a href="https://github.com/lavallee/artoo">artoo</a> artifact built with the
+    artoo-kit design system.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
 </body>
 </html>

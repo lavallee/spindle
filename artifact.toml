@@ -1,0 +1,22 @@
+[artifact]
+slug = "spindle"
+title = "Spindle"
+description = "Spindle composes source skills into surface-specific blends — a tight, efficient, and behaviorally-verified set of skills for each repo and agent."
+kind = "explainer"
+status = "live"
+created = "2026-07-11"
+
+[build]
+site = "docs"
+
+[deploy]
+target = "github-pages"
+
+[deploy.github-pages]
+mode = "docs"
+docs_dir = "docs"
+
+[[libraries]]
+name = "artoo-kit"
+version = "0.1.0"
+sha256 = "c5b710294939bd2f01360ad47a20f6a9a3fdc14840bf92a04480fb6f2a2a23a3"

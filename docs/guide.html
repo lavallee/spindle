@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using Spindle — install, bind, build, extend</title>
+<meta name="description" content="A practical guide: install and activate a distribution, bind a repo, precompute blends, build your own packages, distributions, channels, and profiles, evaluate skills, and plug in your own task, gate, and scout sinks.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+<link rel="stylesheet" href="lib/artoo-kit/base.css">
+<link rel="stylesheet" href="lib/artoo-kit/article.css">
+<link rel="stylesheet" href="lib/artoo-kit/components.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Rationale</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">guide</div>
+    <h1 class="article-title">Using Spindle.</h1>
+    <p class="article-dek">The daily workflow is one command. Everything else —
+    building your own skills, tuning per surface, and wiring Spindle into your own
+    infrastructure — is optional depth you reach for when you need it.</p>
+  </header>
+
+  <div class="toc">
+    <b>On this page</b>
+    <ol>
+      <li><a href="#install">Install &amp; activate</a></li>
+      <li><a href="#bind">Bind a repo (the daily step)</a></li>
+      <li><a href="#ahead">Work ahead: advance &amp; liaison</a></li>
+      <li><a href="#build">Build your own</a></li>
+      <li><a href="#evaluate">Evaluate a skill</a></li>
+      <li><a href="#extending">Extending Spindle</a></li>
+      <li><a href="#cli">CLI reference</a></li>
+    </ol>
+  </div>
+
+  <h2 id="install">Install &amp; activate</h2>
+  <p>Spindle is a Python toolchain; skills arrive as pip-installable
+  distributions. Install one, then mark it active so every later command reads its
+  doctrine, channels, and profiles:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> uv sync --extra dev
+
+<span class="c"># install the reference distribution and its packages, then activate it</span>
+<span class="p">$</span> spindle dist install examples/spindle-sample/distributions/spindle-sample
+<span class="p">$</span> spindle dist activate spindle-sample
+
+<span class="c"># confirm what's live</span>
+<span class="p">$</span> spindle dist list
+<span class="p">$</span> spindle doctrine show
+<span class="p">$</span> spindle skill list
+<span class="p">$</span> spindle capability list</code></pre>
+  </div>
+  <div class="article-mrow">
+    <p>Installing a distribution links its skills into your global skills directory
+    and records the event to Spindle's ledger. Activation writes the active
+    distribution name into <code>$SPINDLE_HOME</code>; with a single distribution
+    installed, Spindle will use it even before you activate.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">$SPINDLE_HOME</span>
+      Per-machine state — bindings, rendered cache, the active pointer, ledgers.
+      Defaults to <code>~/.spindle</code>.
+    </aside>
+  </div>
+
+  <h2 id="bind">Bind a repo — the daily step</h2>
+  <p>This is the one command that stands between "skills installed" and "skills
+  in use." It classifies the repo, resolves its blend, renders it for the harness
+  and model, lints it, and materializes it:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle bind /path/to/repo --harness claude
+
+<span class="c"># target a model tier (changes rendering density), or preview first</span>
+<span class="p">$</span> spindle bind /path/to/repo --harness claude --model frontier
+<span class="p">$</span> spindle bind /path/to/repo --harness claude --dry-run
+
+<span class="c"># see how Spindle classifies a repo without binding</span>
+<span class="p">$</span> spindle appclass /path/to/repo
+
+<span class="c"># remove exactly the skills Spindle materialized</span>
+<span class="p">$</span> spindle unbind /path/to/repo --harness claude</code></pre>
+  </div>
+  <p>The materialized skills land in the harness's native directory —
+  <code>.claude/skills/</code> for Claude — so the agent discovers them with no
+  extra configuration. Useful flags: <code>--dry-run</code> (compute, don't write),
+  <code>--no-render</code> (select only, skip profiles), and <code>--force</code>
+  (materialize despite lint problems — use sparingly; it's the escape hatch past
+  the <a href="how-it-works.html#safety">fail-closed</a> gate).</p>
+
+  <h2 id="ahead">Work ahead: advance &amp; liaison</h2>
+  <div class="article-mrow">
+    <p>Because a bind is deterministic and cached, you can do it <em>before</em>
+    anyone needs it. The <b>advance team</b> binds every configured surface up
+    front — from an <code>advance/surfaces.toml</code> or a project registry — so
+    the common case is a warm cache, and the "extra step" is already paid.</p>
+    <aside class="article-marginnote">
+      <span class="term">amortized</span>
+      Re-binding an unchanged surface reuses the render cache; precomputing turns
+      the per-repo step into a single batch job.
+    </aside>
+  </div>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="c"># precompute blends for every known surface</span>
+<span class="p">$</span> spindle advance run --from-registry
+
+<span class="c"># capture an ad-hoc need as a demand signal (optionally bind it now)</span>
+<span class="p">$</span> spindle liaison request /path/to/repo --intent "audit accessibility" --bind
+<span class="p">$</span> spindle liaison log repo</code></pre>
+  </div>
+  <p>The <b>liaison</b> records what a surface asked for, so a recurring one-off can
+  graduate into a precomputed skill instead of being re-derived every time.</p>
+
+  <h2 id="build">Build your own</h2>
+  <p>A package is an ordinary pip project with a <code>[tool.spindle.package]</code>
+  table; a distribution is one with <code>[tool.spindle.distribution]</code> that
+  depends on packages. Scaffold both:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle package new my-tools --dest ./packages/my-tools \
+      --skill clarify --skill review --capabilities planning
+
+<span class="p">$</span> spindle dist new my-dist --dest ./distributions/my-dist \
+      --source-dir ../../ --package my-tools==0.1.0</code></pre>
+  </div>
+
+  <h3>Author a skill</h3>
+  <p>A skill is a directory with a <code>SKILL.md</code>: YAML frontmatter plus a
+  short, canonical body. Keep it small; put guardrails as
+  <code>ALWAYS</code>/<code>NEVER</code> lines so rendering will protect them:</p>
+<pre><code><span class="c"># packages/my-tools/my_tools/skills/design/SKILL.md</span>
+---
+name: design
+description: Convert a clarified request into an implementation design.
+---
+
+# design
+
+Use after the request has a clear outcome and acceptance criteria.
+
+1. Read the relevant code and existing conventions first.
+2. Propose the smallest coherent change that satisfies the outcome.
+3. Name the affected files, data contracts, and tests.
+
+ALWAYS prefer existing local patterns over new abstractions.</code></pre>
+
+  <h3>Declare the package</h3>
+<pre><code><span class="c"># packages/my-tools/pyproject.toml</span>
+[tool.spindle.package]
+name = "my-tools"
+version = "0.1.0"
+distribution = "my-dist"
+skills = ["clarify", "design", "review"]
+capabilities = ["technical-design", "plan-review"]
+
+[[tool.spindle.package.sources]]        <span class="c"># provenance, optional</span>
+peer = "upstream-lib"
+url  = "https://github.com/org/upstream-lib"
+transposed_at = "2026-07-11"</code></pre>
+
+  <h3>Write a channel</h3>
+  <div class="article-mrow">
+    <p>A channel decides which of your installed skills a surface receives at a
+    given scope and harness. Place it under the distribution's
+    <code>source_dir</code> at
+    <code>channels/&lt;scope&gt;/&lt;name&gt;/&lt;harness&gt;/channel.toml</code>. The
+    system channel is the broad default; add cluster channels for app-types and a
+    repo channel to override a single surface.</p>
+    <aside class="article-marginnote article-marginnote--callout">
+      <span class="term">narrow wins</span>
+      A <code>repo</code> channel overrides a <code>cluster</code> one, which
+      overrides <code>system</code> — but absolutes from every layer stay in force.
+    </aside>
+  </div>
+<pre><code><span class="c"># channels/system/system/claude/channel.toml</span>
+version = "0.1.0"
+absolutes = ["A1", "A2"]
+skills = ["clarify", "design", "review"]
+
+[tiers]
+review = "judgment"</code></pre>
+
+  <h3>Tune per surface with profiles</h3>
+  <p>Add a harness profile (dialect) and a model profile (density) to change how
+  skills render without touching their source. See
+  <a href="how-it-works.html#render">Rendering</a> for the transforms.</p>
+<pre><code><span class="c"># profiles/codex/profile.toml</span>
+version = "1"
+transform = "terse"
+
+<span class="c"># profiles/models/frontier/profile.toml</span>
+version = "1"
+transform = "trim"
+tier = "frontier"</code></pre>
+
+  <h2 id="evaluate">Evaluate a skill</h2>
+  <p>Before you trust a new or edited skill, prove it helps. Write an
+  <code>eval.toml</code>, point it at a runner, and gate on held-out scores:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle eval validate examples/evaluation-sample/eval.toml
+<span class="p">$</span> spindle eval run      examples/evaluation-sample/eval.toml
+<span class="p">$</span> spindle eval show     examples/evaluation-sample/receipts/&lt;receipt&gt;.json</code></pre>
+  </div>
+  <p>The full contract — the runner's env vars, the result JSON, and the promotion
+  gate — is on the <a href="evaluation.html">Evaluation</a> page. To improve a
+  skill's prose against that same gate, use <code>spindle optimize</code>.</p>
+
+  <h2 id="extending">Extending Spindle</h2>
+  <p>Spindle is open-core: the compose-render-materialize-evaluate machinery and
+  the contracts are public; the infrastructure behind them is meant to be your own.
+  The core ships local reference sinks (JSONL files under
+  <code>$SPINDLE_HOME</code>) and swaps them out through environment variables and
+  injectable callables. Private adapters depend on Spindle — never the reverse.</p>
+
+  <table>
+    <thead><tr><th>Seam</th><th>Env var</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td>State root</td><td><code>SPINDLE_HOME</code></td><td><code>~/.spindle</code></td></tr>
+      <tr><td>Active distribution</td><td><code>SPINDLE_ACTIVE_DIST_NAME</code> / <code>_DIR</code></td><td>the activated dist</td></tr>
+      <tr><td>Task sink</td><td><code>SPINDLE_TASK_QUEUE</code> / <code>SPINDLE_TASK_URL</code></td><td>local JSONL queue</td></tr>
+      <tr><td>Gate sink</td><td><code>SPINDLE_GATE_QUEUE</code></td><td>local JSONL queue</td></tr>
+      <tr><td>Scout runner</td><td><code>SPINDLE_SCOUT_COMMAND</code></td><td>illustrative default</td></tr>
+      <tr><td>LLM render / propose</td><td><code>ANTHROPIC_API_KEY</code></td><td>absent → those steps skip, not fail</td></tr>
+    </tbody>
+  </table>
+
+  <div class="article-mrow">
+    <p>Around the core sits an <em>optional</em> learning &amp; marketplace layer —
+    <code>scout</code>, <code>peers</code>, <code>verdict</code>,
+    <code>roster</code>, <code>broker</code>, <code>gate</code>,
+    <code>ingest</code>, <code>fleet</code>. Treat it as a set of extension seams:
+    discovery passes, a judgment store, a marketplace facade, decision-gate and
+    task queues, and cross-machine ledger sync. The public base wires the contracts
+    and offline defaults; the live providers are yours to supply.</p>
+    <aside class="article-marginnote article-marginnote--source">
+      <span class="term">honest status</span>
+      The learning/marketplace modules are intentionally skeletal — contracts and
+      reference stubs, not finished infrastructure. Build the adapters your
+      organization needs against them.
+    </aside>
+  </div>
+
+  <h2 id="cli">CLI reference</h2>
+  <p>The command surface, grouped by what it touches:</p>
+  <table>
+    <thead><tr><th>Area</th><th>Commands</th></tr></thead>
+    <tbody>
+      <tr><td>Distributions</td><td><code>dist list · show · install · uninstall · activate · new</code></td></tr>
+      <tr><td>Packages / skills</td><td><code>package list · show · new</code> · <code>skill list · show</code> · <code>capability list · show</code></td></tr>
+      <tr><td>Compose</td><td><code>appclass</code> · <code>bind</code> · <code>unbind</code> · <code>advance run</code> · <code>liaison request · log</code></td></tr>
+      <tr><td>Doctrine</td><td><code>doctrine show · validate</code></td></tr>
+      <tr><td>Evaluate / tune</td><td><code>eval validate · run · show</code> · <code>optimize</code> · <code>rate</code></td></tr>
+      <tr><td>Learn / market</td><td><code>peers</code> · <code>verdict</code> · <code>roster</code> · <code>broker</code> · <code>acquisitions</code> · <code>scout</code></td></tr>
+      <tr><td>Infra sinks</td><td><code>ingest</code> · <code>gate file · from-result</code> · <code>fleet status · sync</code></td></tr>
+      <tr><td>Housekeeping</td><td><code>status</code> · <code>preempt · unpreempt</code> · <code>state show · rebuild</code></td></tr>
+    </tbody>
+  </table>
+  <p>Run any command with <code>--help</code> for its flags, or read the
+  <a href="bundle.md">bundle</a> for the whole story in one file.</p>
+
+  <nav class="pagenav">
+    <a class="prev" href="evaluation.html">
+      <span class="dir">← Back</span>
+      <span class="ttl">Evaluation</span>
+    </a>
+    <a class="next" href="index.html">
+      <span class="dir">Start over →</span>
+      <span class="ttl">Overview</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    An open toolchain for composing agent skills · built with
+    <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
+</body>
+</html>

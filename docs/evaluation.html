@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Does the skill help? — Spindle's behavioral evaluation</title>
+<meta name="description" content="Binding proves a skill is available; only a held-out evaluation proves it improved behavior. Spindle runs paired baseline/variant cases, randomizes order from a seed, and gates promotion on held-out scores — with durable, hash-pinned receipts.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+<link rel="stylesheet" href="lib/artoo-kit/base.css">
+<link rel="stylesheet" href="lib/artoo-kit/article.css">
+<link rel="stylesheet" href="lib/artoo-kit/components.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Rationale</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">evaluation</div>
+    <h1 class="article-title">Availability is not improvement.</h1>
+    <p class="article-dek">A bind proves a skill loaded without losing guardrails
+    or budget. It says nothing about whether the skill made the agent
+    <em>better</em>. Spindle answers that separately — with a paired, held-out,
+    reproducible experiment.</p>
+  </header>
+
+  <p class="lead">It is tempting to treat "the skill is installed" as "the skill
+  works." It isn't. A skill can be present, coherent, and safely rendered and still
+  make no difference — or make things worse. Spindle draws a hard line between the
+  two questions and refuses to let a bind stand in for an effectiveness claim.</p>
+
+  <div class="ledger">
+    <div>
+      <span class="tag">spindle bind</span>
+      <h4>Availability</h4>
+      <ul>
+        <li>Can this surface load the skill?</li>
+        <li>Without losing guardrails or budget?</li>
+        <li>Coherent with the rest of the blend?</li>
+        <li><b>Deterministic. No model calls.</b></li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">spindle eval</span>
+      <h4>Improvement</h4>
+      <ul>
+        <li>Does the skill improve behavior?</li>
+        <li>On this task family, model, and harness?</li>
+        <li>Versus running without it?</li>
+        <li><b>Measured on held-out cases.</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="article-pullquote">Rendering and binding prove a skill is available,
+  not that it improves an agent.<cite>The boundary the evaluation harness
+  enforces.</cite></p>
+
+  <h2>The paired experiment</h2>
+  <div class="article-mrow">
+    <p>Every selected case runs <em>twice</em>: once as the <b>baseline</b> (skill
+    off) and once as the <b>variant</b> (skill on). Comparing the same case with and
+    without the skill is the only way to attribute a difference to the skill rather
+    than to the case. Case order and the within-pair arm order are both shuffled
+    from the manifest's <code>seed</code> — randomized to avoid ordering bias, yet
+    perfectly reproducible.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">arm</span>
+      One side of the pair: <code>baseline</code> or <code>variant</code>. The
+      runner must actually invoke the skill on the variant and not on the baseline
+      — Spindle checks.
+    </aside>
+  </div>
+
+  <p>An evaluation is a manifest. It names the skill, the runner, the frozen
+  dimensions (model, harness), and a set of cases split into
+  <code>development</code> and <code>held_out</code>:</p>
+
+<pre><code><span class="c"># eval.toml (excerpt)</span>
+schema_version = 1
+id = "diagnosing-bugs-v1"
+skill = "diagnosing-bugs"
+skill_path = "candidate/SKILL.md"
+runner = ["python", "runner.py"]     <span class="c"># an argv contract, not a model client</span>
+seed = 20260711
+min_held_out_cases = 10
+min_improvement = 0.05
+
+[dimensions]
+harness = "isolated-executor"
+model = "frozen-model-coordinate"
+
+[[cases]]
+id = "unseen-regression"
+split = "held_out"
+fixture = "fixtures/unseen-regression.json"</code></pre>
+
+  <h2>The held-out promotion gate</h2>
+  <div class="article-mrow">
+    <p><b>Development</b> cases exist so you can iterate on fixtures and graders;
+    they never make a run promotion-eligible. Promotion is decided only on
+    <b>held-out</b> cases the skill author was not tuning against. A run may promote
+    only if all four hold:</p>
+    <aside class="article-marginnote article-marginnote--callout">
+      <span class="term">why held-out</span>
+      Tuning a skill until it passes the cases you're watching proves nothing. A
+      gate that only counts unseen cases is the difference between a measurement
+      and a rationalization.
+    </aside>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><span class="value">≥ N</span><span class="label">held-out cases met</span></div>
+    <div class="stat"><span class="value">0</span><span class="label">runner errors</span></div>
+    <div class="stat"><span class="value">100%</span><span class="label">complete pairs</span></div>
+    <div class="stat"><span class="value">Δ &gt; 0</span><span class="label">variant over baseline</span></div>
+  </div>
+  <p>When <code>min_improvement</code> is zero, the variant mean must be
+  <em>strictly</em> above baseline; otherwise it must clear the configured margin.
+  The held-out mean is a necessary gate, not the whole decision — Spindle's own
+  docs are explicit that you should still review case-level regressions, cost,
+  latency, and human-correction time before you adopt. Rejected and null receipts
+  are kept as evidence for that exact skill hash.</p>
+
+  <h2>The runner is an argv contract</h2>
+  <p>Spindle never calls a model provider. A manifest names an argv
+  <code>runner</code>, and Spindle invokes it once per case per arm — with no shell
+  — passing everything through environment variables. The runner may wrap an
+  isolated executor, a benchmark harness, or a deterministic local fixture; it
+  writes one JSON result and exits.</p>
+
+  <table>
+    <thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>SPINDLE_EVAL_ARM</code></td><td><code>baseline</code> or <code>variant</code></td></tr>
+      <tr><td><code>SPINDLE_EVAL_SKILL_ENABLED</code></td><td><code>0</code> or <code>1</code> — must match the arm</td></tr>
+      <tr><td><code>SPINDLE_EVAL_SKILL_FILE</code></td><td>candidate skill path (variant); empty for baseline</td></tr>
+      <tr><td><code>SPINDLE_EVAL_FIXTURE</code></td><td>absolute path to the case fixture</td></tr>
+      <tr><td><code>SPINDLE_EVAL_SPLIT</code></td><td><code>development</code> or <code>held_out</code></td></tr>
+      <tr><td><code>SPINDLE_EVAL_DIMENSIONS</code></td><td>JSON of the frozen <code>[dimensions]</code></td></tr>
+      <tr><td><code>SPINDLE_EVAL_RESULT_PATH</code></td><td>where the runner must write its JSON result</td></tr>
+    </tbody>
+  </table>
+
+  <div class="article-mrow">
+    <p>The result is small and validated. <code>score</code> is bounded to
+    <code>[0,1]</code>; <code>skill_invoked</code> must match the arm;
+    <code>evidence</code> must be non-empty. A timeout, a nonzero exit, a malformed
+    result, missing evidence, or an arm mismatch is an evaluation error — and an
+    error blocks promotion.</p>
+    <aside class="article-marginnote article-marginnote--source">
+      <span class="term">freeze the coordinates</span>
+      The runner should hold model, tools, and budgets constant across arms and
+      declare them in <code>[dimensions]</code> and its own evidence — so a measured
+      delta is attributable to the skill alone.
+    </aside>
+  </div>
+
+<pre><code><span class="c">// the JSON the runner writes to $SPINDLE_EVAL_RESULT_PATH</span>
+{
+  "score": 0.82,
+  "passed": true,
+  "skill_invoked": true,
+  "evidence": {"grader": "exact-regression-check", "receipt": "…"},
+  "metrics": {"false_positives": 0, "corrections": 1},
+  "artifacts": [".../agent-output.txt"]
+}</code></pre>
+
+  <h2>Receipts — durable, not intrusive</h2>
+  <p>Each run writes a receipt that keeps input hashes, pair order, exit state,
+  duration, stdout/stderr <em>hashes</em>, scores, metrics, and the promotion
+  decision — but not full transcripts. It's enough to audit and reproduce a
+  decision for a specific skill hash without hoarding potentially sensitive agent
+  output.</p>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle eval validate examples/evaluation-sample/eval.toml
+<span class="p">$</span> spindle eval run      examples/evaluation-sample/eval.toml
+<span class="p">$</span> spindle eval show     examples/evaluation-sample/receipts/&lt;receipt&gt;.json</code></pre>
+  </div>
+
+  <h2>The task families it starts with</h2>
+  <div class="card-grid">
+    <div class="card"><h3>Diagnosis</h3>
+      <p>Exact symptom reproduction, loop determinism, pre-edit hypothesis testing,
+      regression sensitivity — plus completion, time, and cost.</p></div>
+    <div class="card"><h3>Code review</h3>
+      <p>True findings, severity, false positives, spec-vs-standards attribution,
+      missed seeded issues, correction time — with clean controls.</p></div>
+    <div class="card"><h3>Handoff</h3>
+      <p>Repeated exploration, missing decisions, invalid assumptions, time to first
+      correct action, and completion in a fresh context.</p></div>
+  </div>
+
+  <div class="callout callout--success">
+    <span class="callout-title">One gate, two jobs</span>
+    Spindle's skill optimizer (<code>spindle optimize</code>) consumes these same
+    held-out scores. Optimizing a skill's <em>prose</em> and evaluating its
+    <em>behavior</em> therefore run through one gate — and a proposed edit that
+    drops a guardrail is rejected outright, exactly as a bind would reject it.
+  </div>
+
+  <nav class="pagenav">
+    <a class="prev" href="how-it-works.html">
+      <span class="dir">← Back</span>
+      <span class="ttl">How it works</span>
+    </a>
+    <a class="next" href="guide.html">
+      <span class="dir">Next →</span>
+      <span class="ttl">Using Spindle</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    An open toolchain for composing agent skills · built with
+    <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
+</body>
+</html>
