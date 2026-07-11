@@ -1,21 +1,40 @@
 # Spindle
 
-**Spindle** composes source skills into surface-specific blends.
+**Spindle** composes source skills into tight, surface-specific blends.
 
 [![CI](https://github.com/lavallee/spindle/actions/workflows/ci.yml/badge.svg)](https://github.com/lavallee/spindle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 
-It is a small Python toolchain for installing skill packages, grouping them into
-distributions, resolving the right subset for a repo or agent surface, rendering
-that subset for a harness/model profile, and materializing the result where the
-agent runtime can load it.
+📖 **Documentation site: <https://lavallee.github.io/spindle/>** — the rationale,
+how it works, the evaluation model, and a practical guide. Machine-readable
+surface for agents: [`llms.txt`](https://lavallee.github.io/spindle/llms.txt) and a
+single-file [`bundle.md`](https://lavallee.github.io/spindle/bundle.md).
 
-The public base ships with a minimal reference distribution under
-`examples/spindle-sample`. Private organizations can publish their own packages,
-distributions, project registries, task sinks, gate sinks, scout runners, and
-marketplace providers without changing Spindle core.
+## Why
 
-## Quick Start
+Agent "skills" — the reusable instruction files a coding agent loads to do a job
+well — multiply fast. The instinct is to install every useful skill globally so
+it's always available. That instinct is right; the result is not. A global **pile**
+is never vetted as a *set*: it spends context budget on skills the repo will never
+use, combines skills from different authors in ways no author tested (a "pidgin"),
+pushes each skill toward one-size-fits-all bloat, ignores that different surfaces
+want different skills phrased differently, and lets guardrails erode.
+
+Spindle keeps each skill small and canonical and puts coherence at the
+**composition layer**. It resolves a tight subset per surface, renders it for the
+target harness and model, checks it before anything lands — and, separately, proves
+a skill actually *improves behavior* rather than merely being present. One command
+does it:
+
+```bash
+spindle bind /path/to/repo --harness claude
+# classify → select → resolve → render → lint → materialize → record  (fails closed)
+```
+
+See the [rationale](https://lavallee.github.io/spindle/rationale.html) for the full
+argument, including why that extra step pays for itself.
+
+## Quick start
 
 ```bash
 uv sync --extra dev
@@ -28,10 +47,10 @@ spindle skill list
 spindle bind /path/to/repo --harness claude
 ```
 
-`spindle bind` classifies the target repo, resolves the channels it subscribes to,
-lints the blend for coherence, renders through the active harness/model profiles,
-and materializes the selected skills into the surface's harness-native skills
-directory.
+`spindle bind` classifies the target repo, selects the channels it subscribes to,
+resolves them into one blend, renders through the active harness/model profiles,
+lints the blend for coherence, and materializes the selected skills into the
+surface's harness-native skills directory (`.claude/skills/`, `.codex/skills/`, …).
 
 ## Concepts
 
@@ -39,12 +58,16 @@ directory.
 | --- | --- |
 | package | A pip-installable project that declares skills and capabilities in `[tool.spindle.package]`. |
 | distribution | A pip-installable bundle that declares `[tool.spindle.distribution]` and depends on packages. |
-| channel | A versioned `(scope x harness)` manifest listing the skills a surface should receive. |
+| channel | A versioned `(scope × harness)` manifest listing the skills a surface should receive. |
 | surface | A repo or agent that consumes a skill blend. |
 | profile | A harness/model renderer such as `identity`, `terse`, or `trim`. |
-| blend | The resolved skill subset for a surface. |
+| blend | The resolved skill subset for a surface, plus the absolutes in force. |
+| doctrine | The versioned first-principles set (preferences, absolutes, meta-principles) skills are checked against. |
 
-## Reference Layout
+Full walkthrough of the data model and the pipeline:
+[How it works](https://lavallee.github.io/spindle/how-it-works.html).
+
+## Reference layout
 
 ```text
 examples/spindle-sample/
@@ -56,7 +79,7 @@ examples/spindle-sample/
   peers/ verdicts/ scout/ roster/        # optional learning/marketplace scaffolds
 ```
 
-## Build Your Own
+## Build your own
 
 ```bash
 spindle package new my-tools --dest ./packages/my-tools \
@@ -68,11 +91,15 @@ spindle dist new my-dist --dest ./distributions/my-dist \
 ```
 
 Spindle discovers installed packages through `[tool.spindle.package]` metadata and
-installed distributions through `[tool.spindle.distribution]`.
+installed distributions through `[tool.spindle.distribution]`. The
+[guide](https://lavallee.github.io/spindle/guide.html) covers authoring skills,
+writing channels, and tuning per-surface profiles.
 
-## Pluggable Sinks
+## Pluggable sinks
 
-The OSS base includes local reference implementations:
+The OSS base includes local reference implementations; private infrastructure lives
+in separate adapter packages that depend on Spindle rather than being imported by
+Spindle core.
 
 - `spindle ingest` writes a topo-ordered task queue to `SPINDLE_TASK_QUEUE` or
   `$SPINDLE_HOME/tasks.jsonl` unless `SPINDLE_TASK_URL` is set.
@@ -81,15 +108,12 @@ The OSS base includes local reference implementations:
 - `spindle scout` materializes per-peer prompts and emits commands from
   `SPINDLE_SCOUT_COMMAND`.
 
-Private infrastructure should live in separate adapter packages that depend on
-Spindle rather than being imported by Spindle core.
+## Behavioral evaluation
 
-## Behavioral Evaluation
-
-Rendering and binding prove that a skill is available, not that it improves an
+Rendering and binding prove that a skill is *available*, not that it *improves* an
 agent. Spindle evaluation manifests run the same cases with and without a skill,
-randomize pair order, and write a receipt whose promotion gate uses only held-out
-behavioral scores.
+randomize pair order from a seed, and write a receipt whose promotion gate uses only
+held-out behavioral scores.
 
 ```bash
 spindle eval validate examples/evaluation-sample/eval.toml
@@ -100,7 +124,16 @@ spindle eval show examples/evaluation-sample/receipts/<receipt>.json
 The runner is an argv contract rather than a built-in model client. A local test
 harness or isolated executor can implement it while Spindle owns the manifest,
 hashes, pairing, evidence validation, and promotion decision. See
-[Behavioral Skill Evaluations](docs/skill-evaluations.md).
+[Behavioral Skill Evaluations](docs/skill-evaluations.md) and the
+[evaluation overview](https://lavallee.github.io/spindle/evaluation.html).
+
+## Documentation site
+
+The site under [`docs/`](docs/) is an [artoo](https://github.com/lavallee/artoo)
+artifact (see [`artifact.toml`](artifact.toml)). It is served by GitHub Pages
+directly from the `/docs` folder on `main` — no build step — so
+**Settings → Pages → Source = Deploy from a branch, `main` / `docs`** is all it
+needs. Edit the pages in `docs/` and push.
 
 ## Development
 

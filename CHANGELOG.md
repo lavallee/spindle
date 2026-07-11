@@ -12,6 +12,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - `spindle eval validate|run|show` for deterministic paired behavioral skill
   evaluations, held-out promotion gates, and durable evidence receipts.
 - Public evaluation contract documentation and an offline sample runner.
+- Documentation site under `docs/` (an [artoo](https://github.com/lavallee/artoo)
+  artifact): rationale, how-it-works, evaluation, and guide pages, plus an
+  `llms.txt` index and a single-file `bundle.md` for agents. Served by GitHub
+  Pages from `/docs`.
 
 ## [0.1.0] - 2026-07-05
 
