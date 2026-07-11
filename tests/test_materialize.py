@@ -96,3 +96,86 @@ def test_materialize_dry_run_writes_nothing(tmp_path):
     results = mz.materialize(comp, repo, "claude", dry_run=True)
     assert results == [("grill", "linked")]
     assert not (repo / ".claude" / "skills" / "grill").exists()
+
+
+# ---- hermes: global target dir ------------------------------------------
+
+
+def _hermes_dir(tmp_path, monkeypatch):
+    hdir = tmp_path / "hermes-skills" / "spindle"
+    monkeypatch.setenv("SPINDLE_HERMES_SKILLS_DIR", str(hdir))
+    return hdir
+
+
+def test_target_dir_hermes_is_global_not_repo_local(tmp_path, monkeypatch):
+    hdir = _hermes_dir(tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    assert mz.target_dir(repo, "hermes") == hdir
+    # the repo argument names the surface only; nothing repo-local for hermes
+    assert not str(mz.target_dir(repo, "hermes")).startswith(str(repo))
+
+
+def test_target_dir_hermes_default_under_home(monkeypatch):
+    monkeypatch.delenv("SPINDLE_HERMES_SKILLS_DIR", raising=False)
+    from pathlib import Path
+
+    assert mz.target_dir("/anywhere", "hermes") == (
+        Path.home() / ".hermes" / "skills" / "spindle"
+    )
+
+
+def test_materialize_hermes_links_into_dedicated_category(tmp_path, monkeypatch):
+    hdir = _hermes_dir(tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    srcs = _make_source_skills(tmp_path, "grill", "plan")
+    comp = Composition(surface="r", autonomy_mode="deterministic",
+                       skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])])
+    results = mz.materialize(comp, repo, "hermes")
+    assert sorted(results) == [("grill", "linked"), ("plan", "linked")]
+    assert (hdir / "grill").is_symlink()
+    assert (hdir / "grill").resolve() == srcs["grill"].resolve()
+    # nothing materialized inside the repo
+    assert not (repo / ".hermes").exists()
+
+
+def test_materialize_hermes_rebind_keeps(tmp_path, monkeypatch):
+    _hermes_dir(tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    srcs = _make_source_skills(tmp_path, "grill")
+    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    mz.materialize(comp, repo, "hermes")
+    results = mz.materialize(comp, repo, "hermes")
+    assert results == [("grill", "kept")]
+
+
+def test_materialize_hermes_unbind_removes_only_owned_links(tmp_path, monkeypatch):
+    hdir = _hermes_dir(tmp_path, monkeypatch)
+    hdir.mkdir(parents=True)
+    # a hand-added skill dir in the category — not spindle's, never touched
+    (hdir / "handmade").mkdir()
+    (hdir / "handmade" / "SKILL.md").write_text("# mine\n")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    srcs = _make_source_skills(tmp_path, "grill")
+    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    mz.materialize(comp, repo, "hermes")
+    # unbind = empty composition reconciled against what we owned
+    empty = Composition(surface="r", autonomy_mode="deterministic")
+    results = mz.materialize(empty, repo, "hermes", previous={"grill", "handmade"})
+    assert ("grill", "removed") in results
+    assert not (hdir / "grill").exists()
+    assert (hdir / "handmade").is_dir()
+    assert ("handmade", "removed") not in results
+
+
+def test_materialize_hermes_dry_run_writes_nothing(tmp_path, monkeypatch):
+    hdir = _hermes_dir(tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    srcs = _make_source_skills(tmp_path, "grill")
+    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    results = mz.materialize(comp, repo, "hermes", dry_run=True)
+    assert results == [("grill", "linked")]
+    assert not hdir.exists()

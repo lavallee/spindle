@@ -211,3 +211,29 @@ def test_unbind_noop_when_never_bound(tmp_path, monkeypatch):
     repo.mkdir()
     actions = binder.unbind("demo", repo, "claude")
     assert [a for _, a in actions if a == "removed"] == []
+
+
+# ---- hermes: bind/unbind against the global skills dir -------------------
+
+def test_bind_unbind_hermes_global_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr(binding_mod.paths, "spindle_home", lambda: tmp_path / "state")
+    hdir = tmp_path / "hermes-skills" / "spindle"
+    monkeypatch.setenv("SPINDLE_HERMES_SKILLS_DIR", str(hdir))
+    repo = tmp_path / "demo"
+    repo.mkdir()
+    provider = _provider_factory(tmp_path)
+    surface = Surface(name="demo", harness="hermes", autonomy_mode="deterministic")
+
+    result = binder.bind(surface, repo, provider, _doctrine())
+    assert result.ok
+    # skills land in the global hermes category dir, not inside the repo
+    assert (hdir / "grill").is_symlink()
+    assert (hdir / "repo-tool").is_symlink()
+    assert not (repo / ".hermes").exists()
+    assert sorted(binding_mod.current_binding("demo").skills) == ["grill", "repo-tool"]
+
+    actions = binder.unbind("demo", repo, "hermes")
+    removed = sorted(n for n, a in actions if a == "removed")
+    assert removed == ["grill", "repo-tool"]
+    assert not (hdir / "grill").exists()
+    assert not (hdir / "repo-tool").exists()
