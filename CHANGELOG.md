@@ -5,6 +5,14 @@ All notable changes to Spindle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `spindle eval validate|run|show` for deterministic paired behavioral skill
+  evaluations, held-out promotion gates, and durable evidence receipts.
+- Public evaluation contract documentation and an offline sample runner.
+
 ## [0.1.0] - 2026-07-05
 
 ### Added

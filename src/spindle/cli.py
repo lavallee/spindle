@@ -24,6 +24,7 @@ from . import profiles as profiles_mod
 from . import render as render_mod
 from . import distributions as distributions_mod
 from . import doctrine as doctrine_mod
+from . import evaluation as evaluation_mod
 from . import fleet as fleet_mod
 from . import gates as gates_mod
 from . import ingest as ingest_mod
@@ -1164,6 +1165,72 @@ def cmd_capability_show(args) -> int:
     return 0
 
 
+# ---- evaluation ---------------------------------------------------------
+
+def cmd_eval_validate(args) -> int:
+    try:
+        manifest = evaluation_mod.load_manifest(args.manifest)
+        findings = evaluation_mod.validate_manifest(args.manifest)
+    except evaluation_mod.EvaluationError as exc:
+        print(f"invalid: {exc}", file=sys.stderr)
+        return 1
+    print(json.dumps(evaluation_mod.manifest_as_dict(manifest), indent=2))
+    for finding in findings:
+        print(f"warning: {finding}", file=sys.stderr)
+    return 0 if not findings else 2
+
+
+def cmd_eval_run(args) -> int:
+    try:
+        manifest = evaluation_mod.load_manifest(args.manifest)
+        output, receipt = evaluation_mod.run_evaluation(
+            manifest,
+            split=args.split,
+            receipt_path=args.receipt,
+        )
+    except evaluation_mod.EvaluationError as exc:
+        print(f"evaluation error: {exc}", file=sys.stderr)
+        return 1
+    for name, summary in receipt["summaries"].items():
+        if summary["runs"]:
+            print(
+                f"{name}: cases={summary['cases']} errors={summary['errors']} "
+                f"baseline={summary['mean_score']['baseline']} "
+                f"variant={summary['mean_score']['variant']} delta={summary['delta']}"
+            )
+    promotion = receipt["promotion"]
+    status = "eligible" if promotion["eligible"] else "blocked"
+    reasons = ",".join(promotion["reasons"]) or "held-out-improvement"
+    print(f"promotion: {status} ({reasons})")
+    print(f"receipt: {output}")
+    return 0 if not any(run["status"] == "error" for run in receipt["runs"]) else 2
+
+
+def cmd_eval_show(args) -> int:
+    try:
+        receipt = evaluation_mod.load_receipt(args.receipt)
+    except evaluation_mod.EvaluationError as exc:
+        print(f"receipt error: {exc}", file=sys.stderr)
+        return 1
+    if args.json:
+        print(json.dumps(receipt, indent=2, sort_keys=True))
+        return 0
+    print(f"evaluation: {receipt.get('evaluation_id', '?')}")
+    print(f"run:        {receipt.get('run_id', '?')}")
+    print(f"skill:      {receipt.get('skill', '?')} @ {receipt.get('skill_sha256', '?')[:12]}")
+    for name, summary in receipt.get("summaries", {}).items():
+        if summary.get("runs"):
+            print(
+                f"{name:<11} cases={summary['cases']} errors={summary['errors']} "
+                f"delta={summary['delta']}"
+            )
+    promotion = receipt.get("promotion", {})
+    print(f"promotion:  {'eligible' if promotion.get('eligible') else 'blocked'}")
+    for reason in promotion.get("reasons", []):
+        print(f"  - {reason}")
+    return 0
+
+
 # ---- main ---------------------------------------------------------------
 
 def main(argv=None) -> int:
@@ -1485,6 +1552,26 @@ def main(argv=None) -> int:
     show_cap = caps.add_parser("show", help="show full details for a single capability")
     show_cap.add_argument("name", help="capability name")
     show_cap.set_defaults(func=cmd_capability_show)
+
+    sp = sub.add_parser("eval", help="validate and run paired behavioral skill evaluations")
+    evs = sp.add_subparsers(dest="eval_cmd", required=True)
+    validate_eval = evs.add_parser("validate", help="validate an evaluation manifest and its inputs")
+    validate_eval.add_argument("manifest", help="path to eval.toml")
+    validate_eval.set_defaults(func=cmd_eval_validate)
+    run_eval = evs.add_parser("run", help="run paired baseline/variant cases and write a receipt")
+    run_eval.add_argument("manifest", help="path to eval.toml")
+    run_eval.add_argument(
+        "--split",
+        default="all",
+        choices=["development", "held_out", "all"],
+        help="case split to run (default all)",
+    )
+    run_eval.add_argument("--receipt", help="output path (default manifest receipt_dir)")
+    run_eval.set_defaults(func=cmd_eval_run)
+    show_eval = evs.add_parser("show", help="summarize a durable evaluation receipt")
+    show_eval.add_argument("receipt", help="path to receipt JSON")
+    show_eval.add_argument("--json", action="store_true", help="print the complete receipt")
+    show_eval.set_defaults(func=cmd_eval_show)
 
     sp = sub.add_parser("rate", help="rate a skill (thumbs up/down) and log to feedback + ledger")
     sp.add_argument("skill", help="skill name (e.g. clarify)")

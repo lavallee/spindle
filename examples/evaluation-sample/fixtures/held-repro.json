@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "score": 0.5,
+    "observed": "reproduction was not preserved",
+    "metrics": {"reproduced_before_edit": 0}
+  },
+  "variant": {
+    "score": 0.75,
+    "observed": "same signal proved red then green",
+    "metrics": {"reproduced_before_edit": 1}
+  }
+}

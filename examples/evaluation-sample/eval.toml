@@ -1,0 +1,26 @@
+schema_version = 1
+id = "sample-diagnosis"
+skill = "sample-diagnosis"
+skill_path = "skill/SKILL.md"
+runner = ["python", "runner.py"]
+timeout_seconds = 10
+seed = 20260711
+min_held_out_cases = 1
+min_improvement = 0.05
+receipt_dir = "receipts"
+
+[dimensions]
+harness = "deterministic-sample"
+model = "none"
+
+[[cases]]
+id = "visible-repro"
+split = "development"
+fixture = "fixtures/visible-repro.json"
+tags = ["diagnosis"]
+
+[[cases]]
+id = "held-repro"
+split = "held_out"
+fixture = "fixtures/held-repro.json"
+tags = ["diagnosis"]

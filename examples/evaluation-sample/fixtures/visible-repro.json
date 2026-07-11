@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "score": 0.4,
+    "observed": "edited before reproducing",
+    "metrics": {"reproduced_before_edit": 0}
+  },
+  "variant": {
+    "score": 0.8,
+    "observed": "reproduced before editing and retained regression",
+    "metrics": {"reproduced_before_edit": 1}
+  }
+}

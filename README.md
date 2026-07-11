@@ -84,6 +84,24 @@ The OSS base includes local reference implementations:
 Private infrastructure should live in separate adapter packages that depend on
 Spindle rather than being imported by Spindle core.
 
+## Behavioral Evaluation
+
+Rendering and binding prove that a skill is available, not that it improves an
+agent. Spindle evaluation manifests run the same cases with and without a skill,
+randomize pair order, and write a receipt whose promotion gate uses only held-out
+behavioral scores.
+
+```bash
+spindle eval validate examples/evaluation-sample/eval.toml
+spindle eval run examples/evaluation-sample/eval.toml
+spindle eval show examples/evaluation-sample/receipts/<receipt>.json
+```
+
+The runner is an argv contract rather than a built-in model client. A local test
+harness or isolated executor can implement it while Spindle owns the manifest,
+hashes, pairing, evidence validation, and promotion decision. See
+[Behavioral Skill Evaluations](docs/skill-evaluations.md).
+
 ## Development
 
 ```bash
