@@ -22,8 +22,26 @@ def _make_source_skills(tmp_path, *names):
 
 def test_target_dir_per_harness(tmp_path):
     assert mz.target_dir(tmp_path, "claude") == tmp_path / ".claude" / "skills"
-    assert mz.target_dir(tmp_path, "codex") == tmp_path / ".codex" / "skills"
+    assert mz.target_dir(tmp_path, "codex") == tmp_path / ".agents" / "skills"
     assert mz.target_dir(tmp_path, "pi") == tmp_path / ".pi" / "skills"
+
+
+def test_codex_materialize_uses_agents_dir_when_codex_path_is_a_file(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".codex").touch()
+    srcs = _make_source_skills(tmp_path, "review-design")
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("review-design", srcs["review-design"])],
+    )
+
+    results = mz.materialize(comp, repo, "codex")
+
+    assert results == [("review-design", "linked")]
+    assert (repo / ".codex").is_file()
+    assert (repo / ".agents" / "skills" / "review-design").is_symlink()
 
 
 def test_materialize_links_subset(tmp_path):

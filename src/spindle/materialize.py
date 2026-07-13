@@ -23,10 +23,11 @@ from pathlib import Path
 from . import paths as paths_mod
 from .composition import Composition
 
-# Where each harness discovers project-local skills.
+# Where each harness discovers project-local skills. Codex follows the Agent
+# Skills standard and scans `.agents/skills` from CWD to the repository root.
 HARNESS_SUBDIR = {
     "claude": ".claude/skills",
-    "codex": ".codex/skills",
+    "codex": ".agents/skills",
     "pi": ".pi/skills",
 }
 

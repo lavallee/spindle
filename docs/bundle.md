@@ -242,7 +242,7 @@ harness's native location and report a per-skill action
 (`linked · updated · kept · removed · skipped`). Spindle reads the surface's
 previous binding to know which links it owns and removes only those; a hand-added
 file is never touched. Install locations: `claude → .claude/skills`,
-`codex → .codex/skills`, `pi → .pi/skills` (fallback `.<harness>/skills`).
+`codex → .agents/skills`, `pi → .pi/skills` (fallback `.<harness>/skills`).
 
 **Record** — the binding is recorded with a stable coordinate over the skills, the
 doctrine, and the channel versions, appended to a per-surface history so any prior

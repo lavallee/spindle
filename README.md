@@ -50,7 +50,7 @@ spindle bind /path/to/repo --harness claude
 `spindle bind` classifies the target repo, selects the channels it subscribes to,
 resolves them into one blend, renders through the active harness/model profiles,
 lints the blend for coherence, and materializes the selected skills into the
-surface's harness-native skills directory (`.claude/skills/`, `.codex/skills/`, …).
+surface's harness-native skills directory (`.claude/skills/`, `.agents/skills/`, …).
 
 ## Harnesses
 
@@ -60,7 +60,7 @@ directory inside the target repo:
 | Harness | Materialization target |
 | --- | --- |
 | `claude` | `<repo>/.claude/skills/` |
-| `codex` | `<repo>/.codex/skills/` |
+| `codex` | `<repo>/.agents/skills/` |
 | `pi` | `<repo>/.pi/skills/` |
 | `hermes` | `~/.hermes/skills/spindle/` (global) |
 
