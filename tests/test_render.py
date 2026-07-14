@@ -101,6 +101,32 @@ def test_render_skill_is_cached(tmp_path):
     assert out1 == out2  # same cache key → same dir
 
 
+def test_render_skill_cache_changes_with_nested_resource(tmp_path):
+    src = _skill_dir(tmp_path, "grill")
+    store = tmp_path / "store"
+    profile = render.Profile("claude", "1", render.identity_transform)
+    out1 = render.render_skill(src, profile, "d", store_root=store)
+
+    (src / "references" / "guide.md").write_text("revised nested aux\n")
+    out2 = render.render_skill(src, profile, "d", store_root=store)
+
+    assert out1 != out2
+    assert (out2 / "references" / "guide.md").read_text() == "revised nested aux\n"
+
+
+def test_render_skill_repairs_incomplete_cached_resources(tmp_path):
+    src = _skill_dir(tmp_path, "grill")
+    store = tmp_path / "store"
+    profile = render.Profile("claude", "1", render.identity_transform)
+    out = render.render_skill(src, profile, "d", store_root=store)
+    (out / "references" / "guide.md").unlink()
+
+    cached = render.render_skill(src, profile, "d", store_root=store)
+
+    assert cached == out
+    assert (cached / "references" / "guide.md").read_text() == "nested aux\n"
+
+
 # ---- make_render_fn (binder hook) ---------------------------------------
 
 def test_make_render_fn_passes_through_when_no_profile(tmp_path):

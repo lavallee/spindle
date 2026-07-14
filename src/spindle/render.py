@@ -77,7 +77,8 @@ def verify_preserved(source: str, rendered: str) -> list[str]:
 
 
 def cache_key(doctrine_coordinate: str, profile: Profile, content: str,
-              model_profile: Profile | None = None) -> str:
+              model_profile: Profile | None = None, *,
+              resource_fingerprint: str | None = None) -> str:
     """Stable key over (doctrine × harness-profile × model-profile × skill content) —
     the rendered-content store address. Any change to doctrine, either profile's
     version, the model axis, or the source skill invalidates the cache by producing a
@@ -87,11 +88,30 @@ def cache_key(doctrine_coordinate: str, profile: Profile, content: str,
     parts = [doctrine_coordinate, f"{profile.harness}:{profile.version}"]
     if model_profile is not None:
         parts.append(f"model:{model_profile.harness}:{model_profile.version}")
+    if resource_fingerprint is not None:
+        parts.append(f"resources:{resource_fingerprint}")
     parts.append(content)
     for part in parts:
         h.update(part.encode("utf-8"))
         h.update(b"\0")
     return h.hexdigest()[:16]
+
+
+def resource_fingerprint(skill_dir: str | Path) -> str:
+    """Hash every non-SKILL resource by relative path and content.
+
+    Nested references are part of the portable skill. They must invalidate the
+    render cache just like SKILL.md, or a bind can retain stale judge guidance
+    while presenting updated core instructions.
+    """
+    root = Path(skill_dir)
+    h = hashlib.sha256()
+    for path in sorted(p for p in root.rglob("*") if p.is_file() and p.name != "SKILL.md"):
+        h.update(path.relative_to(root).as_posix().encode("utf-8"))
+        h.update(b"\0")
+        h.update(path.read_bytes())
+        h.update(b"\0")
+    return h.hexdigest()
 
 
 def render_store_root() -> Path:
@@ -128,16 +148,20 @@ def render_skill(skill_dir: str | Path, profile: Profile, doctrine_coordinate: s
             [f"{skill_dir.name}: render dropped guardrail clause {m!r}" for m in missing]
         )
 
+    resources = resource_fingerprint(skill_dir)
     out = (store_root
-           / cache_key(doctrine_coordinate, profile, source, model_profile)
+           / cache_key(doctrine_coordinate, profile, source, model_profile,
+                       resource_fingerprint=resources)
            / skill_dir.name)
+    out.mkdir(parents=True, exist_ok=True)
+    # Copy resources on every hit. The content-addressed key prevents mutation
+    # across source variants; the repeat copy repairs a partially written cache.
+    for f in skill_dir.iterdir():
+        if f.is_file() and f.name != "SKILL.md":
+            shutil.copy2(f, out / f.name)
+        elif f.is_dir():
+            shutil.copytree(f, out / f.name, dirs_exist_ok=True)
     if not (out / "SKILL.md").exists():
-        out.mkdir(parents=True, exist_ok=True)
-        for f in skill_dir.iterdir():
-            if f.is_file() and f.name != "SKILL.md":
-                shutil.copy2(f, out / f.name)
-            elif f.is_dir():
-                shutil.copytree(f, out / f.name, dirs_exist_ok=True)
         (out / "SKILL.md").write_text(rendered, encoding="utf-8")
     return out
 
