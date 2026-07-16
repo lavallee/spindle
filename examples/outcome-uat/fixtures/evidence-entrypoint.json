@@ -1,36 +1,38 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "task": {
-    "id": "open-summary-evidence",
-    "name": "Open the evidence supporting a summary",
-    "completion_signal": "source-visible",
-    "delivery_budget": {"max_transferred_bytes": 600000, "max_rendered_bytes": 1200000}
+    "id": "open-summary-evidence", "name": "Open the evidence supporting a summary", "entry_route": "/overview/", "completion_signal": "source-visible",
+    "delivery_budget": {"max_transferred_bytes": 600000, "max_rendered_bytes": 1200000},
+    "source_semantics": {"fixture://evidence/measure": {"sealed": true, "supports": ["measure_value", "measure_change"]}}
   },
   "baseline": {
-    "task_id": "open-summary-evidence", "surface_id": "summary-card-v1",
-    "states": [{"id": "summary", "route": "/overview/", "visible": ["Measure increased to 62"], "signals": []}],
+    "task_id": "open-summary-evidence", "surface_id": "summary-card-v1", "producer_id": "baseline-author",
+    "states": [{"id": "summary", "route": "/overview/", "visible": ["Measure increased to 62"], "signals": [], "foreground": ["summary"], "material_claims": ["Measure increased to 62"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "summary", "events": [], "terminal_state": "summary", "foreground_target": "summary"},
     "interactions": [],
-    "facts": [{"claim": "Measure increased to 62", "source": "fixture://evidence/measure", "matches": true}],
-    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
-    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "claims": [{"artifact_id": "summary", "text": "Measure increased to 62", "source": "fixture://evidence/measure", "kind": "measure_change"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
     "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 210000, "rendered_bytes": 410000},
-    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "primary_action_fires": false, "copy_present": true},
-    "loop": {"generated": false, "critic": {"rounds": 0, "role": "risk-finder-only", "behavior_basis": "not-run", "findings": []}, "repair_passes": 0, "reran_hard_gates": true, "stopped": true}
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
   },
   "variant": {
-    "task_id": "open-summary-evidence", "surface_id": "summary-with-proof-v2", "replacement_for": "summary-card-v1",
+    "task_id": "open-summary-evidence", "surface_id": "summary-with-proof-v2", "replacement_for": "summary-card-v1", "producer_id": "generator-a",
     "states": [
-      {"id": "summary", "route": "/overview/", "visible": ["Measure increased to 62", "View source"], "signals": []},
-      {"id": "source", "route": "/overview/source/", "visible": ["Measure: 62", "Updated: July"], "signals": ["source-visible"], "outcome": {"purpose": "show the source", "answer": "the supporting source is visible", "proof_target": "fixture://evidence/measure", "next_action": "inspect source date"}}
+      {"id": "summary", "route": "/overview/", "visible": ["Measure increased to 62", "View source"], "signals": [], "foreground": ["summary"], "material_claims": ["Measure increased to 62"]},
+      {"id": "source", "route": "/overview/source/", "visible": ["Measure: 62", "Updated: July"], "signals": ["source-visible"], "foreground": ["source-evidence"], "material_claims": ["Measure: 62"], "outcome": {"purpose": "show the source", "answer": "the supporting source is visible", "proof_target": "fixture://evidence/measure", "next_action": "inspect source date"}}
     ],
+    "journey": {"executor": "scripted-browser", "entry_state": "summary", "events": [{"id": "event-view-source", "interaction_id": "view-source", "from_state": "summary", "to_state": "source", "action": "activate View source", "result": "succeeded"}], "terminal_state": "source", "foreground_target": "source-evidence"},
     "interactions": [{"id": "view-source", "from_state": "summary", "to_state": "source", "new": true, "claimed_purpose": "show the source"}],
-    "facts": [{"claim": "Measure increased to 62", "source": "fixture://evidence/measure", "matches": true}],
-    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
-    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "claims": [
+      {"artifact_id": "summary", "text": "Measure increased to 62", "source": "fixture://evidence/measure", "kind": "measure_change"},
+      {"artifact_id": "source", "text": "Measure: 62", "source": "fixture://evidence/measure", "kind": "measure_value"}
+    ],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
     "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 230000, "rendered_bytes": 450000},
-    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "primary_action_fires": true, "copy_present": true},
-    "loop": {"generated": true, "critic": {"rounds": 1, "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "findings": [{"risk": "proof label did not name its destination", "evidence": "captured label was More"}]}, "repair_passes": 1, "reran_hard_gates": true, "stopped": true}
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["c7c2f228804ad89654ff5ce6511b62dbd0d5c04364d2263a7abaed41af07bdeb", "e916b78f2c1a64387a79652e5efa6a5fe711a108b22e5a290cca7de7e26cc9d4"], "findings": []}, "repair_passes": 0}
   }
 }

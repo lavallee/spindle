@@ -1,32 +1,34 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "task": {
-    "id": "explain-missing-comparison",
-    "name": "Understand why a comparison is unavailable",
-    "completion_signal": "unavailable-explained",
-    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 900000}
+    "id": "explain-missing-comparison", "name": "Understand why a comparison is unavailable", "entry_route": "/comparison/", "completion_signal": "unavailable-explained",
+    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 900000},
+    "source_semantics": {"fixture://periods": {"sealed": true, "supports": ["reporting_availability", "reporting_period"]}}
   },
   "baseline": {
-    "task_id": "explain-missing-comparison", "surface_id": "blank-comparison-v1",
-    "states": [{"id": "blank", "route": "/comparison/", "visible": ["Comparison", "—"], "signals": []}],
-    "interactions": [], "facts": [],
-    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
-    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "task_id": "explain-missing-comparison", "surface_id": "blank-comparison-v1", "producer_id": "baseline-author",
+    "states": [{"id": "blank", "route": "/comparison/", "visible": ["Comparison", "—"], "signals": [], "foreground": ["comparison"], "material_claims": []}],
+    "journey": {"executor": "scripted-browser", "entry_state": "blank", "events": [], "terminal_state": "blank", "foreground_target": "comparison"},
+    "interactions": [], "claims": [],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
     "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 170000, "rendered_bytes": 300000},
-    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "primary_action_fires": false, "copy_present": false},
-    "loop": {"generated": false, "critic": {"rounds": 0, "role": "risk-finder-only", "behavior_basis": "not-run", "findings": []}, "repair_passes": 0, "reran_hard_gates": true, "stopped": true}
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
   },
   "variant": {
-    "task_id": "explain-missing-comparison", "surface_id": "honest-sparse-state-v2", "replacement_for": "blank-comparison-v1",
-    "states": [{"id": "explained", "route": "/comparison/", "visible": ["Comparison unavailable", "Only one period is published", "Latest period: 2026"], "signals": ["unavailable-explained"]}],
+    "task_id": "explain-missing-comparison", "surface_id": "honest-sparse-state-v2", "replacement_for": "blank-comparison-v1", "producer_id": "generator-a",
+    "states": [{"id": "explained", "route": "/comparison/", "visible": ["Comparison unavailable", "Only one period is published", "Latest period: 2026"], "signals": ["unavailable-explained"], "foreground": ["unavailable-explanation"], "material_claims": ["Only one period is published", "Latest period: 2026"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "explained", "events": [], "terminal_state": "explained", "foreground_target": "unavailable-explanation"},
     "interactions": [],
-    "facts": [{"claim": "Only one period is published", "source": "fixture://periods", "matches": true}],
-    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
-    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "claims": [
+      {"artifact_id": "explained", "text": "Only one period is published", "source": "fixture://periods", "kind": "reporting_availability"},
+      {"artifact_id": "explained", "text": "Latest period: 2026", "source": "fixture://periods", "kind": "reporting_period"}
+    ],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
     "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 175000, "rendered_bytes": 310000},
-    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "primary_action_fires": true, "copy_present": true},
-    "loop": {"generated": true, "critic": {"rounds": 1, "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "findings": [{"risk": "the empty state looked like a loading failure", "evidence": "capture contained only an em dash"}]}, "repair_passes": 1, "reran_hard_gates": true, "stopped": true}
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["e857a1775dd0db76be0056ce630b551711ddfb4e78b8d2358b3f72edeb1ef6b8"], "findings": []}, "repair_passes": 0}
   }
 }

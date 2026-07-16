@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "read-verified-answer", "name": "Read a verified answer and its evidence", "entry_route": "/answer/", "completion_signal": "verified-answer-visible",
+    "delivery_budget": {"max_transferred_bytes": 600000, "max_rendered_bytes": 1200000},
+    "source_semantics": {"fixture://answer": {"sealed": true, "supports": ["verified_value"]}}
+  },
+  "baseline": {
+    "task_id": "read-verified-answer", "surface_id": "verified-answer-v1", "producer_id": "baseline-author",
+    "states": [{"id": "answer", "route": "/answer/", "visible": ["Answer: 62", "Source"], "signals": ["verified-answer-visible"], "foreground": ["verified-answer"], "material_claims": ["Answer: 62"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "verified-answer"},
+    "interactions": [], "claims": [{"artifact_id": "answer", "text": "Answer: 62", "source": "fixture://answer", "kind": "verified_value"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 190000, "rendered_bytes": 350000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "read-verified-answer", "surface_id": "verified-answer-v2", "replacement_for": "verified-answer-v1", "producer_id": "generator-a",
+    "states": [{"id": "answer", "route": "/answer/", "visible": ["Verified answer: 62", "View source"], "signals": ["verified-answer-visible"], "foreground": ["verified-answer"], "material_claims": ["Verified answer: 62"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "verified-answer"},
+    "interactions": [], "claims": [{"artifact_id": "answer", "text": "Verified answer: 62", "source": "fixture://answer", "kind": "verified_value"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 195000, "rendered_bytes": 360000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {
+      "critic": {"rounds": 1, "actor_id": "generator-a", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["0a4305dc528b639304d93e70b1fdc192bae6c20b347d0d62865cc0b62753c80a"], "findings": [{"id": "weak-source-label", "artifact_id": "answer", "locator": "View source", "risk": "the source label lacks context", "evidence": "the only evidence action reads View source", "postcondition": {"type": "visible_text_absent", "value": "View source"}}]},
+      "repair_passes": 1,
+      "pre_repair_states": [{"id": "answer", "route": "/answer/", "visible": ["Verified answer: 62", "View source"], "signals": ["verified-answer-visible"], "foreground": ["verified-answer"], "material_claims": ["Verified answer: 62"]}],
+      "pre_repair_journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "verified-answer"},
+      "repair": {"addresses": ["weak-source-label"], "affected_artifacts": ["answer"]}
+    }
+  }
+}

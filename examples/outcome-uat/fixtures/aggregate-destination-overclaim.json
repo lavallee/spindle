@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "open-named-assessment-evidence", "name": "Open a named school's assessment evidence", "entry_route": "/test-scores/", "completion_signal": "assessment-evidence-visible",
+    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 1000000},
+    "source_semantics": {"fixture://assessment/grade-year": {"sealed": true, "supports": ["aggregate_distribution", "aggregate_limitation"]}}
+  },
+  "baseline": {
+    "task_id": "open-named-assessment-evidence", "surface_id": "assessment-workbench-v1", "producer_id": "baseline-author",
+    "states": [
+      {"id": "workbench", "route": "/test-scores/", "visible": ["Statewide assessment explorer", "Open Clinton"], "signals": [], "foreground": ["assessment-workbench"], "material_claims": []},
+      {"id": "assessment", "route": "/school/clinton/#assessment", "visible": ["Assessment evidence", "Aggregate grade results are not linked individual records"], "signals": ["assessment-evidence-visible"], "foreground": ["assessment-evidence"], "material_claims": ["Aggregate grade results are not linked individual records"]}
+    ],
+    "journey": {"executor": "scripted-browser", "entry_state": "workbench", "events": [{"id": "event-open-assessment", "interaction_id": "open-assessment", "from_state": "workbench", "to_state": "assessment", "action": "activate Clinton", "result": "succeeded"}], "terminal_state": "assessment", "foreground_target": "assessment-evidence"},
+    "interactions": [{"id": "open-assessment", "from_state": "workbench", "to_state": "assessment", "new": false}],
+    "claims": [{"artifact_id": "assessment", "text": "Aggregate grade results are not linked individual records", "source": "fixture://assessment/grade-year", "kind": "aggregate_limitation"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 300000, "rendered_bytes": 500000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "open-named-assessment-evidence", "surface_id": "school-first-assessment-v2", "replacement_for": "assessment-workbench-v1", "producer_id": "generator-a",
+    "states": [
+      {"id": "school-search", "route": "/test-scores/", "visible": ["Find a school", "Clinton"], "signals": [], "foreground": ["school-search"], "material_claims": []},
+      {"id": "assessment", "route": "/school/clinton/#assessment", "visible": ["Assessment evidence", "Each panel follows the same students one grade higher each year"], "signals": ["assessment-evidence-visible"], "foreground": ["assessment-evidence"], "material_claims": ["Each panel follows the same students one grade higher each year"], "outcome": {"purpose": "show Clinton assessment evidence", "answer": "Clinton assessment evidence is visible", "proof_target": "fixture://assessment/grade-year", "next_action": "inspect the reported distributions"}}
+    ],
+    "journey": {"executor": "scripted-browser", "entry_state": "school-search", "events": [{"id": "event-select-school", "interaction_id": "select-school", "from_state": "school-search", "to_state": "assessment", "action": "select Clinton", "result": "succeeded"}], "terminal_state": "assessment", "foreground_target": "assessment-evidence"},
+    "interactions": [{"id": "select-school", "from_state": "school-search", "to_state": "assessment", "new": true, "claimed_purpose": "show Clinton assessment evidence"}],
+    "claims": [{"artifact_id": "assessment", "text": "Each panel follows the same students one grade higher each year", "source": "fixture://assessment/grade-year", "kind": "linked_individual"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 190000, "rendered_bytes": 350000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {
+      "critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["00153f7a8a61dc39ce0b08b57484fd77c54970287148bbfc93a072aa40409045", "de8cfffb4bb6e536afd5fd4ef9755f7a929be892e0e0bcaa0c75ef11ec4ca91b"], "findings": [{"id": "aggregate-called-individual", "artifact_id": "assessment", "locator": "same students", "risk": "aggregate grade-year data is described as linked individual movement", "evidence": "the destination says the same students while the sealed source declares no individual linkage", "postcondition": {"type": "visible_text_absent", "value": "same students"}}]},
+      "repair_passes": 1,
+      "pre_repair_states": [
+        {"id": "school-search", "route": "/test-scores/", "visible": ["Find a school", "Clinton"], "signals": [], "foreground": ["school-search"], "material_claims": []},
+        {"id": "assessment", "route": "/school/clinton/#assessment", "visible": ["Assessment evidence", "Each panel follows the same students one grade higher each year"], "signals": ["assessment-evidence-visible"], "foreground": ["assessment-evidence"], "material_claims": ["Each panel follows the same students one grade higher each year"], "outcome": {"purpose": "show Clinton assessment evidence", "answer": "Clinton assessment evidence is visible", "proof_target": "fixture://assessment/grade-year", "next_action": "inspect the reported distributions"}}
+      ],
+      "pre_repair_journey": {"executor": "scripted-browser", "entry_state": "school-search", "events": [{"id": "event-select-school", "interaction_id": "select-school", "from_state": "school-search", "to_state": "assessment", "action": "select Clinton", "result": "succeeded"}], "terminal_state": "assessment", "foreground_target": "assessment-evidence"},
+      "repair": {"addresses": ["aggregate-called-individual"], "affected_artifacts": ["assessment"]}
+    }
+  }
+}

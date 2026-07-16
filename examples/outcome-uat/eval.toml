@@ -5,12 +5,12 @@ skill_path = "skill/SKILL.md"
 runner = ["python", "runner.py"]
 timeout_seconds = 10
 seed = 20260715
-min_held_out_cases = 5
+min_held_out_cases = 8
 min_improvement = 0.05
 receipt_dir = "receipts"
 
 [dimensions]
-harness = "deterministic-captured-states"
+harness = "frozen-receipt-calibration"
 model = "none"
 purpose = "outcome-uat-calibration"
 
@@ -22,6 +22,7 @@ required_variant_gates = [
   "no_harm",
   "earned_interaction",
   "critic_bounded",
+  "critic_repair",
   "responsive_layout",
   "delivery_budget",
 ]
@@ -61,3 +62,21 @@ id = "critic-overreach"
 split = "held_out"
 fixture = "fixtures/critic-overreach.json"
 tags = ["negative-control", "critic-boundary"]
+
+[[cases]]
+id = "aggregate-destination-overclaim"
+split = "held_out"
+fixture = "fixtures/aggregate-destination-overclaim.json"
+tags = ["negative-control", "evidence-navigation", "semantic-scope"]
+
+[[cases]]
+id = "declared-route-without-executed-destination"
+split = "held_out"
+fixture = "fixtures/declared-route-without-executed-destination.json"
+tags = ["negative-control", "record-retrieval", "journey-execution"]
+
+[[cases]]
+id = "critic-self-review-noop-repair"
+split = "held_out"
+fixture = "fixtures/critic-self-review-noop-repair.json"
+tags = ["negative-control", "verified-answer", "critic-repair"]
