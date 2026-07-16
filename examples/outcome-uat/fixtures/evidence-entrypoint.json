@@ -12,7 +12,7 @@
     "interactions": [],
     "claims": [{"artifact_id": "summary", "text": "Measure increased to 62", "source": "fixture://evidence/measure", "kind": "measure_change"}],
     "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
-    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 210000, "rendered_bytes": 410000},
     "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
     "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
@@ -30,7 +30,7 @@
       {"artifact_id": "source", "text": "Measure: 62", "source": "fixture://evidence/measure", "kind": "measure_value"}
     ],
     "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
-    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 230000, "rendered_bytes": 450000},
     "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
     "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["c7c2f228804ad89654ff5ce6511b62dbd0d5c04364d2263a7abaed41af07bdeb", "e916b78f2c1a64387a79652e5efa6a5fe711a108b22e5a290cca7de7e26cc9d4"], "findings": []}, "repair_passes": 0}

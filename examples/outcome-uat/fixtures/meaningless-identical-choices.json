@@ -21,7 +21,7 @@
     ],
     "claims": [{"artifact_id": "start", "text": "Three analyses are available", "source": "fixture://analyses", "kind": "analysis_availability"}],
     "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
-    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 220000, "rendered_bytes": 420000},
     "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
     "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
@@ -42,7 +42,7 @@
     ],
     "claims": [{"artifact_id": "question", "text": "Three analyses are available", "source": "fixture://analyses", "kind": "analysis_availability"}],
     "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
-    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 240000, "rendered_bytes": 450000},
     "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
     "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["bcfaa3ad44f86f861db3288043df09ac153df4a55bc8f91450420b3ace4584fe", "7e285822c2d8f84782b4c1825b1f8d476c77de8b44d6f26b872b182faac61b75", "42328e33d2064e3c2950b88ad69fde30e415b1e37b6657608e3e4f3ccb53d6be", "45d6719d6e87065ef6429d5511190a6ab5bb6e27824ddba2f7ee1d2e61bcd6a3"], "findings": []}, "repair_passes": 0}

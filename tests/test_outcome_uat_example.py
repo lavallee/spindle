@@ -107,6 +107,12 @@ def test_outcome_uat_negative_controls_block_promotion(tmp_path: Path) -> None:
         {"case_id": "missing-as-zero", "gate": "facts_correct"},
         {"case_id": "missing-as-zero", "gate": "no_harm"},
         {"case_id": "oversized-payload", "gate": "delivery_budget"},
+        {
+            "case_id": "undisclosed-mobile-proof-fields",
+            "gate": "responsive_layout",
+        },
+        {"case_id": "wrong-grain-proof", "gate": "facts_correct"},
+        {"case_id": "wrong-grain-proof", "gate": "no_harm"},
     ]
 
     variants = {
@@ -273,6 +279,70 @@ def test_missing_source_data_cannot_be_reported_as_zero(tmp_path: Path) -> None:
     assert all(gate["passed"] for gate in reported["gates"].values())
 
 
+def test_adjacent_source_at_the_wrong_grain_cannot_prove_the_claim(
+    tmp_path: Path,
+) -> None:
+    fixture = json.loads((EXAMPLE / "fixtures" / "wrong-grain-proof.json").read_text())
+    result = _run_fixture(tmp_path, fixture)
+
+    assert result["score"] == 1.0
+    assert result["gates"]["task_closed"]["passed"] is True
+    assert result["gates"]["facts_correct"]["passed"] is False
+    assert result["gates"]["no_harm"]["passed"] is False
+    assert result["gates"]["facts_correct"]["evidence"]["failures"] == [
+        {
+            "claim": "Published school-wide ELA record: 64.5%",
+            "reason": (
+                "fixture://njdoe/grade-panels does not support claim kind "
+                "schoolwide_topline"
+            ),
+        }
+    ]
+
+    # Relabeling the claim's source cannot make a route to the wrong proof pass.
+    relabeled = json.loads(json.dumps(fixture))
+    relabeled["variant"]["claims"][1]["source"] = "fixture://njdoe/schoolwide-row"
+    result = _run_fixture(tmp_path, relabeled)
+    assert result["gates"]["facts_correct"]["passed"] is False
+    assert result["gates"]["facts_correct"]["evidence"]["failures"] == [
+        {
+            "claim": "Published school-wide ELA record: 64.5%",
+            "reason": (
+                "claim source fixture://njdoe/schoolwide-row does not match "
+                "outcome proof target fixture://njdoe/grade-panels"
+            ),
+        }
+    ]
+
+    relabeled["variant"]["states"][1]["outcome"]["proof_target"] = (
+        "fixture://njdoe/schoolwide-row"
+    )
+    relabeled["variant"]["loop"]["critic"]["input_capture_hashes"] = [
+        _capture_hash(state) for state in relabeled["variant"]["states"]
+    ]
+    result = _run_fixture(tmp_path, relabeled)
+    assert result["passed"] is True
+
+
+def test_zero_document_overflow_does_not_certify_hidden_mobile_proof_fields(
+    tmp_path: Path,
+) -> None:
+    result = _run_fixture(
+        tmp_path,
+        EXAMPLE / "fixtures" / "undisclosed-mobile-proof-fields.json",
+    )
+
+    assert result["score"] == 1.0
+    assert result["gates"]["task_closed"]["passed"] is True
+    responsive = result["gates"]["responsive_layout"]
+    assert responsive["passed"] is False
+    assert responsive["evidence"]["mobile"] == {
+        "contained": True,
+        "horizontal_overflow_px": 0,
+        "required_fields_visible_without_undisclosed_action": False,
+    }
+
+
 def test_product_adapter_guidance_requires_settled_cross_engine_execution() -> None:
     skill = (EXAMPLE / "skill" / "SKILL.md").read_text(encoding="utf-8")
     readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
@@ -286,6 +356,10 @@ def test_product_adapter_guidance_requires_settled_cross_engine_execution() -> N
         assert "limit the compatibility claim" in normalized
 
     assert "calibration runner cannot prove" in readme
+    assert "same grain" in skill
+    assert "generic source link" in skill
+    assert "undisclosed gesture" in skill
+    assert "internal scroller" in skill
 
 
 @pytest.mark.parametrize("target", ["state", "outcome", "journey", "event"])

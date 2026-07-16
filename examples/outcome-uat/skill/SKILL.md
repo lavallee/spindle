@@ -44,7 +44,11 @@ preference score.
 - `task_closed`: the same task executes from its real entry to the foregrounded
   completion target on a real replacement.
 - `facts_correct`: every material claim in every capture is covered exactly once
-  and its sealed source supports that claim kind.
+  and its sealed source supports that claim kind at the same grain. A nearby
+  visualization or generic source link is not proof of a separately published
+  record; the product adapter must seal the exact source locator and aggregation
+  that support the claim, and the recorded claim source must match the executed
+  outcome's `proof_target`.
 - `accessibility`: the task has a complete keyboard path and no serious known
   accessibility violation.
 - `no_harm`: the candidate introduces no unsupported material claim,
@@ -62,7 +66,10 @@ preference score.
   hashes prove the capture changed, and postconditions prove this calibration's
   cited risk was addressed before the adapter recomputes the journey and gates.
 - `responsive_layout`: desktop and mobile observations contain the task without
-  horizontal overflow and preserve useful order while reflowing.
+  horizontal overflow, preserve useful order while reflowing, and expose every
+  required answer and proof field without an undisclosed gesture. A page can
+  have zero document overflow and still fail when an internal scroller hides
+  required fields behind an unmarked swipe.
 - `delivery_budget`: captured transferred and rendered bytes remain within the
   task-specific limits.
 

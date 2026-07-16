@@ -364,6 +364,16 @@ def semantic_result(
             failures.append({"claim": claim_text, "reason": "capture is missing"})
         elif claim_text not in "\n".join(state["visible"]):
             failures.append({"claim": claim_text, "reason": "claim is not visible"})
+        elif state.get("outcome") and source != state["outcome"]["proof_target"]:
+            failures.append(
+                {
+                    "claim": claim_text,
+                    "reason": (
+                        f"claim source {source} does not match outcome proof target "
+                        f"{state['outcome']['proof_target']}"
+                    ),
+                }
+            )
         if source not in supported:
             failures.append({"claim": claim_text, "reason": "source is not sealed"})
         elif kind not in supported[source]:
@@ -520,8 +530,10 @@ mobile = obj(responsive.get("mobile"), "responsive_layout.mobile")
 responsive_passed = (
     desktop.get("contained") is True
     and desktop.get("horizontal_overflow_px") == 0
+    and desktop.get("required_fields_visible_without_undisclosed_action") is True
     and mobile.get("contained") is True
     and mobile.get("horizontal_overflow_px") == 0
+    and mobile.get("required_fields_visible_without_undisclosed_action") is True
     and responsive.get("reflow_observed") is True
     and responsive.get("task_order_preserved") is True
 )

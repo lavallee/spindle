@@ -15,7 +15,7 @@
     "interactions": [{"id": "open-echo", "from_state": "list", "to_state": "case", "new": false}],
     "claims": [{"artifact_id": "case", "text": "Status: open", "source": "fixture://cases/echo", "kind": "case_status"}],
     "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
-    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 180000, "rendered_bytes": 330000},
     "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
     "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
@@ -30,7 +30,7 @@
     "interactions": [{"id": "jump-echo", "from_state": "jump", "to_state": "case", "new": true, "claimed_purpose": "open Echo"}],
     "claims": [{"artifact_id": "case", "text": "Status: open", "source": "fixture://cases/echo", "kind": "case_status"}],
     "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
-    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
     "delivery": {"transferred_bytes": 190000, "rendered_bytes": 350000},
     "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
     "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["d819855aaf736821a48536f5065f76610ac1df7e87ad8cfd98d3d1de797878e0", "53c0ec49ad131e0b747da70dcb911894e68d823060d2229ec369b16a7a5e88c8"], "findings": []}, "repair_passes": 0}

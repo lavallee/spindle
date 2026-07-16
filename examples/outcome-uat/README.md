@@ -56,6 +56,12 @@ still blocks on deliberately different failure families:
   the affected artifact hash does not change.
 - `missing-as-zero`: the page is tidy and functional, but reports unavailable
   source data as a numeric zero.
+- `wrong-grain-proof`: the executed route lands on a polished assessment
+  destination, but a by-grade source is asked to prove a separately published
+  school-wide claim.
+- `undisclosed-mobile-proof-fields`: the document has zero horizontal overflow,
+  but an internal mobile scroller hides required proof fields behind an unmarked
+  swipe.
 
 `aggregate-destination-repaired.json` is the positive twin: the same adapter,
 task, pre-repair capture, and critic finding pass after the destination changes
@@ -76,8 +82,12 @@ Fixtures are schema version 2 frozen calibration artifacts, not product claims.
   foregrounded terminal capture. A completion signal in an unexecuted state is
   insufficient; the product adapter, not this calibration runner, owns execution
   and capture custody.
-- `source_semantics` is sealed and lists the claim kinds each source supports.
-  `claims` must cover every material captured claim exactly once.
+- `source_semantics` is sealed and lists the claim kinds each exact source
+  locator and aggregation support. `claims` must cover every material captured
+  claim exactly once; a generic source URL or adjacent visualization is not an
+  exact-record oracle. On an outcome state, the claim source must also equal the
+  executed outcome's `proof_target`; relabeling a claim cannot repair a route to
+  the wrong evidence.
 - `interactions` are graded by effective outcome, not URL or DOM difference.
 - The product adapter gives the critic randomized, anonymized captures plus the
   task and retains prompt, model, order, and raw-input custody.
@@ -89,6 +99,9 @@ Fixtures are schema version 2 frozen calibration artifacts, not product claims.
   prove change; deterministic postconditions prove the cited calibration finding
   was addressed. The runner recomputes the post-repair journey and gate-input
   hash; fixtures cannot assert a rerun with a Boolean.
+- `responsive_layout` records document/task containment and whether every
+  required field is visible without an undisclosed interaction at each measured
+  viewport. Zero document overflow alone cannot certify an internal scroller.
 
 The example intentionally contains no browser dependency and no general semantic
 model. Replace the frozen receipt fixture with a product-owned scripted harness
