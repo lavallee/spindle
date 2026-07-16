@@ -8,7 +8,10 @@ the interface, then supply the recorded evidence to this contract.
 The loop is deliberately short:
 
 1. Freeze one task, real entry, completion target, and sealed source semantics.
-2. Execute baseline and candidate through the same full journey.
+2. Execute baseline and candidate through the same full journey using real user
+   actions. After asynchronous or native actions, wait for an explicit settled
+   task-state predicate before capture, including the completion signal and the
+   expected foreground or focus state when relevant.
 3. Hash consequential captures and run conjunctive task, fact, accessibility,
    harm, interaction, layout, delivery, and critic gates.
 4. Give one independent cold critic the task plus randomized, anonymized
@@ -16,6 +19,12 @@ The loop is deliberately short:
    owns proof of what the critic actually received.
 5. Repair once at most, then recompute the journey and hard gates from changed
    post-repair evidence.
+
+Product-owned execution evidence records the browser engine and version. When
+native event or focus lifecycle is load-bearing, run it in at least two browser
+engines; otherwise limit the compatibility claim to the engine actually run.
+The calibration runner cannot prove these browser facts or external capture
+custody.
 
 `eval.toml` requires all nine hard checks on every held-out variant. A high mean
 score cannot average away one failed task family.
@@ -45,10 +54,17 @@ still blocks on deliberately different failure families:
   are declared, but the action trace records a failed navigation.
 - `critic-self-review-noop-repair`: producer and critic are the same actor and
   the affected artifact hash does not change.
+- `missing-as-zero`: the page is tidy and functional, but reports unavailable
+  source data as a numeric zero.
 
 `aggregate-destination-repaired.json` is the positive twin: the same adapter,
 task, pre-repair capture, and critic finding pass after the destination changes
 to a source-supported aggregate limitation and the full journey is recomputed.
+
+`reported-zero.json` is the positive twin for `missing-as-zero`: the same visible
+zero passes when sealed source semantics support a reported value. The generic
+runner does not classify reported, derived, structurally absent, or unknown
+values; that distinction belongs to the product adapter and its domain oracle.
 
 ## Fixture contract
 

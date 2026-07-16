@@ -104,6 +104,8 @@ def test_outcome_uat_negative_controls_block_promotion(tmp_path: Path) -> None:
         },
         {"case_id": "meaningless-identical-choices", "gate": "earned_interaction"},
         {"case_id": "meaningless-identical-choices", "gate": "task_closed"},
+        {"case_id": "missing-as-zero", "gate": "facts_correct"},
+        {"case_id": "missing-as-zero", "gate": "no_harm"},
         {"case_id": "oversized-payload", "gate": "delivery_budget"},
     ]
 
@@ -242,6 +244,48 @@ def test_uncovered_material_claim_fails_closed(tmp_path: Path) -> None:
             "reason": "material claim in explained is uncovered",
         }
     ]
+
+
+def test_missing_source_data_cannot_be_reported_as_zero(tmp_path: Path) -> None:
+    result = _run_fixture(
+        tmp_path,
+        EXAMPLE / "fixtures" / "missing-as-zero.json",
+    )
+
+    assert result["score"] == 1.0
+    assert result["gates"]["task_closed"]["passed"] is True
+    assert result["gates"]["facts_correct"]["passed"] is False
+    assert result["gates"]["no_harm"]["passed"] is False
+    assert result["gates"]["facts_correct"]["evidence"]["failures"] == [
+        {
+            "claim": "Reported total: 0",
+            "reason": (
+                "fixture://missing-total does not support claim kind reported_value"
+            ),
+        }
+    ]
+
+    reported = _run_fixture(
+        tmp_path,
+        EXAMPLE / "fixtures" / "reported-zero.json",
+    )
+    assert reported["passed"] is True
+    assert all(gate["passed"] for gate in reported["gates"].values())
+
+
+def test_product_adapter_guidance_requires_settled_cross_engine_execution() -> None:
+    skill = (EXAMPLE / "skill" / "SKILL.md").read_text(encoding="utf-8")
+    readme = (EXAMPLE / "README.md").read_text(encoding="utf-8")
+
+    for guidance in (skill, readme):
+        normalized = " ".join(guidance.split())
+        assert "real user actions" in normalized
+        assert "explicit settled task-state predicate" in normalized
+        assert "browser engine and version" in normalized
+        assert "at least two browser engines" in normalized
+        assert "limit the compatibility claim" in normalized
+
+    assert "calibration runner cannot prove" in readme
 
 
 @pytest.mark.parametrize("target", ["state", "outcome", "journey", "event"])

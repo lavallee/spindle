@@ -5,7 +5,7 @@ skill_path = "skill/SKILL.md"
 runner = ["python", "runner.py"]
 timeout_seconds = 10
 seed = 20260715
-min_held_out_cases = 8
+min_held_out_cases = 10
 min_improvement = 0.05
 receipt_dir = "receipts"
 
@@ -44,6 +44,18 @@ id = "sparse-honest-state"
 split = "held_out"
 fixture = "fixtures/sparse-honest-state.json"
 tags = ["sparse-data", "harm"]
+
+[[cases]]
+id = "missing-as-zero"
+split = "held_out"
+fixture = "fixtures/missing-as-zero.json"
+tags = ["negative-control", "sparse-data", "semantic-scope", "harm"]
+
+[[cases]]
+id = "reported-zero"
+split = "held_out"
+fixture = "fixtures/reported-zero.json"
+tags = ["positive-control", "reported-zero", "semantic-scope"]
 
 [[cases]]
 id = "meaningless-identical-choices"

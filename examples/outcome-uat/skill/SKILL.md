@@ -19,9 +19,18 @@ classifier.
 ## 2. Execute the whole journey
 
 Run baseline and candidate from the real entry with the same scripted product
-harness, data, viewport, and test conditions. Retain a contiguous action trace.
-Capture every consequential state and hash its route, visible content,
-foreground targets, material claims, and completion signals.
+harness, data, viewport, and test conditions. Drive the journey through real user
+actions, not direct DOM mutation or asserted state. After an asynchronous or
+native action, wait for an explicit settled task-state predicate before capture:
+the expected completion signal must be present and the intended target must be
+foregrounded, with focus restored where the task depends on it. Retain a
+contiguous action trace. Capture every consequential state and hash its route,
+visible content, foreground targets, material claims, and completion signals.
+
+Record the browser engine and version with product-owned execution evidence. If
+the task depends on native event or focus lifecycle, exercise that lifecycle in
+at least two browser engines; otherwise limit the compatibility claim to the
+engine actually executed.
 
 `task_closed` requires the executed trace—not a declared URL—to end at a
 foregrounded terminal capture containing the completion signal. A working entry
