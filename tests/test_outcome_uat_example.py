@@ -90,10 +90,14 @@ def test_outcome_uat_negative_controls_block_promotion(tmp_path: Path) -> None:
         {"case_id": "aggregate-destination-overclaim", "gate": "critic_repair"},
         {"case_id": "aggregate-destination-overclaim", "gate": "facts_correct"},
         {"case_id": "aggregate-destination-overclaim", "gate": "no_harm"},
+        {"case_id": "backfilled-role-as-eliminated", "gate": "facts_correct"},
+        {"case_id": "backfilled-role-as-eliminated", "gate": "no_harm"},
         {"case_id": "critic-overreach", "gate": "critic_bounded"},
         {"case_id": "critic-overreach", "gate": "critic_repair"},
         {"case_id": "critic-self-review-noop-repair", "gate": "critic_bounded"},
         {"case_id": "critic-self-review-noop-repair", "gate": "critic_repair"},
+        {"case_id": "dated-snapshots-as-canonical-total", "gate": "facts_correct"},
+        {"case_id": "dated-snapshots-as-canonical-total", "gate": "no_harm"},
         {
             "case_id": "declared-route-without-executed-destination",
             "gate": "earned_interaction",
@@ -107,6 +111,10 @@ def test_outcome_uat_negative_controls_block_promotion(tmp_path: Path) -> None:
         {"case_id": "missing-as-zero", "gate": "facts_correct"},
         {"case_id": "missing-as-zero", "gate": "no_harm"},
         {"case_id": "oversized-payload", "gate": "delivery_budget"},
+        {"case_id": "planned-configuration-as-observed", "gate": "facts_correct"},
+        {"case_id": "planned-configuration-as-observed", "gate": "no_harm"},
+        {"case_id": "rif-person-as-position-service-loss", "gate": "facts_correct"},
+        {"case_id": "rif-person-as-position-service-loss", "gate": "no_harm"},
         {
             "case_id": "undisclosed-mobile-proof-fields",
             "gate": "responsive_layout",
@@ -341,6 +349,55 @@ def test_zero_document_overflow_does_not_certify_hidden_mobile_proof_fields(
         "horizontal_overflow_px": 0,
         "required_fields_visible_without_undisclosed_action": False,
     }
+
+
+@pytest.mark.parametrize(
+    ("fixture_name", "claim", "unsupported_kind"),
+    [
+        (
+            "dated-snapshots-as-canonical-total.json",
+            "Canonical total across March, May 4, and May 7: 22 positions and 7 RIFs",
+            "canonical_staffing_total",
+        ),
+        (
+            "rif-person-as-position-service-loss.json",
+            "Eight RIF notices mean eight positions and their student services were eliminated",
+            "position_and_service_elimination",
+        ),
+        (
+            "backfilled-role-as-eliminated.json",
+            "The middle-school media role was eliminated",
+            "eliminated_position",
+        ),
+        (
+            "planned-configuration-as-observed.json",
+            "Students now share one media specialist across two middle schools",
+            "observed_service_outcome",
+        ),
+    ],
+)
+def test_evidence_state_conflations_fail_existing_fact_and_harm_gates(
+    tmp_path: Path,
+    fixture_name: str,
+    claim: str,
+    unsupported_kind: str,
+) -> None:
+    fixture_path = EXAMPLE / "fixtures" / fixture_name
+    fixture = json.loads(fixture_path.read_text())
+    source = next(iter(fixture["task"]["source_semantics"]))
+
+    result = _run_fixture(tmp_path, fixture_path)
+
+    assert result["score"] == 1.0
+    assert result["gates"]["task_closed"]["passed"] is True
+    assert result["gates"]["facts_correct"]["passed"] is False
+    assert result["gates"]["no_harm"]["passed"] is False
+    assert result["gates"]["facts_correct"]["evidence"]["failures"] == [
+        {
+            "claim": claim,
+            "reason": f"{source} does not support claim kind {unsupported_kind}",
+        }
+    ]
 
 
 def test_product_adapter_guidance_requires_settled_cross_engine_execution() -> None:

@@ -5,7 +5,7 @@ skill_path = "skill/SKILL.md"
 runner = ["python", "runner.py"]
 timeout_seconds = 10
 seed = 20260715
-min_held_out_cases = 12
+min_held_out_cases = 16
 min_improvement = 0.05
 receipt_dir = "receipts"
 
@@ -104,3 +104,27 @@ id = "undisclosed-mobile-proof-fields"
 split = "held_out"
 fixture = "fixtures/undisclosed-mobile-proof-fields.json"
 tags = ["negative-control", "responsive-layout", "proof-visibility"]
+
+[[cases]]
+id = "dated-snapshots-as-canonical-total"
+split = "held_out"
+fixture = "fixtures/dated-snapshots-as-canonical-total.json"
+tags = ["negative-control", "facts", "evidence-state", "dated-snapshots"]
+
+[[cases]]
+id = "rif-person-as-position-service-loss"
+split = "held_out"
+fixture = "fixtures/rif-person-as-position-service-loss.json"
+tags = ["negative-control", "facts", "evidence-state", "entity-grain"]
+
+[[cases]]
+id = "backfilled-role-as-eliminated"
+split = "held_out"
+fixture = "fixtures/backfilled-role-as-eliminated.json"
+tags = ["negative-control", "facts", "evidence-state", "entity-grain"]
+
+[[cases]]
+id = "planned-configuration-as-observed"
+split = "held_out"
+fixture = "fixtures/planned-configuration-as-observed.json"
+tags = ["negative-control", "facts", "evidence-state", "future-outcome"]
