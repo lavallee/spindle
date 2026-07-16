@@ -1202,6 +1202,8 @@ def cmd_eval_run(args) -> int:
     status = "eligible" if promotion["eligible"] else "blocked"
     reasons = ",".join(promotion["reasons"]) or "held-out-improvement"
     print(f"promotion: {status} ({reasons})")
+    for failure in promotion.get("failed_variant_gates", []):
+        print(f"  required gate failed: {failure['case_id']}/{failure['gate']}")
     print(f"receipt: {output}")
     return 0 if not any(run["status"] == "error" for run in receipt["runs"]) else 2
 
@@ -1228,6 +1230,8 @@ def cmd_eval_show(args) -> int:
     print(f"promotion:  {'eligible' if promotion.get('eligible') else 'blocked'}")
     for reason in promotion.get("reasons", []):
         print(f"  - {reason}")
+    for failure in promotion.get("failed_variant_gates", []):
+        print(f"    {failure['case_id']}/{failure['gate']}")
     return 0
 
 

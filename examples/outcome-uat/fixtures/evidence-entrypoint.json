@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task": {
+    "id": "open-summary-evidence",
+    "name": "Open the evidence supporting a summary",
+    "completion_signal": "source-visible",
+    "delivery_budget": {"max_transferred_bytes": 600000, "max_rendered_bytes": 1200000}
+  },
+  "baseline": {
+    "task_id": "open-summary-evidence", "surface_id": "summary-card-v1",
+    "states": [{"id": "summary", "route": "/overview/", "visible": ["Measure increased to 62"], "signals": []}],
+    "interactions": [],
+    "facts": [{"claim": "Measure increased to 62", "source": "fixture://evidence/measure", "matches": true}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
+    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 210000, "rendered_bytes": 410000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "primary_action_fires": false, "copy_present": true},
+    "loop": {"generated": false, "critic": {"rounds": 0, "role": "risk-finder-only", "behavior_basis": "not-run", "findings": []}, "repair_passes": 0, "reran_hard_gates": true, "stopped": true}
+  },
+  "variant": {
+    "task_id": "open-summary-evidence", "surface_id": "summary-with-proof-v2", "replacement_for": "summary-card-v1",
+    "states": [
+      {"id": "summary", "route": "/overview/", "visible": ["Measure increased to 62", "View source"], "signals": []},
+      {"id": "source", "route": "/overview/source/", "visible": ["Measure: 62", "Updated: July"], "signals": ["source-visible"], "outcome": {"purpose": "show the source", "answer": "the supporting source is visible", "proof_target": "fixture://evidence/measure", "next_action": "inspect source date"}}
+    ],
+    "interactions": [{"id": "view-source", "from_state": "summary", "to_state": "source", "new": true, "claimed_purpose": "show the source"}],
+    "facts": [{"claim": "Measure increased to 62", "source": "fixture://evidence/measure", "matches": true}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
+    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0}, "mobile": {"contained": true, "horizontal_overflow_px": 0}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 230000, "rendered_bytes": 450000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "primary_action_fires": true, "copy_present": true},
+    "loop": {"generated": true, "critic": {"rounds": 1, "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "findings": [{"risk": "proof label did not name its destination", "evidence": "captured label was More"}]}, "repair_passes": 1, "reran_hard_gates": true, "stopped": true}
+  }
+}

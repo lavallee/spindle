@@ -1,0 +1,63 @@
+schema_version = 1
+id = "outcome-uat-calibration"
+skill = "outcome-uat"
+skill_path = "skill/SKILL.md"
+runner = ["python", "runner.py"]
+timeout_seconds = 10
+seed = 20260715
+min_held_out_cases = 5
+min_improvement = 0.05
+receipt_dir = "receipts"
+
+[dimensions]
+harness = "deterministic-captured-states"
+model = "none"
+purpose = "outcome-uat-calibration"
+
+[acceptance]
+required_variant_gates = [
+  "task_closed",
+  "facts_correct",
+  "accessibility",
+  "no_harm",
+  "earned_interaction",
+  "critic_bounded",
+  "responsive_layout",
+  "delivery_budget",
+]
+
+[[cases]]
+id = "direct-record-jump"
+split = "development"
+fixture = "fixtures/direct-record-jump.json"
+tags = ["task-closure", "replacement"]
+
+[[cases]]
+id = "evidence-entrypoint"
+split = "held_out"
+fixture = "fixtures/evidence-entrypoint.json"
+tags = ["facts", "task-closure"]
+
+[[cases]]
+id = "sparse-honest-state"
+split = "held_out"
+fixture = "fixtures/sparse-honest-state.json"
+tags = ["sparse-data", "harm"]
+
+[[cases]]
+id = "meaningless-identical-choices"
+split = "held_out"
+fixture = "fixtures/meaningless-identical-choices.json"
+tags = ["negative-control", "earned-interaction"]
+
+[[cases]]
+id = "oversized-payload"
+split = "held_out"
+fixture = "fixtures/oversized-payload.json"
+tags = ["negative-control", "delivery-budget"]
+
+[[cases]]
+id = "critic-overreach"
+split = "held_out"
+fixture = "fixtures/critic-overreach.json"
+tags = ["negative-control", "critic-boundary"]
