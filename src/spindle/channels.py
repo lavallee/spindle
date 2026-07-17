@@ -32,6 +32,27 @@ from .composition import ChannelLayer, ComposedSkill
 ChannelProvider = Callable[[str, str, str], Optional[ChannelLayer]]
 
 
+def _frontmatter_chip(src: str | Path) -> str:
+    """Read the optional ``chip:`` alias from a skill dir's SKILL.md frontmatter.
+
+    Advisory-only; missing file or key returns "". Kept string-level here so the
+    channel layer never imports chip tooling."""
+    md = Path(src) / "SKILL.md"
+    try:
+        text = md.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    if not text.startswith("---"):
+        return ""
+    end = text.find("\n---", 3)
+    if end < 0:
+        return ""
+    for line in text[3:end].splitlines():
+        if line.startswith("chip:"):
+            return line.split(":", 1)[1].strip().strip('"').strip("'")
+    return ""
+
+
 @dataclass(frozen=True)
 class Surface:
     """A skill consumer. ``clusters`` are app-class keys from spindle.appclass."""
@@ -88,11 +109,16 @@ def fs_provider(skill_index: dict[str, str | Path], *,
     """A ChannelProvider backed by on-disk channel manifests.
 
     A ``channel.toml`` declares ``version``, ``absolutes`` (ids in force at that
-    scope), ``skills`` (skill names), and an optional ``tiers`` map (skill name →
-    P10 routing hint, ``judgment`` | ``execution``). ``skill_index`` maps a skill
-    name to its canonical source dir (built once from installed skills via
+    scope), ``skills`` (skill names), an optional ``tiers`` map (skill name → P10
+    routing hint, ``judgment`` | ``execution``), and an optional ``chips`` map
+    (skill name → chip alias, touchpoint A). ``skill_index`` maps a skill name to
+    its canonical source dir (built once from installed skills via
     ``skills.discover_skills``); names absent from the index are skipped. The
     command is conventionally ``/<name>``.
+
+    The chip alias falls back to the skill's own ``chip:`` frontmatter key when
+    the manifest does not name one — either source is purely advisory and inert
+    without a chip host.
 
     ``source_dir`` defaults to the active distribution's source dir.
     """
@@ -105,14 +131,16 @@ def fs_provider(skill_index: dict[str, str | Path], *,
             return None
         data = tomllib.loads(manifest.read_text(encoding="utf-8"))
         tiers = data.get("tiers", {}) or {}
+        chips = data.get("chips", {}) or {}
         skills: list[ComposedSkill] = []
         for sname in data.get("skills", []):
             src = skill_index.get(sname)
             if src is None:
                 continue
+            chip = str(chips.get(sname, "")) or _frontmatter_chip(src)
             skills.append(ComposedSkill(
                 name=sname, command=f"/{sname}", scope=scope, source_dir=str(src),
-                tier=str(tiers.get(sname, "")),
+                tier=str(tiers.get(sname, "")), chip=chip,
             ))
         return ChannelLayer(
             scope=scope,

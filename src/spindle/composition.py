@@ -36,6 +36,10 @@ class ComposedSkill:
     source_dir: str = ""  # canonical on-disk skill dir; what materialize symlinks (or, post-render, the rendered dir)
     tier: str = ""        # P10 routing hint: judgment | execution | "" (unset). Advisory —
                           # spindle annotates which model tier a skill wants; the harness routes.
+    chip: str = ""        # optional chip alias (touchpoint A). Advisory routing hint, mirroring
+                          # `tier`: names a chip a chip-host *could* wire this skill to. Inert
+                          # without a chip host — spindle never imports chip tooling; it only
+                          # carries the string through resolve/render/materialize untouched.
 
 
 @dataclass(frozen=True)

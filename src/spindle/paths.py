@@ -66,6 +66,15 @@ def ledger_path() -> Path:
     return spindle_home() / "ledger.jsonl"
 
 
+def chippability_ledger_path() -> Path:
+    """Append-only record of chippability assessments (touchpoint C).
+
+    One JSON line per assessed skill: ``{at, skill, package, score, hint}``.
+    A local emit — it names strings and writes a file; it never imports chip
+    tooling or requires a chip host."""
+    return _env_path("SPINDLE_CHIPPABILITY_LEDGER", spindle_home() / "chippability.jsonl")
+
+
 def candidates_dir() -> Path:
     """Draft candidate verdicts waiting for human review (output of scout cron pass)."""
     return spindle_home() / "verdicts" / "_candidates"
