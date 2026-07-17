@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "open-named-record",
+    "name": "Open a named record from the collection home",
+    "entry_route": "/records/",
+    "completion_signal": "named-record-visible",
+    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 1000000},
+    "source_semantics": {"fixture://records/delta": {"sealed": true, "supports": ["record_status"]}}
+  },
+  "baseline": {
+    "task_id": "open-named-record", "surface_id": "collection-list-v1", "producer_id": "baseline-author",
+    "states": [
+      {"id": "list", "route": "/records/", "visible": ["Record index"], "signals": [], "foreground": ["record-index"], "material_claims": []},
+      {"id": "record", "route": "/records/delta/", "visible": ["Delta", "Status: active"], "signals": ["named-record-visible"], "foreground": ["record-details"], "material_claims": ["Status: active"]}
+    ],
+    "journey": {"executor": "scripted-browser", "entry_state": "list", "events": [{"id": "event-open-delta", "interaction_id": "open-delta", "from_state": "list", "to_state": "record", "action": "activate Delta", "result": "succeeded"}], "terminal_state": "record", "foreground_target": "record-details"},
+    "interactions": [{"id": "open-delta", "from_state": "list", "to_state": "record", "new": false}],
+    "claims": [{"artifact_id": "record", "text": "Status: active", "source": "fixture://records/delta", "kind": "record_status"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
+    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 180000, "rendered_bytes": 330000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "open-named-record", "surface_id": "direct-record-jump-v2", "replacement_for": "collection-list-v1", "producer_id": "generator-a",
+    "states": [
+      {"id": "home", "route": "/records/", "visible": ["Jump to a record", "Delta"], "signals": [], "foreground": ["record-jump"], "material_claims": []},
+      {"id": "delta", "route": "/records/delta/", "visible": ["Delta", "Status: active"], "signals": ["named-record-visible"], "foreground": ["record-details"], "material_claims": ["Status: active"], "outcome": {"purpose": "open Delta", "answer": "Delta record is visible", "proof_target": "fixture://records/delta", "next_action": "read record details"}}
+    ],
+    "journey": {"executor": "scripted-browser", "entry_state": "home", "events": [{"id": "event-jump-delta", "interaction_id": "jump-delta", "from_state": "home", "to_state": "delta", "action": "activate Delta", "result": "succeeded"}], "terminal_state": "delta", "foreground_target": "record-details"},
+    "interactions": [{"id": "jump-delta", "from_state": "home", "to_state": "delta", "new": true, "claimed_purpose": "open Delta"}],
+    "claims": [{"artifact_id": "delta", "text": "Status: active", "source": "fixture://records/delta", "kind": "record_status"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []},
+    "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 190000, "rendered_bytes": 350000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {
+      "critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["6425f10aa0a44a4d7af745b52f6a611beac9cf7118a39240f969193f92c66daf", "5d65398ba7f059c4016ed2c2891e141e952f08cc86fb2ac6f017aaef523655ef"], "findings": [{"id": "missing-status", "artifact_id": "delta", "locator": "Status unavailable", "risk": "the named record does not provide its published status", "evidence": "the terminal capture says Status unavailable", "postcondition": {"type": "visible_text_absent", "value": "Status unavailable"}}]},
+      "repair_passes": 1,
+      "pre_repair_states": [
+        {"id": "home", "route": "/records/", "visible": ["Jump to a record", "Delta"], "signals": [], "foreground": ["record-jump"], "material_claims": []},
+        {"id": "delta", "route": "/records/delta/", "visible": ["Delta", "Status unavailable"], "signals": ["named-record-visible"], "foreground": ["record-details"], "material_claims": [], "outcome": {"purpose": "open Delta", "answer": "Delta record is visible", "proof_target": "fixture://records/delta", "next_action": "read record details"}}
+      ],
+      "pre_repair_journey": {"executor": "scripted-browser", "entry_state": "home", "events": [{"id": "event-jump-delta", "interaction_id": "jump-delta", "from_state": "home", "to_state": "delta", "action": "activate Delta", "result": "succeeded"}], "terminal_state": "delta", "foreground_target": "record-details"},
+      "repair": {"addresses": ["missing-status"], "affected_artifacts": ["delta"]}
+    }
+  }
+}

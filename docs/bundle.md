@@ -383,6 +383,9 @@ seed = 20260711
 min_held_out_cases = 10
 min_improvement = 0.05
 
+[acceptance]
+required_variant_gates = ["task_closed", "facts_correct", "no_harm"]
+
 [dimensions]
 harness = "isolated-executor"
 model = "frozen-model-coordinate"
@@ -397,17 +400,43 @@ fixture = "fixtures/unseen-regression.json"
 
 **Development** cases exist so you can iterate on fixtures and graders; they never
 make a run promotion-eligible. Promotion is decided only on **held-out** cases. A run
-may promote only if all four hold:
+may promote only if all applicable conditions hold:
 
 1. the configured minimum number of held-out cases is met;
 2. zero runner errors;
 3. complete baseline/variant pairs;
-4. variant mean strictly above baseline (when `min_improvement = 0`), else at least
+4. every configured required gate passes on every held-out variant;
+5. variant mean strictly above baseline (when `min_improvement = 0`), else at least
    the configured margin.
 
 The held-out mean is a necessary gate, not the whole decision — review case-level
 regressions, cost, latency, and human-correction time before adopting. Rejected and
 null receipts are kept as evidence for that exact skill hash.
+
+### 4.2.1 Required variant gates
+
+A manifest may optionally declare `[acceptance].required_variant_gates`. Each named
+gate in every held-out variant result must provide `passed` as a Boolean and
+non-empty `evidence`. A missing, malformed, or false required gate blocks promotion
+by conjunction regardless of score. Passing them all does not replace the paired
+experiment: the variant must still clear the comparative held-out improvement bar.
+Baseline and development gate outcomes remain diagnostic receipt evidence, not
+independent promotion blockers.
+
+```json
+"gates": {
+  "task_closed": {"passed": true, "evidence": "completion signal observed"},
+  "facts_correct": {"passed": true, "evidence": {"checked_claims": 4}},
+  "no_harm": {"passed": true, "evidence": "no misleading claims found"}
+}
+```
+
+The runner or skill package owns each gate's meaning and oracle; Spindle enforces
+only the conjunction. This prevents factual, harm, or task-closure failures from
+averaging away without pretending there is one universal UX score. Model critique
+may point to risks, but it cannot override a deterministic gate or stand in for
+observed user behavior. See `examples/outcome-uat/eval.toml` for a deterministic
+calibration example.
 
 ### 4.3 The runner is an argv contract
 
@@ -424,6 +453,7 @@ harness, or a deterministic local fixture; it writes one JSON result and exits.
 | `SPINDLE_EVAL_FIXTURE` | absolute path to the case fixture |
 | `SPINDLE_EVAL_SPLIT` | `development` or `held_out` |
 | `SPINDLE_EVAL_DIMENSIONS` | JSON of the frozen `[dimensions]` |
+| `SPINDLE_EVAL_REQUIRED_VARIANT_GATES` | JSON array copied from `[acceptance].required_variant_gates` |
 | `SPINDLE_EVAL_RESULT_PATH` | where the runner must write its JSON result |
 | `SPINDLE_EVAL_ID` / `_RUN_ID` / `_CASE_ID` | evaluation, run, and case coordinates |
 
@@ -431,6 +461,8 @@ The result is small and validated: `score` bounded to `[0,1]`; `skill_invoked` m
 match the arm; `evidence` must be non-empty. A timeout, nonzero exit, malformed
 result, missing evidence, or arm mismatch is an evaluation error — and an error
 blocks promotion.
+`passed` is runner-supplied diagnostic evidence; promotion uses the comparative
+score and any explicitly configured required gates.
 
 ```json
 // the JSON the runner writes to $SPINDLE_EVAL_RESULT_PATH
@@ -439,6 +471,9 @@ blocks promotion.
   "passed": true,
   "skill_invoked": true,
   "evidence": {"grader": "exact-regression-check", "receipt": "…"},
+  "gates": {
+    "task_closed": {"passed": true, "evidence": "completion signal observed"}
+  },
   "metrics": {"false_positives": 0, "corrections": 1},
   "artifacts": [".../agent-output.txt"]
 }

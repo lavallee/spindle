@@ -1,0 +1,130 @@
+schema_version = 1
+id = "outcome-uat-calibration"
+skill = "outcome-uat"
+skill_path = "skill/SKILL.md"
+runner = ["python", "runner.py"]
+timeout_seconds = 10
+seed = 20260715
+min_held_out_cases = 16
+min_improvement = 0.05
+receipt_dir = "receipts"
+
+[dimensions]
+harness = "frozen-receipt-calibration"
+model = "none"
+purpose = "outcome-uat-calibration"
+
+[acceptance]
+required_variant_gates = [
+  "task_closed",
+  "facts_correct",
+  "accessibility",
+  "no_harm",
+  "earned_interaction",
+  "critic_bounded",
+  "critic_repair",
+  "responsive_layout",
+  "delivery_budget",
+]
+
+[[cases]]
+id = "direct-record-jump"
+split = "development"
+fixture = "fixtures/direct-record-jump.json"
+tags = ["task-closure", "replacement"]
+
+[[cases]]
+id = "evidence-entrypoint"
+split = "held_out"
+fixture = "fixtures/evidence-entrypoint.json"
+tags = ["facts", "task-closure"]
+
+[[cases]]
+id = "sparse-honest-state"
+split = "held_out"
+fixture = "fixtures/sparse-honest-state.json"
+tags = ["sparse-data", "harm"]
+
+[[cases]]
+id = "missing-as-zero"
+split = "held_out"
+fixture = "fixtures/missing-as-zero.json"
+tags = ["negative-control", "sparse-data", "semantic-scope", "harm"]
+
+[[cases]]
+id = "reported-zero"
+split = "held_out"
+fixture = "fixtures/reported-zero.json"
+tags = ["positive-control", "reported-zero", "semantic-scope"]
+
+[[cases]]
+id = "meaningless-identical-choices"
+split = "held_out"
+fixture = "fixtures/meaningless-identical-choices.json"
+tags = ["negative-control", "earned-interaction"]
+
+[[cases]]
+id = "oversized-payload"
+split = "held_out"
+fixture = "fixtures/oversized-payload.json"
+tags = ["negative-control", "delivery-budget"]
+
+[[cases]]
+id = "critic-overreach"
+split = "held_out"
+fixture = "fixtures/critic-overreach.json"
+tags = ["negative-control", "critic-boundary"]
+
+[[cases]]
+id = "aggregate-destination-overclaim"
+split = "held_out"
+fixture = "fixtures/aggregate-destination-overclaim.json"
+tags = ["negative-control", "evidence-navigation", "semantic-scope"]
+
+[[cases]]
+id = "declared-route-without-executed-destination"
+split = "held_out"
+fixture = "fixtures/declared-route-without-executed-destination.json"
+tags = ["negative-control", "record-retrieval", "journey-execution"]
+
+[[cases]]
+id = "critic-self-review-noop-repair"
+split = "held_out"
+fixture = "fixtures/critic-self-review-noop-repair.json"
+tags = ["negative-control", "verified-answer", "critic-repair"]
+
+[[cases]]
+id = "wrong-grain-proof"
+split = "held_out"
+fixture = "fixtures/wrong-grain-proof.json"
+tags = ["negative-control", "facts", "evidence-navigation", "source-grain"]
+
+[[cases]]
+id = "undisclosed-mobile-proof-fields"
+split = "held_out"
+fixture = "fixtures/undisclosed-mobile-proof-fields.json"
+tags = ["negative-control", "responsive-layout", "proof-visibility"]
+
+[[cases]]
+id = "dated-snapshots-as-canonical-total"
+split = "held_out"
+fixture = "fixtures/dated-snapshots-as-canonical-total.json"
+tags = ["negative-control", "facts", "evidence-state", "dated-snapshots"]
+
+[[cases]]
+id = "rif-person-as-position-service-loss"
+split = "held_out"
+fixture = "fixtures/rif-person-as-position-service-loss.json"
+tags = ["negative-control", "facts", "evidence-state", "entity-grain"]
+
+[[cases]]
+id = "backfilled-role-as-eliminated"
+split = "held_out"
+fixture = "fixtures/backfilled-role-as-eliminated.json"
+tags = ["negative-control", "facts", "evidence-state", "entity-grain"]
+
+[[cases]]
+id = "planned-configuration-as-observed"
+split = "held_out"
+fixture = "fixtures/planned-configuration-as-observed.json"
+tags = ["negative-control", "facts", "evidence-state", "future-outcome"]

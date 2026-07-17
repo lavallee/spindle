@@ -99,6 +99,9 @@ seed = 20260711
 min_held_out_cases = 10
 min_improvement = 0.05
 
+[acceptance]
+required_variant_gates = ["task_closed", "facts_correct", "no_harm"]
+
 [dimensions]
 harness = "isolated-executor"
 model = "frozen-model-coordinate"
@@ -113,7 +116,7 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
     <p><b>Development</b> cases exist so you can iterate on fixtures and graders;
     they never make a run promotion-eligible. Promotion is decided only on
     <b>held-out</b> cases the skill author was not tuning against. A run may promote
-    only if all four hold:</p>
+    only if all applicable conditions hold:</p>
     <aside class="article-marginnote article-marginnote--callout">
       <span class="term">why held-out</span>
       Tuning a skill until it passes the cases you're watching proves nothing. A
@@ -125,6 +128,7 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
     <div class="stat"><span class="value">≥ N</span><span class="label">held-out cases met</span></div>
     <div class="stat"><span class="value">0</span><span class="label">runner errors</span></div>
     <div class="stat"><span class="value">100%</span><span class="label">complete pairs</span></div>
+    <div class="stat"><span class="value">all</span><span class="label">required gates pass</span></div>
     <div class="stat"><span class="value">Δ &gt; 0</span><span class="label">variant over baseline</span></div>
   </div>
   <p>When <code>min_improvement</code> is zero, the variant mean must be
@@ -133,6 +137,30 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
   docs are explicit that you should still review case-level regressions, cost,
   latency, and human-correction time before you adopt. Rejected and null receipts
   are kept as evidence for that exact skill hash.</p>
+
+  <h2>Failures that cannot average away</h2>
+  <p>A manifest may optionally declare
+  <code>[acceptance].required_variant_gates</code>. Each named gate in every
+  held-out variant result must have a Boolean <code>passed</code> value and
+  non-empty <code>evidence</code>. One missing, malformed, or false required gate
+  blocks promotion regardless of score. Passing every gate is still not enough:
+  the variant must also clear the comparative held-out improvement bar. Baseline
+  and development gate outcomes are diagnostic receipt evidence, not independent
+  promotion blockers.</p>
+
+<pre><code>"gates": {
+  "task_closed": {"passed": true, "evidence": "completion signal observed"},
+  "facts_correct": {"passed": true, "evidence": {"checked_claims": 4}},
+  "no_harm": {"passed": true, "evidence": "no misleading claims found"}
+}</code></pre>
+
+  <p>The runner or skill package defines the gate meanings and oracles; Spindle
+  enforces their conjunction. This prevents factual, harm, or task-closure failures
+  from disappearing inside an average without creating a universal UX score. A
+  model critic may identify risks, but it cannot override a deterministic gate or
+  stand in for observed user behavior. The deterministic
+  <a href="https://github.com/lavallee/spindle/blob/main/examples/outcome-uat/eval.toml"><code>outcome-uat</code> example</a>
+  shows the contract.</p>
 
   <h2>The runner is an argv contract</h2>
   <p>Spindle never calls a model provider. A manifest names an argv
@@ -150,6 +178,7 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
       <tr><td><code>SPINDLE_EVAL_FIXTURE</code></td><td>absolute path to the case fixture</td></tr>
       <tr><td><code>SPINDLE_EVAL_SPLIT</code></td><td><code>development</code> or <code>held_out</code></td></tr>
       <tr><td><code>SPINDLE_EVAL_DIMENSIONS</code></td><td>JSON of the frozen <code>[dimensions]</code></td></tr>
+      <tr><td><code>SPINDLE_EVAL_REQUIRED_VARIANT_GATES</code></td><td>JSON array from <code>[acceptance].required_variant_gates</code></td></tr>
       <tr><td><code>SPINDLE_EVAL_RESULT_PATH</code></td><td>where the runner must write its JSON result</td></tr>
     </tbody>
   </table>
@@ -159,7 +188,9 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
     <code>[0,1]</code>; <code>skill_invoked</code> must match the arm;
     <code>evidence</code> must be non-empty. A timeout, a nonzero exit, a malformed
     result, missing evidence, or an arm mismatch is an evaluation error — and an
-    error blocks promotion.</p>
+    error blocks promotion. <code>passed</code> is runner-supplied diagnostic
+    evidence; promotion uses the comparative score and any explicitly configured
+    required gates.</p>
     <aside class="article-marginnote article-marginnote--source">
       <span class="term">freeze the coordinates</span>
       The runner should hold model, tools, and budgets constant across arms and
@@ -174,6 +205,9 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
   "passed": true,
   "skill_invoked": true,
   "evidence": {"grader": "exact-regression-check", "receipt": "…"},
+  "gates": {
+    "task_closed": {"passed": true, "evidence": "completion signal observed"}
+  },
   "metrics": {"false_positives": 0, "corrections": 1},
   "artifacts": [".../agent-output.txt"]
 }</code></pre>

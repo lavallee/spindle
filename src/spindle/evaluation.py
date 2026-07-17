@@ -19,6 +19,21 @@ from typing import Any, Iterable
 SCHEMA_VERSION = 1
 VALID_SPLITS = {"development", "held_out"}
 VALID_ARMS = ("baseline", "variant")
+VALID_MANIFEST_KEYS = {
+    "schema_version",
+    "id",
+    "skill",
+    "skill_path",
+    "runner",
+    "cases",
+    "timeout_seconds",
+    "seed",
+    "min_held_out_cases",
+    "min_improvement",
+    "receipt_dir",
+    "dimensions",
+    "acceptance",
+}
 
 
 class EvaluationError(ValueError):
@@ -47,6 +62,7 @@ class EvalManifest:
     min_improvement: float = 0.0
     receipt_dir: Path | None = None
     dimensions: dict[str, str] = field(default_factory=dict)
+    required_variant_gates: tuple[str, ...] = ()
 
 
 def _resolve(root: Path, value: str) -> Path:
@@ -79,6 +95,11 @@ def load_manifest(path: str | Path) -> EvalManifest:
 
     if raw.get("schema_version") != SCHEMA_VERSION:
         raise EvaluationError(f"schema_version must be {SCHEMA_VERSION}")
+    unknown_manifest_keys = sorted(set(raw) - VALID_MANIFEST_KEYS)
+    if unknown_manifest_keys:
+        raise EvaluationError(
+            "unknown top-level manifest key(s): " + ", ".join(unknown_manifest_keys)
+        )
 
     root = manifest_path.parent
     runner = raw.get("runner")
@@ -130,6 +151,35 @@ def load_manifest(path: str | Path) -> EvalManifest:
     ):
         raise EvaluationError("[dimensions] values must be strings")
 
+    required_variant_gates: tuple[str, ...] = ()
+    acceptance = raw.get("acceptance")
+    if acceptance is not None:
+        if not isinstance(acceptance, dict):
+            raise EvaluationError("[acceptance] must be a table")
+        unknown_acceptance_keys = sorted(
+            set(acceptance) - {"required_variant_gates"}
+        )
+        if unknown_acceptance_keys:
+            raise EvaluationError(
+                "[acceptance] unknown key(s): " + ", ".join(unknown_acceptance_keys)
+            )
+        if "required_variant_gates" in acceptance:
+            raw_gates = acceptance["required_variant_gates"]
+            if not isinstance(raw_gates, list) or not raw_gates:
+                raise EvaluationError(
+                    "acceptance.required_variant_gates must be a non-empty array of strings"
+                )
+            if not all(isinstance(gate, str) and gate.strip() for gate in raw_gates):
+                raise EvaluationError(
+                    "acceptance.required_variant_gates values must be non-empty strings"
+                )
+            normalized_gates = tuple(gate.strip() for gate in raw_gates)
+            if len(set(normalized_gates)) != len(normalized_gates):
+                raise EvaluationError(
+                    "acceptance.required_variant_gates values must be unique"
+                )
+            required_variant_gates = normalized_gates
+
     receipt_value = raw.get("receipt_dir", "receipts")
     if not isinstance(receipt_value, str) or not receipt_value:
         raise EvaluationError("receipt_dir must be a non-empty string")
@@ -151,6 +201,7 @@ def load_manifest(path: str | Path) -> EvalManifest:
         min_improvement=improvement,
         receipt_dir=_resolve(root, receipt_value),
         dimensions=dict(dimensions),
+        required_variant_gates=required_variant_gates,
     )
 
 
@@ -174,7 +225,13 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _result_payload(path: Path, *, case_id: str, arm: str) -> dict[str, Any]:
+def _result_payload(
+    path: Path,
+    *,
+    case_id: str,
+    arm: str,
+    required_gates: tuple[str, ...] = (),
+) -> dict[str, Any]:
     try:
         if path.stat().st_size > 1024 * 1024:
             raise EvaluationError(f"case {case_id}/{arm}: result exceeds 1 MiB")
@@ -208,6 +265,34 @@ def _result_payload(path: Path, *, case_id: str, arm: str) -> dict[str, Any]:
     artifacts = payload.get("artifacts", [])
     if not isinstance(artifacts, list) or not all(isinstance(item, str) for item in artifacts):
         raise EvaluationError(f"case {case_id}/{arm}: artifacts must be an array of strings")
+    if required_gates:
+        gates = payload.get("gates")
+        if not isinstance(gates, dict):
+            raise EvaluationError(f"case {case_id}/{arm}: gates must be an object")
+        for gate in required_gates:
+            if gate not in gates:
+                raise EvaluationError(
+                    f"case {case_id}/{arm}: gates is missing required gate {gate!r}"
+                )
+            gate_result = gates[gate]
+            if not isinstance(gate_result, dict):
+                raise EvaluationError(
+                    f"case {case_id}/{arm}: gate {gate!r} must be an object"
+                )
+            if not isinstance(gate_result.get("passed"), bool):
+                raise EvaluationError(
+                    f"case {case_id}/{arm}: gate {gate!r} passed must be boolean"
+                )
+            evidence_value = gate_result.get("evidence")
+            if not isinstance(evidence_value, (str, list, dict)) or (
+                not evidence_value
+                or isinstance(evidence_value, str)
+                and not evidence_value.strip()
+            ):
+                raise EvaluationError(
+                    f"case {case_id}/{arm}: gate {gate!r} evidence "
+                    "must be a non-empty string, array, or object"
+                )
     payload["score"] = float(score)
     payload["passed"] = passed
     payload.setdefault("metrics", {})
@@ -242,6 +327,9 @@ def _run_one(manifest: EvalManifest, case: EvalCase, arm: str, run_id: str) -> d
             "SPINDLE_EVAL_SKILL_ENABLED": "1" if arm == "variant" else "0",
             "SPINDLE_EVAL_RESULT_PATH": str(result_path),
             "SPINDLE_EVAL_DIMENSIONS": json.dumps(manifest.dimensions, sort_keys=True),
+            "SPINDLE_EVAL_REQUIRED_VARIANT_GATES": json.dumps(
+                manifest.required_variant_gates
+            ),
         }
         try:
             process = subprocess.run(
@@ -287,7 +375,16 @@ def _run_one(manifest: EvalManifest, case: EvalCase, arm: str, run_id: str) -> d
             )
             return record
         try:
-            record["result"] = _result_payload(result_path, case_id=case.id, arm=arm)
+            record["result"] = _result_payload(
+                result_path,
+                case_id=case.id,
+                arm=arm,
+                required_gates=(
+                    manifest.required_variant_gates
+                    if case.split == "held_out" and arm == "variant"
+                    else ()
+                ),
+            )
             record["status"] = "ok"
         except EvaluationError as exc:
             record.update(status="error", error=str(exc), stderr_tail=stderr[-1000:])
@@ -333,13 +430,31 @@ def _promotion(manifest: EvalManifest, runs: list[dict[str, Any]]) -> dict[str, 
         reasons.append("no-held-out-improvement")
     elif manifest.min_improvement > 0 and delta < manifest.min_improvement:
         reasons.append("below-min-improvement")
-    return {
+    failed_variant_gates = sorted(
+        (
+            {"case_id": str(run["case_id"]), "gate": gate}
+            for run in runs
+            if run.get("split") == "held_out"
+            and run.get("arm") == "variant"
+            and run.get("status") == "ok"
+            for gate in manifest.required_variant_gates
+            if run["result"]["gates"][gate]["passed"] is False
+        ),
+        key=lambda failure: (failure["case_id"], failure["gate"]),
+    )
+    if failed_variant_gates:
+        reasons.append("required-variant-gates-failed")
+    promotion = {
         "eligible": not reasons,
         "reasons": reasons,
         "required_cases": manifest.min_held_out_cases,
         "required_improvement": manifest.min_improvement,
         "observed_delta": delta,
     }
+    if manifest.required_variant_gates:
+        promotion["required_variant_gates"] = list(manifest.required_variant_gates)
+        promotion["failed_variant_gates"] = failed_variant_gates
+    return promotion
 
 
 def _default_receipt_path(manifest: EvalManifest, run_id: str) -> Path:
@@ -380,6 +495,7 @@ def run_evaluation(
         "skill_path": str(manifest.skill_path),
         "skill_sha256": _sha256(manifest.skill_path),
         "dimensions": manifest.dimensions,
+        "required_variant_gates": list(manifest.required_variant_gates),
         "seed": manifest.seed,
         "split_requested": split,
         "runs": runs,

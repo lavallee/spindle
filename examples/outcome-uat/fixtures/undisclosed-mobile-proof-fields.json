@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "inspect-complete-assessment-record", "name": "Inspect one complete assessment record", "entry_route": "/school/", "completion_signal": "record-visible",
+    "delivery_budget": {"max_transferred_bytes": 600000, "max_rendered_bytes": 1200000},
+    "source_semantics": {"fixture://njdoe/schoolwide-row": {"sealed": true, "supports": ["schoolwide_topline"]}}
+  },
+  "baseline": {
+    "task_id": "inspect-complete-assessment-record", "surface_id": "assessment-summary-v1", "producer_id": "baseline-author",
+    "states": [{"id": "summary", "route": "/school/", "visible": ["School-wide ELA: 64.5%"], "signals": [], "foreground": ["summary"], "material_claims": ["School-wide ELA: 64.5%"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "summary", "events": [], "terminal_state": "summary", "foreground_target": "summary"},
+    "interactions": [],
+    "claims": [{"artifact_id": "summary", "text": "School-wide ELA: 64.5%", "source": "fixture://njdoe/schoolwide-row", "kind": "schoolwide_topline"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 210000, "rendered_bytes": 410000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "inspect-complete-assessment-record", "surface_id": "scrolling-record-v2", "replacement_for": "assessment-summary-v1", "producer_id": "generator-a",
+    "states": [
+      {"id": "summary", "route": "/school/", "visible": ["School-wide ELA: 64.5%", "See exact record"], "signals": [], "foreground": ["summary"], "material_claims": ["School-wide ELA: 64.5%"]},
+      {"id": "record", "route": "/school/#assessment-ela-record", "visible": ["2024-25", "Met or exceeded: 64.5%", "Valid scores: 293", "Participation: 98.7%", "NJ statewide: 53.0%"], "signals": ["record-visible"], "foreground": ["assessment-record"], "material_claims": ["Met or exceeded: 64.5%"], "outcome": {"purpose": "show the exact record", "answer": "the published assessment record is visible", "proof_target": "fixture://njdoe/schoolwide-row", "next_action": "inspect the method"}}
+    ],
+    "journey": {"executor": "scripted-browser", "entry_state": "summary", "events": [{"id": "event-view-record", "interaction_id": "view-record", "from_state": "summary", "to_state": "record", "action": "activate See exact record", "result": "succeeded"}], "terminal_state": "record", "foreground_target": "assessment-record"},
+    "interactions": [{"id": "view-record", "from_state": "summary", "to_state": "record", "new": true, "claimed_purpose": "show the exact record"}],
+    "claims": [
+      {"artifact_id": "summary", "text": "School-wide ELA: 64.5%", "source": "fixture://njdoe/schoolwide-row", "kind": "schoolwide_topline"},
+      {"artifact_id": "record", "text": "Met or exceeded: 64.5%", "source": "fixture://njdoe/schoolwide-row", "kind": "schoolwide_topline"}
+    ],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": false}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 230000, "rendered_bytes": 450000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["40cdf7cdc84168af4df4dc56f7e329e7915f3bae20d9ed6e26d4f9017420179c", "5eef84f4e137ee83ddbf9afe6834fb696a743de945d7af305b3806182cea50f9"], "findings": []}, "repair_passes": 0}
+  }
+}

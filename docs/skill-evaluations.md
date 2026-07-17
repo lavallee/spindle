@@ -26,6 +26,9 @@ min_held_out_cases = 10
 min_improvement = 0.05
 receipt_dir = "receipts"
 
+[acceptance]
+required_variant_gates = ["task_closed", "facts_correct", "no_harm"]
+
 [dimensions]
 harness = "isolated-executor"
 model = "frozen-model-coordinate"
@@ -63,8 +66,10 @@ Spindle sets:
 | `SPINDLE_EVAL_SKILL_FILE` | candidate path for the variant; empty for baseline |
 | `SPINDLE_EVAL_RESULT_PATH` | where the runner must write JSON |
 | `SPINDLE_EVAL_DIMENSIONS` | JSON object copied from `[dimensions]` |
+| `SPINDLE_EVAL_REQUIRED_VARIANT_GATES` | JSON array copied from `[acceptance].required_variant_gates` |
 
-The result must contain:
+The result must contain the ordinary fields below and, when acceptance gates are
+configured, the `gates` object shown:
 
 ```json
 {
@@ -72,6 +77,11 @@ The result must contain:
   "passed": true,
   "skill_invoked": true,
   "evidence": {"grader": "exact-regression-check", "receipt": "..."},
+  "gates": {
+    "task_closed": {"passed": true, "evidence": "completion signal observed"},
+    "facts_correct": {"passed": true, "evidence": {"checked_claims": 4}},
+    "no_harm": {"passed": true, "evidence": "no misleading claims found"}
+  },
   "metrics": {"false_positives": 0, "corrections": 1},
   "artifacts": [".../agent-output.txt"]
 }
@@ -82,6 +92,23 @@ be non-empty. A timeout, nonzero exit, malformed result, missing evidence, or ar
 mismatch is an evaluation error and blocks promotion. Receipts retain input hashes,
 pair order, exit state, duration, stdout/stderr hashes, scores, metrics, and the
 promotion decision without copying full potentially sensitive transcripts.
+`passed` is runner-supplied diagnostic evidence; promotion uses the comparative
+score and any explicitly configured required gates.
+
+`[acceptance]` is optional. When `required_variant_gates` is present, every named
+gate in every held-out variant result must contain a Boolean `passed` value and
+non-empty `evidence`. Missing, malformed, or false required gates block promotion
+by conjunction regardless of score. All gates passing does not promote by itself;
+the variant must still clear the comparative held-out improvement bar. Baseline
+and development gate outcomes remain diagnostic receipt evidence, not independent
+promotion blockers.
+
+Gate names, meanings, and oracles belong to the runner or skill package. This
+mechanism lets factual, harm, or task-closure failures remain non-negotiable without
+inventing a universal UX score. A model critic may surface risks for a runner to
+check, but it cannot override a deterministic gate or claim that synthetic feedback
+was observed user behavior. See [`examples/outcome-uat/eval.toml`](../examples/outcome-uat/eval.toml)
+for a deterministic calibration example.
 
 ## Promotion Gate
 
@@ -95,7 +122,8 @@ promotion-eligible. Promotion requires:
 
 1. the configured minimum number of held-out cases;
 2. complete baseline/variant pairs with no runner errors;
-3. variant mean score strictly above baseline when `min_improvement = 0`, or at
+3. every configured required gate passing on every held-out variant;
+4. variant mean score strictly above baseline when `min_improvement = 0`, or at
    least the configured positive improvement otherwise.
 
 The held-out mean is a necessary gate, not a complete adoption decision. Review

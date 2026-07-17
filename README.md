@@ -156,6 +156,13 @@ hashes, pairing, evidence validation, and promotion decision. See
 [Behavioral Skill Evaluations](docs/skill-evaluations.md) and the
 [evaluation overview](https://lavallee.github.io/spindle/evaluation.html).
 
+For tasks where one failure must not be averaged away, a manifest may name
+`[acceptance].required_variant_gates`. Every held-out variant must pass every named
+gate, with evidence, before its score can count toward promotion. The runner or
+package defines each gate's meaning and oracle; Spindle only enforces the
+conjunction. See the deterministic
+[`outcome-uat` example](examples/outcome-uat/eval.toml).
+
 ## Documentation site
 
 The site under [`docs/`](docs/) is an [artoo](https://github.com/lavallee/artoo)
