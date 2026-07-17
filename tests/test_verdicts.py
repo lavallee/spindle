@@ -57,6 +57,27 @@ def test_write_creates_parent_dir(tmp_path, monkeypatch):
     assert (tmp_path / "verdicts").is_dir()
 
 
+def test_chippable_keys_round_trip(tmp_path, monkeypatch):
+    # Touchpoint B: chippable / chip_alias persist and surface via list_verdicts.
+    monkeypatch.setattr(active_mod, "source_dir", lambda: tmp_path)
+    verdicts_mod.write("gate-tool", source="gstack", chippable="yes", chip_alias="signoff-chip")
+    fm, _ = verdicts_mod.get("gate-tool")
+    assert fm["chippable"] == "yes"
+    assert fm["chip_alias"] == "signoff-chip"
+    rows = {r["slug"]: r for r in verdicts_mod.list_verdicts()}
+    assert rows["gate-tool"]["chippable"] == "yes"
+    assert rows["gate-tool"]["chip_alias"] == "signoff-chip"
+
+
+def test_chippable_keys_omitted_when_empty(tmp_path, monkeypatch):
+    # No enum enforcement and no empty keys written — matches the open-dict style.
+    monkeypatch.setattr(active_mod, "source_dir", lambda: tmp_path)
+    verdicts_mod.write("plain", source="peer")
+    fm, _ = verdicts_mod.get("plain")
+    assert "chippable" not in fm
+    assert "chip_alias" not in fm
+
+
 def test_list_candidates_empty(tmp_path, monkeypatch):
     monkeypatch.setattr(verdicts_mod._paths, "candidates_dir", lambda: tmp_path / "_candidates")
     assert verdicts_mod.list_candidates() == []

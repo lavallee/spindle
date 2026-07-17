@@ -9,6 +9,19 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
+- `spindle chippability <package-or-skill-dir>` — a static, LLM-free scorer that
+  flags skills hiding a chip-shaped behaviour (a refusing gate over durable
+  cross-run state). Prints a compact table (or `--json`), appends a per-skill
+  record to `$SPINDLE_HOME/chippability.jsonl`, and with `--emit-candidates`
+  writes chip candidates in the public `candidates.jsonl` convention. Spindle
+  imports no chip tooling and requires no chip host — it names strings and emits
+  files, degrading gracefully when no chip side exists.
+- Advisory `chip:` alias on composed skills (channel `[chips]` map or SKILL.md
+  `chip:` frontmatter), mirroring the `tier` routing hint. It travels through
+  resolve/render/materialize untouched; `spindle bind` emits a non-fatal
+  advisory when a chip-annotated skill shows no guardrail line.
+- Optional `chippable` / `chip_alias` keys on verdicts, surfaced by
+  `spindle verdict list|show` (open dict, no enum enforcement).
 - `spindle eval validate|run|show` for deterministic paired behavioral skill
   evaluations, held-out promotion gates, and durable evidence receipts.
 - Public evaluation contract documentation and an offline sample runner.

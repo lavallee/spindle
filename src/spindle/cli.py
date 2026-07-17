@@ -12,6 +12,7 @@ from pathlib import Path
 from . import scaffold as scaffold_mod
 from . import active as active_mod
 from . import capabilities as capabilities_mod
+from . import chippability as chippability_mod
 from . import advance as advance_mod
 from . import appclass as appclass_mod
 from . import binder as binder_mod
@@ -177,6 +178,8 @@ def cmd_verdict_add(args) -> int:
         verdict=args.verdict,
         status=args.status,
         body=body,
+        chippable=getattr(args, "chippable", "") or "",
+        chip_alias=getattr(args, "chip_alias", "") or "",
     )
     print(f"wrote {p}")
     return 0
@@ -499,6 +502,10 @@ def cmd_bind(args) -> int:
                 tiers[s.tier] = tiers.get(s.tier, 0) + 1
         if tiers:
             print("  P10 tiers: " + ", ".join(f"{t}={n}" for t, n in sorted(tiers.items())))
+        # Touchpoint A: advisory (never a bind failure) for chip-annotated skills
+        # that show no guardrail/gate line. Purely informational.
+        for note in chippability_mod.advise_composition(result.composition):
+            print(f"  advisory: {note}")
     if result.composition is not None and not result.composition.skills:
         print(
             "warning: composition resolved 0 skills — the subscribed channels list "
@@ -1231,6 +1238,104 @@ def cmd_eval_show(args) -> int:
     return 0
 
 
+# ---- chippability -------------------------------------------------------
+
+def _append_candidate(path: Path, report: chippability_mod.ChippabilityReport) -> None:
+    """Append one chip candidate in the chip candidates.jsonl convention.
+
+    Written by hand — spindle imports nothing from chip. The record shape is
+    the public convention documented at https://github.com/lavallee/chip
+    (docs/candidates.md): {observedAt, shape, occurrenceRefs, fixtureRefs,
+    count, notedBy}. ``fixtureRefs`` is left empty here: harvesting real inputs
+    as held-out fixtures is a separate, situated act, not something a static
+    scan can do."""
+    record = {
+        "observedAt": _now_iso(),
+        "shape": report.draft_shape,
+        "occurrenceRefs": [f"skill:{report.package}/{report.skill}"],
+        "fixtureRefs": [],
+        "count": 1,
+        "notedBy": "spindle:chippability",
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record) + "\n")
+
+
+def _append_chippability_ledger(report: chippability_mod.ChippabilityReport) -> None:
+    """Touchpoint C: append {at, skill, package, score, hint} to the ledger."""
+    from .paths import chippability_ledger_path
+    record = {
+        "at": _now_iso(),
+        "skill": report.skill,
+        "package": report.package,
+        "score": report.score,
+        "hint": report.classification_hint,
+    }
+    p = chippability_ledger_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record) + "\n")
+
+
+def cmd_chippability(args) -> int:
+    """Score every skill under a package-dir or skill-dir for chip-shape.
+
+    Static only — regex/line scans over SKILL.md + bundled files. No chip import,
+    no chip host. Appends a chippability ledger record per skill (touchpoint C),
+    and, with --emit-candidates, appends chip candidates for the chip-candidate
+    skills in the public candidates.jsonl convention."""
+    root = Path(args.target)
+    if not root.exists():
+        print(f"no such path: {root}", file=sys.stderr)
+        return 1
+    skill_dirs = chippability_mod.discover_skill_dirs(root)
+    if not skill_dirs:
+        print(f"no skills found under {root}", file=sys.stderr)
+        return 1
+    package = chippability_mod.package_name_for(root)
+
+    reports = [chippability_mod.assess_skill(d, package=package) for d in skill_dirs]
+    reports.sort(key=lambda r: (-r.score, r.skill))
+
+    emit_path = Path(args.emit_candidates) if args.emit_candidates else None
+    emitted = 0
+    for report in reports:
+        _append_chippability_ledger(report)
+        if emit_path is not None and report.classification_hint == "chip-candidate":
+            _append_candidate(emit_path, report)
+            emitted += 1
+
+    if args.json:
+        payload = [
+            {
+                "skill": r.skill,
+                "package": r.package,
+                "score": r.score,
+                "f": r.f,
+                "g": r.g,
+                "classification_hint": r.classification_hint,
+                "draft_shape": r.draft_shape,
+                "signals": [
+                    {"name": s.name, "polarity": s.polarity, "evidence_line": s.evidence_line}
+                    for s in r.signals
+                ],
+            }
+            for r in reports
+        ]
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    name_width = max(len(r.skill) for r in reports)
+    print(f"  {'skill':<{name_width}}  {'score':>5}  {'f':>3} {'g':>3}  hint")
+    for r in reports:
+        print(f"  {r.skill:<{name_width}}  {r.score:>5}  {r.f:>3} {r.g:>3}  {r.classification_hint}")
+    print(f"\nassessed {len(reports)} skill(s) in {package!r}; ledger updated.")
+    if emit_path is not None:
+        print(f"emitted {emitted} chip candidate(s) → {emit_path}")
+    return 0
+
+
 # ---- main ---------------------------------------------------------------
 
 def main(argv=None) -> int:
@@ -1279,6 +1384,8 @@ def main(argv=None) -> int:
                      choices=["candidate", "in-use", "rejected", "superseded"])
     add.add_argument("--body")
     add.add_argument("--body-file")
+    add.add_argument("--chippable", help="chip-shape judgment (open text; e.g. yes/no/candidate)")
+    add.add_argument("--chip-alias", help="associated chip alias (advisory)")
     add.set_defaults(func=cmd_verdict_add)
 
     sp = sub.add_parser("doctrine", help="show/validate the active distribution's doctrine")
@@ -1574,6 +1681,25 @@ def main(argv=None) -> int:
     show_eval.add_argument("receipt", help="path to receipt JSON")
     show_eval.add_argument("--json", action="store_true", help="print the complete receipt")
     show_eval.set_defaults(func=cmd_eval_show)
+
+    sp = sub.add_parser(
+        "chippability",
+        help="score skills for chip-shape (a refusing gate over durable cross-run state)",
+        description=(
+            "Statically score every skill under a package-dir or skill-dir for "
+            "chip-shape. Regex/line scans only — no chip import, no chip host. "
+            "Appends a chippability ledger record per skill; --emit-candidates "
+            "appends chip candidates in the public candidates.jsonl convention."
+        ),
+    )
+    sp.add_argument("target", help="a package directory or a single skill directory")
+    sp.add_argument(
+        "--emit-candidates",
+        metavar="PATH",
+        help="append chip-candidate skills to this candidates.jsonl file",
+    )
+    sp.add_argument("--json", action="store_true", help="print full reports as JSON")
+    sp.set_defaults(func=cmd_chippability)
 
     sp = sub.add_parser("rate", help="rate a skill (thumbs up/down) and log to feedback + ledger")
     sp.add_argument("skill", help="skill name (e.g. clarify)")
