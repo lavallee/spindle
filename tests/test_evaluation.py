@@ -9,7 +9,15 @@ from pathlib import Path
 import pytest
 
 from spindle import cli
-from spindle.evaluation import EvaluationError, load_manifest, load_receipt, run_evaluation
+from spindle.binding import record_evaluated_binding
+from spindle.composition import ComposedSkill, Composition
+from spindle.evaluation import (
+    EvaluationError,
+    load_manifest,
+    load_receipt,
+    record_promotion,
+    run_evaluation,
+)
 
 
 RUNNER = '''
@@ -78,6 +86,26 @@ tags = ["diagnosis", "held-out"]
     return manifest
 
 
+def _procedure_manifest(tmp_path: Path) -> Path:
+    manifest = _manifest(tmp_path)
+    text = manifest.read_text(encoding="utf-8")
+    text = text.replace(
+        '[dimensions]\nharness = "fixture"\nmodel = "frozen-test-model"',
+        '[dimensions]\nharness = "fixture"\nmodel = "frozen-test-model"\n'
+        'profile = "procedure-profile@1"\nbaseline_implementation = "raw-agent@1"',
+    )
+    text += '''
+[origin]
+schema = "spindle.procedure-origin/v1"
+milton_finding_id = "fnd-1"
+milton_revision_id = "fnr-1"
+chip_candidate_id = "candidate-1"
+chip_receipt_id = "chip-receipt-1"
+'''
+    manifest.write_text(text, encoding="utf-8")
+    return manifest
+
+
 def test_load_manifest_resolves_contract_paths(tmp_path: Path) -> None:
     manifest = load_manifest(_manifest(tmp_path))
     assert manifest.id == "diagnosis-pilot"
@@ -141,3 +169,64 @@ def test_cli_validate_run_and_show(tmp_path: Path, capsys) -> None:
     assert "promotion: eligible" in run_output
     assert cli.main(["eval", "show", str(receipt)]) == 0
     assert "held_out" in capsys.readouterr().out
+
+
+def test_procedure_evaluation_binds_origin_tuple_and_idempotent_promotion(
+    tmp_path: Path, monkeypatch
+) -> None:
+    import spindle.binding as binding
+
+    monkeypatch.setattr(binding.paths, "spindle_home", lambda: tmp_path / "state")
+    output, receipt = run_evaluation(
+        load_manifest(_procedure_manifest(tmp_path)),
+        split="held_out",
+        receipt_path=tmp_path / "evaluation-receipt.json",
+    )
+    assert load_receipt(output)["origin"]["milton_revision_id"] == "fnr-1"
+    assert receipt["evaluation_tuple"] == {
+        "implementation": f"sha256:{receipt['skill_sha256']}",
+        "profile": "procedure-profile@1",
+        "model": "frozen-test-model",
+        "harness": "fixture",
+    }
+    assert receipt["baseline_tuple"]["implementation"] == "raw-agent@1"
+
+    composition = Composition(
+        surface="repo:procedure-pilot",
+        autonomy_mode="deterministic",
+        skills=[ComposedSkill("diagnosing-bugs", str(tmp_path / "SKILL.md"), "candidate")],
+    )
+    bound = record_evaluated_binding(
+        composition,
+        doctrine_coordinate="procedure-doctrine@1",
+        channel_versions={"candidate": "1"},
+        evaluation_receipt=receipt,
+    )
+    assert bound.evaluation_receipt_id == receipt["receipt_id"]
+    assert bound.origin == receipt["origin"]
+
+    path = tmp_path / "promotion-receipt.json"
+    first = record_promotion(receipt, bound, path)
+    replay = record_promotion(receipt, bound, path)
+    assert replay == first
+    assert first["schema"] == "spindle.procedure-promotion/v1"
+    assert first["binding"]["coordinate"] == bound.coordinate
+    assert first["origin"]["chip_receipt_id"] == "chip-receipt-1"
+
+
+def test_procedure_origin_requires_complete_tuple_dimensions(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8")
+        + '''
+[origin]
+schema = "spindle.procedure-origin/v1"
+milton_finding_id = "fnd-1"
+milton_revision_id = "fnr-1"
+chip_candidate_id = "candidate-1"
+chip_receipt_id = "chip-receipt-1"
+''',
+        encoding="utf-8",
+    )
+    with pytest.raises(EvaluationError, match="dimensions.*missing"):
+        load_manifest(manifest)

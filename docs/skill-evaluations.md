@@ -29,6 +29,15 @@ receipt_dir = "receipts"
 [dimensions]
 harness = "isolated-executor"
 model = "frozen-model-coordinate"
+profile = "procedure-profile@1"
+baseline_implementation = "raw-agent@1"
+
+[origin]
+schema = "spindle.procedure-origin/v1"
+milton_finding_id = "fnd_..."
+milton_revision_id = "fnr_..."
+chip_candidate_id = "chc_..."
+chip_receipt_id = "ccr_..."
 
 [[cases]]
 id = "known-regression"
@@ -46,6 +55,14 @@ tags = ["diagnosis"]
 Paths resolve relative to the manifest. Case IDs are unique. A valid manifest has
 at least `min_held_out_cases`; `eval validate` exits `2` when the contract is
 structurally valid but the held-out bar is not met.
+
+`[origin]` is optional for ordinary evaluations and required for a procedure
+candidate entering the promotion loop. When present, all four coordinates are
+required and `[dimensions]` must also name `profile`, `model`, `harness`, and
+`baseline_implementation`. Spindle computes the variant implementation from the
+exact skill SHA-256. The evaluation receipt therefore carries complete baseline
+and variant implementation/profile/model/harness tuples rather than relying on
+a label such as “skill on” or “skill off.”
 
 ## Runner Contract
 
@@ -101,6 +118,14 @@ promotion-eligible. Promotion requires:
 The held-out mean is a necessary gate, not a complete adoption decision. Review
 case-level regressions, costs, latency, and human correction time before binding.
 Rejected and null receipts remain evidence for that exact skill hash.
+
+For a procedure candidate, `record_evaluated_binding` is the binding boundary.
+It refuses an ineligible evaluation and records the exact evaluation receipt,
+origin, variant tuple, and baseline tuple in binding history.
+`record_promotion` then emits an idempotent
+`spindle.procedure-promotion/v1` receipt tying that evaluated tuple to the
+binding coordinate. Spindle owns both decisions. An external finding system can
+observe the receipts, but cannot evaluate or bind on Spindle's behalf.
 
 ## System Adapters
 

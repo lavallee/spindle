@@ -7,6 +7,12 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- Procedure evaluations can preserve exact Milton/Chip origin and explicit
+  baseline/variant implementation-profile-model-harness tuples.
+- Eligible evaluations can enter `record_evaluated_binding`; idempotent
+  `spindle.procedure-promotion/v1` receipts bind evaluation custody to the
+  resulting surface coordinate.
+
 ### Added
 
 - `spindle chippability <package-or-skill-dir>` — a static, LLM-free scorer that

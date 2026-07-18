@@ -31,6 +31,10 @@ class BindingRecord:
     skills: list[str]          # skill names materialized, sorted
     channel_versions: dict[str, str]  # channel id -> version that fed this bind
     bound_at: str              # ISO 8601 UTC
+    evaluation_receipt_id: str | None = None
+    origin: dict[str, str] | None = None
+    evaluation_tuple: dict[str, str] | None = None
+    baseline_tuple: dict[str, str] | None = None
 
 
 def _now_iso() -> str:
@@ -60,7 +64,11 @@ def _binding_file(surface: str) -> Path:
 
 
 def record_binding(comp: Composition, *, doctrine_coordinate: str,
-                   channel_versions: dict[str, str]) -> BindingRecord:
+                   channel_versions: dict[str, str],
+                   evaluation_receipt_id: str | None = None,
+                   origin: dict[str, str] | None = None,
+                   evaluation_tuple: dict[str, str] | None = None,
+                   baseline_tuple: dict[str, str] | None = None) -> BindingRecord:
     """Append a binding record for ``comp.surface`` and return it.
 
     History is preserved (prior records kept) so any earlier coordinate stays a
@@ -75,6 +83,10 @@ def record_binding(comp: Composition, *, doctrine_coordinate: str,
         skills=sorted(s.name for s in comp.skills),
         channel_versions=dict(channel_versions),
         bound_at=_now_iso(),
+        evaluation_receipt_id=evaluation_receipt_id,
+        origin=dict(origin) if origin is not None else None,
+        evaluation_tuple=dict(evaluation_tuple) if evaluation_tuple is not None else None,
+        baseline_tuple=dict(baseline_tuple) if baseline_tuple is not None else None,
     )
     p = _binding_file(comp.surface)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -82,6 +94,39 @@ def record_binding(comp: Composition, *, doctrine_coordinate: str,
     history.append(rec)
     p.write_text(json.dumps([asdict(r) for r in history], indent=2) + "\n", encoding="utf-8")
     return rec
+
+
+def record_evaluated_binding(
+    comp: Composition,
+    *,
+    doctrine_coordinate: str,
+    channel_versions: dict[str, str],
+    evaluation_receipt: dict,
+) -> BindingRecord:
+    """Bind an eligible procedure while preserving its exact evaluation custody."""
+
+    promotion = evaluation_receipt.get("promotion")
+    if not isinstance(promotion, dict) or promotion.get("eligible") is not True:
+        raise ValueError("evaluated binding requires an eligible promotion decision")
+    receipt_id = evaluation_receipt.get("receipt_id")
+    origin = evaluation_receipt.get("origin")
+    evaluation_tuple = evaluation_receipt.get("evaluation_tuple")
+    baseline_tuple = evaluation_receipt.get("baseline_tuple")
+    if not isinstance(receipt_id, str) or not receipt_id:
+        raise ValueError("evaluated binding requires an evaluation receipt id")
+    if not all(isinstance(value, dict) and value for value in (
+        origin, evaluation_tuple, baseline_tuple
+    )):
+        raise ValueError("evaluated binding requires origin and exact baseline/variant tuples")
+    return record_binding(
+        comp,
+        doctrine_coordinate=doctrine_coordinate,
+        channel_versions=channel_versions,
+        evaluation_receipt_id=receipt_id,
+        origin=origin,
+        evaluation_tuple=evaluation_tuple,
+        baseline_tuple=baseline_tuple,
+    )
 
 
 def _read_history(surface: str) -> list[BindingRecord]:
