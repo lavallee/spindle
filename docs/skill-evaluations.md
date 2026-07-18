@@ -119,6 +119,36 @@ The held-out mean is a necessary gate, not a complete adoption decision. Review
 case-level regressions, costs, latency, and human correction time before binding.
 Rejected and null receipts remain evidence for that exact skill hash.
 
+### DES design evaluations
+
+A design skill or blend must bind its evidence to the semantic DES profile as
+well as Spindle's implementation/model/harness tuple. If `[dimensions]` contains
+either `des_profile` or `surface_mode`, Spindle fails closed unless all of these
+string coordinates are present:
+
+```toml
+[dimensions]
+des_profile = "des-public-data-frontier-c936737aee21"
+surface_mode = "public-data"
+harness = "codex"
+model_tier = "frontier"
+requested_model = "gpt-5"
+served_model = "gpt-5"
+capabilities = "browser,visual-input"
+```
+
+The four valid modes are `operator`, `public-data`, `editorial`, and `marketing`.
+The runner should also carry the DES audit receipt path in result `evidence` and
+put screenshots or grader artifacts in `artifacts`. Requested and served model
+remain separate because a routed or fallback call is a different evaluation.
+Capabilities are part of the context: a harness without browser or visual input
+cannot make the same effectiveness claim as one that rendered and saw the work.
+
+Use at least one held-out case per relevant mode; do not average a marketing win
+over an operator regression. Promotion still requires review of case-level
+safety, fabrication, accessibility, overflow, latency, tokens, and human
+correction time rather than only the mean score.
+
 For a procedure candidate, `record_evaluated_binding` is the binding boundary.
 It refuses an ineligible evaluation and records the exact evaluation receipt,
 origin, variant tuple, and baseline tuple in binding history.

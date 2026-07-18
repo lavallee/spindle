@@ -230,3 +230,55 @@ chip_receipt_id = "chip-receipt-1"
     )
     with pytest.raises(EvaluationError, match="dimensions.*missing"):
         load_manifest(manifest)
+
+
+def test_design_evaluation_requires_complete_des_profile_dimensions(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            'model = "frozen-test-model"',
+            'model = "frozen-test-model"\ndes_profile = "des-operator-frontier-test"',
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(EvaluationError, match="design evaluation.*missing"):
+        load_manifest(manifest)
+
+
+def test_design_evaluation_accepts_explicit_mode_model_harness_tuple(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            'model = "frozen-test-model"',
+            '''model = "frozen-test-model"
+des_profile = "des-public-data-frontier-test"
+surface_mode = "public-data"
+model_tier = "frontier"
+requested_model = "gpt-test"
+served_model = "gpt-test-served"
+capabilities = "browser,visual-input"''',
+        ),
+        encoding="utf-8",
+    )
+    loaded = load_manifest(manifest)
+    assert loaded.dimensions["surface_mode"] == "public-data"
+    assert loaded.dimensions["served_model"] == "gpt-test-served"
+
+
+def test_design_evaluation_rejects_unknown_surface_mode(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path)
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            'model = "frozen-test-model"',
+            '''model = "frozen-test-model"
+des_profile = "des-website-frontier-test"
+surface_mode = "website"
+model_tier = "frontier"
+requested_model = "gpt-test"
+served_model = "gpt-test"
+capabilities = "browser"''',
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(EvaluationError, match="surface_mode must be"):
+        load_manifest(manifest)

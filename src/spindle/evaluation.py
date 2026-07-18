@@ -29,6 +29,16 @@ _ORIGIN_FIELDS = (
     "chip_receipt_id",
 )
 _TUPLE_DIMENSIONS = ("profile", "model", "harness", "baseline_implementation")
+_DESIGN_PROFILE_DIMENSIONS = (
+    "des_profile",
+    "surface_mode",
+    "harness",
+    "model_tier",
+    "requested_model",
+    "served_model",
+    "capabilities",
+)
+_DESIGN_SURFACE_MODES = {"operator", "public-data", "editorial", "marketing"}
 
 
 class EvaluationError(ValueError):
@@ -140,6 +150,17 @@ def load_manifest(path: str | Path) -> EvalManifest:
         isinstance(key, str) and isinstance(value, str) for key, value in dimensions.items()
     ):
         raise EvaluationError("[dimensions] values must be strings")
+    if "des_profile" in dimensions or "surface_mode" in dimensions:
+        missing_design = [key for key in _DESIGN_PROFILE_DIMENSIONS if not dimensions.get(key)]
+        if missing_design:
+            raise EvaluationError(
+                "design evaluation [dimensions] missing " + ", ".join(missing_design)
+            )
+        if dimensions["surface_mode"] not in _DESIGN_SURFACE_MODES:
+            raise EvaluationError(
+                "design evaluation surface_mode must be operator, public-data, "
+                "editorial, or marketing"
+            )
 
     origin = raw.get("origin", {})
     if not isinstance(origin, dict) or not all(
