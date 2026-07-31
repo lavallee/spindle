@@ -1,7 +1,7 @@
 [artifact]
 slug = "spindle"
 title = "Spindle"
-description = "Spindle composes source skills into surface-specific blends — a tight, efficient, and behaviorally-verified set of skills for each repo and agent."
+description = "Spindle is an evidence-bearing lifecycle and control plane for agent skills: inspect, try, verify, realize, evaluate, adopt, update, and retire exact skill packages safely."
 kind = "explainer"
 status = "live"
 created = "2026-07-11"

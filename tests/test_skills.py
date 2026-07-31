@@ -12,7 +12,12 @@ from unittest import mock
 import pytest
 
 from spindle.models import SkillSpec
-from spindle.skills import install_skills, uninstall_skills, status_skills, prune_legacy_symlinks
+from spindle.skills import (
+    install_skills,
+    prune_legacy_symlinks,
+    status_skills,
+    uninstall_skills,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -61,7 +66,6 @@ def src(tmp_path):
 
 
 class TestInstallRoundTrip:
-
     def test_creates_symlink(self, skills_dir, src):
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
@@ -83,7 +87,10 @@ class TestInstallRoundTrip:
         assert (sd / "sample-plan").is_symlink()
 
     def test_multiple_skills_all_linked(self, skills_dir, src):
-        specs = [_make_skill(src, n) for n in ["sample-grill", "sample-orient", "sample-review"]]
+        specs = [
+            _make_skill(src, n)
+            for n in ["sample-grill", "sample-orient", "sample-review"]
+        ]
         with mock.patch("spindle.skills.discover_skills", return_value=specs):
             with mock.patch("spindle.active.source_dir", return_value=src):
                 results = install_skills()
@@ -107,7 +114,6 @@ class TestInstallRoundTrip:
 
 
 class TestIdempotency:
-
     def test_second_install_skips(self, skills_dir, src):
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
@@ -117,16 +123,29 @@ class TestIdempotency:
         assert ("sample-grill", "skipped:already-current") in results
 
     def test_updated_when_link_points_elsewhere(self, skills_dir, src):
+        old_base = src / "old"
+        old_base.mkdir()
+        old_spec = _make_skill(old_base, "sample-grill")
         spec = _make_skill(src, "sample-grill")
-        old_target = src / "old-sample-grill"
+        link = skills_dir / "sample-grill"
+        with mock.patch("spindle.active.source_dir", return_value=src):
+            with mock.patch("spindle.skills.discover_skills", return_value=[old_spec]):
+                install_skills()
+            with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
+                results = install_skills()
+        assert ("sample-grill", "updated") in results
+        assert os.readlink(link) == str(spec.skill_dir)
+
+    def test_does_not_update_unowned_link(self, skills_dir, src):
+        spec = _make_skill(src, "sample-grill")
+        old_target = src / "foreign"
         old_target.mkdir()
         link = skills_dir / "sample-grill"
         link.symlink_to(old_target)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
-            with mock.patch("spindle.active.source_dir", return_value=src):
-                results = install_skills()
-        assert ("sample-grill", "updated") in results
-        assert os.readlink(link) == str(spec.skill_dir)
+            results = install_skills()
+        assert ("sample-grill", "skipped:foreign-symlink") in results
+        assert link.resolve() == old_target
 
     def test_skips_non_ivy_real_file(self, skills_dir, src):
         spec = _make_skill(src, "sample-grill")
@@ -143,7 +162,6 @@ class TestIdempotency:
 
 
 class TestUninstall:
-
     def test_removes_installed_symlink(self, skills_dir, src):
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
@@ -174,8 +192,8 @@ class TestUninstall:
     def test_dry_run_does_not_remove(self, skills_dir, src):
         spec = _make_skill(src, "sample-grill")
         link = skills_dir / "sample-grill"
-        link.symlink_to(spec.skill_dir)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
+            install_skills()
             results = uninstall_skills(dry_run=True)
         assert link.is_symlink()
         assert ("sample-grill", "removed") in results
@@ -185,11 +203,11 @@ class TestUninstall:
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_TO", "spindle-")
         spec = _make_skill(src, "sample-grill")
         main_link = skills_dir / "sample-grill"
-        main_link.symlink_to(spec.skill_dir)
         alias_link = skills_dir / "spindle-grill"
-        alias_link.symlink_to(main_link)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
+            install_skills(legacy_shim=True)
             results = uninstall_skills()
+        assert not main_link.is_symlink()
         assert not alias_link.is_symlink()
         assert ("spindle-grill (alias)", "removed") in results
 
@@ -207,11 +225,10 @@ class TestUninstall:
 
 
 class TestStatus:
-
     def test_installed(self, skills_dir, src):
         spec = _make_skill(src, "sample-grill")
-        (skills_dir / "sample-grill").symlink_to(spec.skill_dir)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
+            install_skills()
             results = status_skills()
         assert ("sample-grill", "installed") in results
 
@@ -235,26 +252,25 @@ class TestStatus:
         (skills_dir / "sample-grill").symlink_to(elsewhere)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
             results = status_skills()
-        assert ("sample-grill", "conflict:other-symlink") in results
+        assert ("sample-grill", "conflict:unowned-symlink") in results
 
     def test_stale_link(self, skills_dir, src):
-        spec_a = _make_skill(src, "sample-grill")
-        spec_b = _make_skill(src, "sample-orient")
-        # sample-grill's link points at spec_b's dir (a different owned target)
-        (skills_dir / "sample-grill").symlink_to(spec_b.skill_dir)
-        with mock.patch("spindle.skills.discover_skills", return_value=[spec_a, spec_b]):
+        old_base = src / "old"
+        old_base.mkdir()
+        old_spec = _make_skill(old_base, "sample-grill")
+        spec = _make_skill(src, "sample-grill")
+        with mock.patch("spindle.skills.discover_skills", return_value=[old_spec]):
+            install_skills()
+        with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
             results = status_skills()
-        assert ("sample-grill", "installed:stale-link") in results
+        assert ("sample-grill", "installed:stale-owned") in results
 
     def test_alias_installed(self, skills_dir, src, monkeypatch):
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_FROM", "sample-")
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_TO", "spindle-")
         spec = _make_skill(src, "sample-grill")
-        main_link = skills_dir / "sample-grill"
-        main_link.symlink_to(spec.skill_dir)
-        alias_link = skills_dir / "spindle-grill"
-        alias_link.symlink_to(main_link)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
+            install_skills(legacy_shim=True)
             results = status_skills()
         assert ("spindle-grill (alias)", "installed") in results
 
@@ -282,35 +298,54 @@ class TestStatus:
 
 
 class TestLegacyPrune:
-
     def test_install_prunes_dead_legacy_link(self, skills_dir, src):
         dist_root = src / "dist"
-        dead_link = skills_dir / "spindle-dead"
-        dead_link.symlink_to(dist_root / "skills" / "spindle-dead")
+        legacy_spec = _make_skill(dist_root / "skills", "spindle-dead")
         spec = _make_skill(src, "sample-grill")
-        with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
-            with mock.patch("spindle.active.source_dir", return_value=dist_root):
+        with mock.patch("spindle.active.source_dir", return_value=dist_root):
+            with mock.patch(
+                "spindle.skills.discover_skills", return_value=[legacy_spec]
+            ):
+                install_skills()
+            (legacy_spec.skill_dir / "SKILL.md").unlink()
+            legacy_spec.skill_dir.rmdir()
+            with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
                 results = install_skills()
+        dead_link = skills_dir / "spindle-dead"
         assert not dead_link.is_symlink()
         assert ("spindle-dead", "pruned") in results
 
     def test_install_dry_run_does_not_prune(self, skills_dir, src):
         dist_root = src / "dist"
-        dead_link = skills_dir / "spindle-dead"
-        dead_link.symlink_to(dist_root / "skills" / "spindle-dead")
+        legacy_spec = _make_skill(dist_root / "skills", "spindle-dead")
         spec = _make_skill(src, "sample-grill")
-        with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
-            with mock.patch("spindle.active.source_dir", return_value=dist_root):
+        with mock.patch("spindle.active.source_dir", return_value=dist_root):
+            with mock.patch(
+                "spindle.skills.discover_skills", return_value=[legacy_spec]
+            ):
+                install_skills()
+            (legacy_spec.skill_dir / "SKILL.md").unlink()
+            legacy_spec.skill_dir.rmdir()
+            with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
                 results = install_skills(dry_run=True)
+        dead_link = skills_dir / "spindle-dead"
         assert dead_link.is_symlink()
         assert ("spindle-dead", "pruned") in results
 
     def test_prune_alone_removes_dead_link(self, skills_dir, src):
         dist_root = src / "dist"
+        legacy_spec = _make_skill(dist_root / "skills", "spindle-plan")
         dead_link = skills_dir / "spindle-plan"
-        dead_link.symlink_to(dist_root / "skills" / "spindle-plan")
-        with mock.patch("spindle.skills.claude_skills_dir", return_value=skills_dir):
-            with mock.patch("spindle.active.source_dir", return_value=dist_root):
+        with mock.patch("spindle.active.source_dir", return_value=dist_root):
+            with mock.patch(
+                "spindle.skills.discover_skills", return_value=[legacy_spec]
+            ):
+                install_skills()
+            (legacy_spec.skill_dir / "SKILL.md").unlink()
+            legacy_spec.skill_dir.rmdir()
+            with mock.patch(
+                "spindle.skills.claude_skills_dir", return_value=skills_dir
+            ):
                 results = prune_legacy_symlinks()
         assert not dead_link.is_symlink()
         assert ("spindle-plan", "pruned") in results

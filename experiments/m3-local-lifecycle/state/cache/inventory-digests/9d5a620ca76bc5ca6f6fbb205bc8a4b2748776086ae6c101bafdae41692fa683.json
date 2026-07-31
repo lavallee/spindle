@@ -1,0 +1,7 @@
+{
+  "cache_id": "sha256:9d5a620ca76bc5ca6f6fbb205bc8a4b2748776086ae6c101bafdae41692fa683",
+  "content_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+  "metadata_digest": "sha256:1ff87bf022e1495bbe8ba1b7ce5b8b412ed7d226b309e7f5933b89fa52b2de0d",
+  "schema": "spindle.inventory-digest-cache-entry/v1",
+  "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary"
+}

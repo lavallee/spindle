@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import datetime
+import json
 from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 from spindle.cli import main
 from spindle.models import PackageMetadata, Source
@@ -44,26 +43,34 @@ def _fake_packages():
 
 class TestPackageList:
     def test_list_exit_zero(self, capsys):
-        with patch("spindle.packages.list_installed_packages", return_value=_fake_packages()):
+        with patch(
+            "spindle.packages.list_installed_packages", return_value=_fake_packages()
+        ):
             rc = main(["package", "list"])
         assert rc == 0
 
     def test_list_shows_names(self, capsys):
-        with patch("spindle.packages.list_installed_packages", return_value=_fake_packages()):
+        with patch(
+            "spindle.packages.list_installed_packages", return_value=_fake_packages()
+        ):
             main(["package", "list"])
         out = capsys.readouterr().out
         assert "sample-alpha" in out
         assert "sample-beta" in out
 
     def test_list_shows_version(self, capsys):
-        with patch("spindle.packages.list_installed_packages", return_value=_fake_packages()):
+        with patch(
+            "spindle.packages.list_installed_packages", return_value=_fake_packages()
+        ):
             main(["package", "list"])
         out = capsys.readouterr().out
         assert "1.0.0" in out
         assert "2.0.0" in out
 
     def test_list_shows_skills(self, capsys):
-        with patch("spindle.packages.list_installed_packages", return_value=_fake_packages()):
+        with patch(
+            "spindle.packages.list_installed_packages", return_value=_fake_packages()
+        ):
             main(["package", "list"])
         out = capsys.readouterr().out
         assert "alpha" in out
@@ -122,3 +129,28 @@ class TestPackageShow:
         out = capsys.readouterr().out
         assert "sample-planning" in out
         assert "requirements-clarification" in out
+
+
+class TestPackageSnapshot:
+    def test_snapshot_dry_run_resolves_without_writing(
+        self, tmp_path, monkeypatch, capsys
+    ):
+        monkeypatch.setenv("SPINDLE_HOME", str(tmp_path / "state"))
+
+        rc = main(["package", "snapshot", "sample-planning", "--dry-run", "--json"])
+        payload = json.loads(capsys.readouterr().out)
+
+        assert rc == 0
+        assert payload["dry_run"] is True
+        assert payload["revision"]["content_digest"].startswith("sha256:")
+        assert not Path(payload["cache_path"]).exists()
+
+    def test_snapshot_caches_exact_revision(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setenv("SPINDLE_HOME", str(tmp_path / "state"))
+
+        rc = main(["package", "snapshot", "sample-planning", "--json"])
+        payload = json.loads(capsys.readouterr().out)
+
+        assert rc == 0
+        assert payload["dry_run"] is False
+        assert Path(payload["cache_path"]).is_dir()

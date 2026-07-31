@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -11,14 +12,18 @@ try:
 except ImportError:
     import tomli as tomllib  # type: ignore[no-redef]
 
-from spindle.scaffold import package_new, dist_new
+from spindle.cli import main as cli_main
+from spindle.scaffold import dist_new, package_new
 
 
 # ---------------------------------------------------------------------------
 # Name validation
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("bad", ["", "Bad", "-start", "under_score", "has space", "1start"])
+
+@pytest.mark.parametrize(
+    "bad", ["", "Bad", "-start", "under_score", "has space", "1start"]
+)
 def test_package_new_rejects_bad_names(tmp_path, bad):
     with pytest.raises(ValueError, match="Invalid name"):
         package_new(bad, tmp_path / "out", skills=[], capabilities=[])
@@ -39,6 +44,7 @@ def test_package_new_accepts_valid_names(tmp_path, good):
 # ---------------------------------------------------------------------------
 # package_new: file structure
 # ---------------------------------------------------------------------------
+
 
 def test_package_new_creates_pyproject(tmp_path):
     package_new("my-pkg", tmp_path, skills=["hello"], capabilities=["greeting"])
@@ -69,6 +75,7 @@ def test_package_new_returns_all_paths(tmp_path):
 # package_new: pyproject content
 # ---------------------------------------------------------------------------
 
+
 def test_package_pyproject_parses(tmp_path):
     package_new("my-pkg", tmp_path, skills=["hello"], capabilities=["greeting"])
     data = tomllib.loads((tmp_path / "pyproject.toml").read_text())
@@ -97,6 +104,7 @@ def test_package_pyproject_empty_skills_and_caps(tmp_path):
 # dist_new: file structure
 # ---------------------------------------------------------------------------
 
+
 def test_dist_new_creates_pyproject(tmp_path):
     dist_new("my-dist", tmp_path, source_dir="../../", packages=["pkg-a"])
     assert (tmp_path / "pyproject.toml").is_file()
@@ -118,6 +126,7 @@ def test_dist_new_returns_two_paths(tmp_path):
 # ---------------------------------------------------------------------------
 # dist_new: pyproject content
 # ---------------------------------------------------------------------------
+
 
 def test_dist_pyproject_parses(tmp_path):
     dist_new("my-dist", tmp_path, source_dir="../../", packages=["pkg-a", "pkg-b"])
@@ -146,8 +155,6 @@ def test_dist_pyproject_display_name_derived(tmp_path):
 # CLI wiring: spindle package new
 # ---------------------------------------------------------------------------
 
-from spindle.cli import main as cli_main
-
 
 def test_cli_package_new_exits_zero(tmp_path):
     rc = cli_main(["package", "new", "my-tools", "--dest", str(tmp_path / "my-tools")])
@@ -163,7 +170,19 @@ def test_cli_package_new_prints_written_paths(tmp_path, capsys):
 
 def test_cli_package_new_with_skills_creates_md(tmp_path):
     dest = tmp_path / "my-tools"
-    cli_main(["package", "new", "my-tools", "--dest", str(dest), "--skill", "search", "--skill", "summarise"])
+    cli_main(
+        [
+            "package",
+            "new",
+            "my-tools",
+            "--dest",
+            str(dest),
+            "--skill",
+            "search",
+            "--skill",
+            "summarise",
+        ]
+    )
     assert (dest / "my_tools" / "search.md").is_file()
     assert (dest / "my_tools" / "summarise.md").is_file()
 
@@ -193,12 +212,19 @@ def test_cli_dist_new_prints_written_paths(tmp_path, capsys):
 
 def test_cli_dist_new_with_packages_in_deps(tmp_path):
     dest = tmp_path / "my-dist"
-    cli_main([
-        "dist", "new", "my-dist",
-        "--dest", str(dest),
-        "--package", "sample-grill==0.2.0",
-        "--source-dir", "../../",
-    ])
+    cli_main(
+        [
+            "dist",
+            "new",
+            "my-dist",
+            "--dest",
+            str(dest),
+            "--package",
+            "sample-grill==0.2.0",
+            "--source-dir",
+            "../../",
+        ]
+    )
     data = tomllib.loads((dest / "pyproject.toml").read_text())
     assert any("sample-grill" in d for d in data["project"]["dependencies"])
 
@@ -212,9 +238,6 @@ def test_cli_dist_new_bad_name_exits_nonzero(tmp_path, capsys):
 # ---------------------------------------------------------------------------
 # CLI integration: scaffold → uv install -e → spindle package list → uninstall
 # ---------------------------------------------------------------------------
-
-import subprocess
-import sys
 
 
 def test_scaffold_install_list_uninstall(tmp_path):
@@ -240,8 +263,11 @@ def test_scaffold_install_list_uninstall(tmp_path):
         # 3. spindle package list must show the package — run in a fresh subprocess so
         #    importlib.metadata picks up the newly installed .dist-info
         listed = subprocess.run(
-            [sys.executable, "-c",
-             "from spindle.cli import main; import sys; sys.exit(main(['package', 'list']))"],
+            [
+                sys.executable,
+                "-c",
+                "from spindle.cli import main; import sys; sys.exit(main(['package', 'list']))",
+            ],
             capture_output=True,
             text=True,
         )

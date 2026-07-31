@@ -48,6 +48,15 @@ Fake verdict for e2e tests.
 """
 
 
+def _force_sample_only(monkeypatch):
+    from spindle.distributions import read_distribution_metadata
+
+    sample = read_distribution_metadata("spindle-sample")
+    assert sample is not None, "spindle-sample must be installed"
+    monkeypatch.setattr(active_mod, "list_installed_distributions", lambda: [sample])
+    return sample
+
+
 @pytest.fixture(scope="module")
 def stub_dist():
     """Create /tmp/stub-dist with fake peers and verdicts; clean up after."""
@@ -69,6 +78,7 @@ def stub_dist():
 # Stub dist layout
 # ---------------------------------------------------------------------------
 
+
 def test_stub_dist_peers_toml_exists(stub_dist):
     assert (STUB_DIST / "peers" / "peers.toml").exists()
 
@@ -80,6 +90,7 @@ def test_stub_dist_verdict_exists(stub_dist):
 # ---------------------------------------------------------------------------
 # SPINDLE_ACTIVE_DIST_DIR override routes reads to stub-dist
 # ---------------------------------------------------------------------------
+
 
 def test_override_peers_reads_stub(stub_dist, monkeypatch):
     """SPINDLE_ACTIVE_DIST_DIR routes peers.list_peers() to stub-dist content."""
@@ -111,15 +122,14 @@ def test_override_active_distribution_is_anonymous(stub_dist, monkeypatch):
 # Unset env var returns to the sample distribution
 # ---------------------------------------------------------------------------
 
+
 def test_unset_returns_to_spindle_sample_source_dir(tmp_path, monkeypatch):
     """Without SPINDLE_ACTIVE_DIST_DIR, source_dir resolves to the sample source."""
     monkeypatch.setenv("SPINDLE_HOME", str(tmp_path))  # no pointer file
     monkeypatch.delenv("SPINDLE_ACTIVE_DIST_DIR", raising=False)
     monkeypatch.delenv("SPINDLE_ACTIVE_DIST_NAME", raising=False)
 
-    from spindle.distributions import read_distribution_metadata
-    sample_meta = read_distribution_metadata("spindle-sample")
-    assert sample_meta is not None, "spindle-sample must be installed"
+    sample_meta = _force_sample_only(monkeypatch)
 
     assert active_mod.source_dir() == sample_meta.source_dir
 
@@ -129,6 +139,7 @@ def test_unset_stub_peer_not_visible(tmp_path, stub_dist, monkeypatch):
     monkeypatch.setenv("SPINDLE_HOME", str(tmp_path))
     monkeypatch.delenv("SPINDLE_ACTIVE_DIST_DIR", raising=False)
     monkeypatch.delenv("SPINDLE_ACTIVE_DIST_NAME", raising=False)
+    _force_sample_only(monkeypatch)
 
     slugs = [p["slug"] for p in peers_mod.list_peers()]
     assert "stub-peer" not in slugs
@@ -139,6 +150,7 @@ def test_unset_stub_verdict_not_visible(tmp_path, stub_dist, monkeypatch):
     monkeypatch.setenv("SPINDLE_HOME", str(tmp_path))
     monkeypatch.delenv("SPINDLE_ACTIVE_DIST_DIR", raising=False)
     monkeypatch.delenv("SPINDLE_ACTIVE_DIST_NAME", raising=False)
+    _force_sample_only(monkeypatch)
 
     slugs = [v.get("slug") for v in verdicts_mod.list_verdicts()]
     assert "stub-verdict" not in slugs

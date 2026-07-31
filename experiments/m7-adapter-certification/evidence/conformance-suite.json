@@ -1,0 +1,27 @@
+{
+  "cases": [
+    "inventory",
+    "bootstrap",
+    "projection",
+    "model-identity",
+    "effective-tools",
+    "effective-policy",
+    "subagent-independence",
+    "resume-reload",
+    "restart",
+    "receipt-integrity"
+  ],
+  "commands": [
+    "pytest -q tests/test_conformance.py tests/test_acceptance_journey.py",
+    "pytest -q",
+    "ruff check .",
+    "git diff --check"
+  ],
+  "evidence_id": "sha256:db95ec79207ecd303e40f9c8f62d8d3ac5d736596874350dd2a3d35ad836ce05",
+  "fixture_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+  "prior_live_evidence": {
+    "m2_native_hooks": "sha256:370b2fe58c1393575425dddcd1ec52bf915fe172c17b40aa9e386b92f5da1b6f",
+    "m4_remote_codex": "sha256:d02f9467d148d74902131c26008fc81f8441fef83712d26bd64ebd4c8a94a095"
+  },
+  "schema": "spindle.adapter-conformance-suite-evidence/v1"
+}

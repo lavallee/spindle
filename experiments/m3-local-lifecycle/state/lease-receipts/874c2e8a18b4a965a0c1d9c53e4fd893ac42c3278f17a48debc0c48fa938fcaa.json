@@ -1,0 +1,29 @@
+{
+  "agents": [
+    "parent"
+  ],
+  "cleanup_policy": "remove-owned-projection",
+  "expires_at": "2026-08-01T15:32:32Z",
+  "harness": "codex",
+  "kind": "session",
+  "lease_id": "sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa",
+  "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+  "posture": "read-only",
+  "renewal_policy": "none",
+  "schema": "spindle.lease/v1",
+  "scope": "session",
+  "skill": "spindle-lease-canary",
+  "skill_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+  "source": {
+    "content_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "locator": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/candidate/spindle-lease-canary",
+    "provider": "local",
+    "revision": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "schema": "spindle.skill-ref/v1",
+    "subpath": "."
+  },
+  "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary",
+  "starts_at": "2026-07-31T15:32:32Z",
+  "surface_id": "sha256:a4cd94198ac6b48d7c74aee439ff3eced93211da84b252b0649fead7bf527918",
+  "task_digest": "sha256:eee76947bcee951709c60714b8bc2fcb68f841f69b5961b64bcd3308356ebde4"
+}

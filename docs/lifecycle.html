@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The skill lifecycle — Spindle</title>
+<meta name="description" content="Inspect, try, borrow, compose, verify, activate, evaluate, adopt, update, distill, and retire agent skills with exact ownership and evidence.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+<link rel="stylesheet" href="lib/artoo-kit/base.css">
+<link rel="stylesheet" href="lib/artoo-kit/article.css">
+<link rel="stylesheet" href="lib/artoo-kit/components.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Rationale</a>
+    <a href="lifecycle.html">Lifecycle</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">skill lifecycle · v0.2</div>
+    <h1 class="article-title">Try first. Adopt deliberately. Keep evidence.</h1>
+    <p class="article-dek">Spindle replaces “install this skill and hope” with a
+    reversible chain from intent to exact runtime behavior. Temporary use is easy;
+    durable custody has to be earned.</p>
+  </header>
+
+  <p class="lead">A skill is more than its <code>SKILL.md</code>. Its effect
+  depends on exact package bytes, the other skills a harness can see, the model
+  actually served, available tools, policy, and whether the instructions still
+  improve the current generation of model. Spindle keeps those facts distinct and
+  joins them with content-addressed receipts.</p>
+
+  <div class="article-breakout">
+    <div class="chain">
+      <span class="node">inspect</span><span class="sep">→</span>
+      <span class="node">try / borrow</span><span class="sep">→</span>
+      <span class="node">compose</span><span class="sep">→</span>
+      <span class="node">bootstrap</span><span class="sep">→</span>
+      <span class="node">activate</span><span class="sep">→</span>
+      <span class="node">evaluate</span><span class="sep">→</span>
+      <span class="node">adopt / release</span>
+    </div>
+  </div>
+
+  <h2>Intent before authority</h2>
+  <p><code>spindle inspect</code> builds an intent card without importing or
+  executing candidate code. It separates package facts from contextual fit,
+  reports provenance, contents, authority requirements, context cost, and known
+  evidence, and leaves the package inactive.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle inspect ./candidate/review \
+    --for "review this migration" --harness codex --here --json
+
+<span class="p">$</span> spindle inspect \
+    'github:owner/repository@0123456789abcdef0123456789abcdef01234567#review' \
+    --harness claude --here --json</code></pre>
+  </div>
+
+  <h2>Temporary before durable</h2>
+  <div class="ledger">
+    <div>
+      <span class="tag">try</span>
+      <h4>One disposable session</h4>
+      <ul>
+        <li>Exact content-addressed snapshot.</li>
+        <li>Read-only harness posture by default.</li>
+        <li>Startup, activation, run, and cleanup receipts.</li>
+        <li>No durable adoption.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">borrow</span>
+      <h4>One expiring lease</h4>
+      <ul>
+        <li>Overlays the actual incumbent blend.</li>
+        <li>Names permitted surface, harness, agents, and authority.</li>
+        <li>Rechecked on launch, resume, and compaction.</li>
+        <li>Released or expired without rewriting history.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Desired state beats ambient state</h2>
+  <p>A surface lock names exact adopted and leased inputs. At startup, Spindle
+  inventories repository, ancestor, user, administrator, plugin, and known system
+  scopes; compares desired with observed state; and classifies every entry. It may
+  repair or remove only a projection whose current path and target still match an
+  immutable ownership receipt.</p>
+
+  <div class="callout callout--success">
+    <span class="callout-title">Foreign means preserve</span>
+    A user-managed directory, unowned symlink, plugin, or same-name collision is
+    never silently deleted. A collision blocks strict startup until an exact,
+    content-bound decision exists. Post-discovery repair reports
+    <code>restart-required</code> instead of pretending the session is clean.
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle inventory --effective --harness codex --here
+<span class="p">$</span> spindle bootstrap --harness codex --here --check
+<span class="p">$</span> spindle hooks install --harness codex --scope repo --here --dry-run
+<span class="p">$</span> spindle launch codex --here --</code></pre>
+  </div>
+
+  <h2>One package, agent-local realizations</h2>
+  <p>Parent and child agents independently resolve from the model actually served,
+  effort, role, harness build, effective tools, policy, and active blend. The
+  package stays immutable: Spindle combines its invariant core with at most one
+  evaluated overlay and writes a realization receipt. The adapter separately
+  records whether that exact agent loaded it.</p>
+
+  <p class="article-pullquote">Harness mechanics belong in deterministic adapters,
+  not in portable skill prose.<cite>Version checks, routing, permissions, startup,
+  and receipt writing stay outside <code>SKILL.md</code>.</cite></p>
+
+  <h2>Evidence before promotion</h2>
+  <p>Evaluation reports availability, activation, routing, authorization,
+  behavior, and adapter conformance as separate gates. Named arms include
+  no-skill, invariant core, candidate overlay, incumbent, and ablations. A smaller
+  or empty overlay qualifies only when repeated held-out results clear a
+  predeclared non-inferiority margin, hard floor, and efficiency threshold for the
+  exact runtime coordinate.</p>
+
+  <h2>Adoption is maintenance custody</h2>
+  <p><code>spindle adopt</code> promotes the exact bytes from a successful trial.
+  Updates are new candidates tested beside the incumbent; they do not inherit old
+  evaluation claims. Health reports source, package, cache, inventory, model,
+  harness, toolset, and policy drift independently. Rollback creates a new exact
+  decision without rewriting prior records.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle adopt sha256:&lt;lease-id&gt; --here --dry-run --json
+<span class="p">$</span> spindle update try review --harness codex --task-file task.md --here
+<span class="p">$</span> spindle health --harness codex --here
+<span class="p">$</span> spindle rollback review --harness codex --reason regression --here
+<span class="p">$</span> spindle retire review --harness codex --reason obsolete --here --dry-run</code></pre>
+  </div>
+
+  <h2>Custody survives failure</h2>
+  <p>Immutable records can rebuild mutable indexes after a crash. Deterministic
+  state bundles import only absent or byte-identical files. Cache garbage
+  collection uses an exact plan and protects all current locks, leases, and
+  adoption history. Legacy migration audits preserve ambient state and never turn
+  an old install into an adoption by inference.</p>
+
+  <h2>Adapters are certified per build</h2>
+  <p>Spindle's reference matrices fail closed on unobserved runtime facts. The
+  checked evidence certifies Claude Code 2.1.220 and Codex CLI 0.146.0 with
+  independently activated mixed-model parent and child agents. A new harness
+  build, model, tool composition, policy, package digest, or active blend is a new
+  coordinate—not permission to reuse an old claim.</p>
+
+  <nav class="pagenav">
+    <a class="prev" href="rationale.html">
+      <span class="dir">← Back</span>
+      <span class="ttl">Why Spindle exists</span>
+    </a>
+    <a class="next" href="how-it-works.html">
+      <span class="dir">Next →</span>
+      <span class="ttl">How it works</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    Spindle is an open lifecycle and control plane for agent skills · built with
+    <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
+</body>
+</html>

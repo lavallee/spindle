@@ -1,0 +1,2194 @@
+{
+  "arms": [
+    {
+      "artifact": null,
+      "artifact_bytes": 0,
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "id": "no-skill",
+      "kind": "no-skill"
+    },
+    {
+      "artifact": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m6-minimalism/arms/core.md",
+      "artifact_bytes": 48,
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "id": "invariant-core",
+      "kind": "invariant-core"
+    },
+    {
+      "artifact": null,
+      "artifact_bytes": 0,
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "id": "empty-overlay",
+      "kind": "candidate-overlay"
+    },
+    {
+      "artifact": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m6-minimalism/arms/incumbent.md",
+      "artifact_bytes": 203,
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "id": "incumbent",
+      "kind": "incumbent"
+    },
+    {
+      "artifact": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m6-minimalism/arms/without-example.md",
+      "artifact_bytes": 124,
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "id": "without-example",
+      "kind": "ablation"
+    }
+  ],
+  "candidate_arm": "empty-overlay",
+  "coordinate": {
+    "active_blend_digest": "sha256:fixture-blend",
+    "harness": "fixture-adapter",
+    "harness_build": "fixture-adapter-1",
+    "model": "fixture-frontier-v1",
+    "policy_digest": "sha256:fixture-read-only",
+    "toolset_digest": "sha256:fixture-tools"
+  },
+  "coordinate_digest": "sha256:f166a426f6cd92b7451118fe588c1250ed86fc6f3d1f38e4459a01d35540c839",
+  "distillation_gate": {
+    "artifact_reduction_bytes": 203,
+    "candidate_arm": "empty-overlay",
+    "candidate_min_score": 0.79,
+    "efficiency_passed": true,
+    "eligible": true,
+    "evaluation_inheritance": "none",
+    "expected_observations": 6,
+    "gates": {
+      "activation": {
+        "passed": true,
+        "statuses": {
+          "fail": 0,
+          "not-applicable": 0,
+          "pass": 6,
+          "unknown": 0
+        }
+      },
+      "adapter": {
+        "passed": true,
+        "statuses": {
+          "fail": 0,
+          "not-applicable": 0,
+          "pass": 6,
+          "unknown": 0
+        }
+      },
+      "authorization": {
+        "passed": true,
+        "statuses": {
+          "fail": 0,
+          "not-applicable": 0,
+          "pass": 6,
+          "unknown": 0
+        }
+      },
+      "availability": {
+        "passed": true,
+        "statuses": {
+          "fail": 0,
+          "not-applicable": 0,
+          "pass": 6,
+          "unknown": 0
+        }
+      },
+      "behavior": {
+        "passed": true,
+        "statuses": {
+          "fail": 0,
+          "not-applicable": 0,
+          "pass": 6,
+          "unknown": 0
+        }
+      },
+      "routing": {
+        "passed": true,
+        "statuses": {
+          "fail": 0,
+          "not-applicable": 0,
+          "pass": 6,
+          "unknown": 0
+        }
+      }
+    },
+    "hard_floor": 0.7,
+    "hard_floor_passed": true,
+    "mean_delta": -0.010000000000000009,
+    "non_inferior": true,
+    "non_inferiority_margin": 0.03,
+    "one_sided_95_lower_bound": -0.010000000000000009,
+    "paired_observations": 6,
+    "reasons": [],
+    "reference_arm": "incumbent",
+    "required_artifact_reduction_bytes": 1,
+    "standard_error": 0.0
+  },
+  "evaluation_id": "m6-empty-overlay",
+  "manifest_digest": "sha256:07375255cee60593cf0526980f109f6c1af9b76f4700fb6fea29c57fc1b9345b",
+  "observed_at": "2026-07-31T16:33:48.648944+00:00",
+  "receipt_id": "sha256:32918ba56b641bf9e197da9caf31ed32e8fb8bad9ce9b738cee9d84e20af836e",
+  "reference_arm": "incumbent",
+  "repeats": 3,
+  "run_id": "20260731T163347969566Z",
+  "runs": [
+    {
+      "arm": "invariant-core",
+      "arm_kind": "invariant-core",
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "case_id": "held-rollback",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "no-skill",
+      "arm_kind": "no-skill",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-rollback",
+      "duration_ms": 23,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "adapter": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "authorization": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "availability": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": null,
+            "status": "not-applicable"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.72
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "incumbent",
+      "arm_kind": "incumbent",
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "case_id": "held-locking",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.8
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "incumbent",
+      "arm_kind": "incumbent",
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "case_id": "held-locking",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.8
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "incumbent",
+      "arm_kind": "incumbent",
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "case_id": "held-rollback",
+      "duration_ms": 23,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.8
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "without-example",
+      "arm_kind": "ablation",
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "case_id": "held-locking",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "without-example",
+      "arm_kind": "ablation",
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "case_id": "held-rollback",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "no-skill",
+      "arm_kind": "no-skill",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-locking",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "adapter": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "authorization": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "availability": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": null,
+            "status": "not-applicable"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.7
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "empty-overlay",
+      "arm_kind": "candidate-overlay",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-locking",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "invariant-core",
+      "arm_kind": "invariant-core",
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "case_id": "held-locking",
+      "duration_ms": 24,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.78
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "no-skill",
+      "arm_kind": "no-skill",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-rollback",
+      "duration_ms": 23,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "adapter": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "authorization": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "availability": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": null,
+            "status": "not-applicable"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.72
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "no-skill",
+      "arm_kind": "no-skill",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-locking",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "adapter": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "authorization": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "availability": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": null,
+            "status": "not-applicable"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.7
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "invariant-core",
+      "arm_kind": "invariant-core",
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "case_id": "held-rollback",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "empty-overlay",
+      "arm_kind": "candidate-overlay",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-rollback",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "without-example",
+      "arm_kind": "ablation",
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "case_id": "held-rollback",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "without-example",
+      "arm_kind": "ablation",
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "case_id": "held-locking",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "invariant-core",
+      "arm_kind": "invariant-core",
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "case_id": "held-locking",
+      "duration_ms": 24,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.78
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "empty-overlay",
+      "arm_kind": "candidate-overlay",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-rollback",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "without-example",
+      "arm_kind": "ablation",
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "case_id": "held-locking",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "empty-overlay",
+      "arm_kind": "candidate-overlay",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-locking",
+      "duration_ms": 25,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "invariant-core",
+      "arm_kind": "invariant-core",
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "case_id": "held-rollback",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "without-example",
+      "arm_kind": "ablation",
+      "artifact_digest": "sha256:f7eacef3529e6e6c8cab134eb448b61a0daa55d563de523d321ca2f986dc21d7",
+      "case_id": "held-rollback",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "no-skill",
+      "arm_kind": "no-skill",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-locking",
+      "duration_ms": 23,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "adapter": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "authorization": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "availability": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": null,
+            "status": "not-applicable"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.7
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "incumbent",
+      "arm_kind": "incumbent",
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "case_id": "held-rollback",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.8
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "invariant-core",
+      "arm_kind": "invariant-core",
+      "artifact_digest": "sha256:150f55e0268779477109ead9f41bf9f1a4160f6607b515fd3d193640f3cad632",
+      "case_id": "held-locking",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 3,
+      "result": {
+        "evidence": {
+          "repeat": "3",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.78
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "incumbent",
+      "arm_kind": "incumbent",
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "case_id": "held-locking",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.8
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "empty-overlay",
+      "arm_kind": "candidate-overlay",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-rollback",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "empty-overlay",
+      "arm_kind": "candidate-overlay",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-locking",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:01c6fa45697352732e42637de7af227d9ab0779a7cb032b5a2f82d0d0dfc8f49",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-locking",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.79
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "locking"
+      ]
+    },
+    {
+      "arm": "incumbent",
+      "arm_kind": "incumbent",
+      "artifact_digest": "sha256:6dbd359e0a75b4b67db2462f9f8a65bca11f64514d5f9873273c5010f395146a",
+      "case_id": "held-rollback",
+      "duration_ms": 21,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 2,
+      "result": {
+        "evidence": {
+          "repeat": "2",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "adapter": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "authorization": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "availability": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.8
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    },
+    {
+      "arm": "no-skill",
+      "arm_kind": "no-skill",
+      "artifact_digest": "sha256:ded3eb2608a70a2e28040c5e1e7c4faa49be0d27b4ffc4d3e2a3ffb91bf72fbb",
+      "case_id": "held-rollback",
+      "duration_ms": 22,
+      "exit_code": 0,
+      "fixture_digest": "sha256:585154419bbbdfcddccb3031f825a7dc97580cddba4cbcc5337aefef60f4cac5",
+      "repeat": 1,
+      "result": {
+        "evidence": {
+          "repeat": "1",
+          "source": "checked-in deterministic M6 contract fixture"
+        },
+        "gates": {
+          "activation": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "adapter": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "authorization": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "availability": {
+            "evidence": null,
+            "status": "not-applicable"
+          },
+          "behavior": {
+            "evidence": "deterministic fixture held-rollback",
+            "status": "pass"
+          },
+          "routing": {
+            "evidence": null,
+            "status": "not-applicable"
+          }
+        },
+        "metrics": {
+          "human_corrections": 0
+        },
+        "score": 0.72
+      },
+      "split": "held_out",
+      "status": "ok",
+      "stderr_digest": "sha256:db4697ccfb953bb82a4b9cd70c14a37135dbc146340122250a31978bec74ad02",
+      "stdout_digest": "sha256:d70a1c5ef2842a425d76df0bd0df851c51f577d604d7434b3d3b404478715c5b",
+      "tags": [
+        "rollback"
+      ]
+    }
+  ],
+  "schema": "spindle.minimalism-evaluation-receipt/v1",
+  "skill": "migration-review",
+  "split_requested": "held_out",
+  "summaries": {
+    "development": {
+      "arms": {
+        "empty-overlay": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            }
+          },
+          "kind": "candidate-overlay",
+          "mean_score": null,
+          "min_score": null,
+          "runs": 0
+        },
+        "incumbent": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            }
+          },
+          "kind": "incumbent",
+          "mean_score": null,
+          "min_score": null,
+          "runs": 0
+        },
+        "invariant-core": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            }
+          },
+          "kind": "invariant-core",
+          "mean_score": null,
+          "min_score": null,
+          "runs": 0
+        },
+        "no-skill": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            }
+          },
+          "kind": "no-skill",
+          "mean_score": null,
+          "min_score": null,
+          "runs": 0
+        },
+        "without-example": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 0,
+              "unknown": 0
+            }
+          },
+          "kind": "ablation",
+          "mean_score": null,
+          "min_score": null,
+          "runs": 0
+        }
+      },
+      "cases": 0,
+      "runs": 0,
+      "split": "development"
+    },
+    "held_out": {
+      "arms": {
+        "empty-overlay": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            }
+          },
+          "kind": "candidate-overlay",
+          "mean_score": 0.79,
+          "min_score": 0.79,
+          "runs": 6
+        },
+        "incumbent": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            }
+          },
+          "kind": "incumbent",
+          "mean_score": 0.8,
+          "min_score": 0.8,
+          "runs": 6
+        },
+        "invariant-core": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            }
+          },
+          "kind": "invariant-core",
+          "mean_score": 0.785,
+          "min_score": 0.78,
+          "runs": 6
+        },
+        "no-skill": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 6,
+              "pass": 0,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 6,
+              "pass": 0,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 6,
+              "pass": 0,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 6,
+              "pass": 0,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 6,
+              "pass": 0,
+              "unknown": 0
+            }
+          },
+          "kind": "no-skill",
+          "mean_score": 0.71,
+          "min_score": 0.7,
+          "runs": 6
+        },
+        "without-example": {
+          "errors": 0,
+          "gate_counts": {
+            "activation": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "adapter": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "authorization": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "availability": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "behavior": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            },
+            "routing": {
+              "fail": 0,
+              "not-applicable": 0,
+              "pass": 6,
+              "unknown": 0
+            }
+          },
+          "kind": "ablation",
+          "mean_score": 0.79,
+          "min_score": 0.79,
+          "runs": 6
+        }
+      },
+      "cases": 2,
+      "runs": 30,
+      "split": "held_out"
+    }
+  },
+  "task_distribution_digest": "sha256:01e178bad198c7043199ea2da0c9f766dd90436138f0c04390a62b289616d75d"
+}

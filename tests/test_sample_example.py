@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime
 from pathlib import Path
 
-import pytest
 
 SAMPLE_ROOT = Path(__file__).parent.parent / "examples" / "spindle-sample"
 PACKAGE_PYPROJECT = SAMPLE_ROOT / "packages" / "sample-planning" / "pyproject.toml"

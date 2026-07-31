@@ -11,7 +11,6 @@ auto-activated for generic planning phrasing.
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from . import active
 from .distributions import read_distribution_metadata

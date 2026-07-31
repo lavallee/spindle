@@ -17,11 +17,14 @@ from __future__ import annotations
 import datetime
 import importlib.metadata
 import json
+import os
+import re
 import tomllib
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from .models import PackageMetadata, Source
+from .lifecycle import PackageRevision, SkillRef, digest_path
 
 
 def _resolve_pyproject(dist: importlib.metadata.Distribution) -> Path | None:
@@ -50,7 +53,11 @@ def _parse_source(raw: dict) -> Source:
     if isinstance(transposed, datetime.date):
         date = transposed
     else:
-        date = datetime.date.fromisoformat(str(transposed)) if transposed else datetime.date.min
+        date = (
+            datetime.date.fromisoformat(str(transposed))
+            if transposed
+            else datetime.date.min
+        )
     return Source(
         peer=str(raw.get("peer", "")),
         url=str(raw.get("url", "")),
@@ -94,7 +101,9 @@ def _parse_package_metadata(pyproject_path: Path) -> PackageMetadata | None:
 DATA_FILE = "spindle-package.toml"
 
 
-def _data_file_metadata(dist: importlib.metadata.Distribution) -> PackageMetadata | None:
+def _data_file_metadata(
+    dist: importlib.metadata.Distribution,
+) -> PackageMetadata | None:
     """Wheel-friendly discovery: a `<module>/spindle-package.toml` data file.
 
     Wheels do not ship pyproject.toml, so packages installed from an index
@@ -208,3 +217,115 @@ def package_skill_dirs(name: str) -> list[Path]:
                 dirs.append(candidate)
                 break
     return dirs
+
+
+_REQUIREMENT_NAME = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
+
+
+def resolve_package_revision(name: str) -> PackageRevision:
+    """Resolve an installed package/version or editable source to content identity.
+
+    PEP 610 metadata supplies the immutable VCS commit when available and marks
+    editable installs.  The content digest is still computed from the complete
+    declared skill tree, so a local edit is drift even when version and VCS
+    labels remain unchanged.
+    """
+
+    meta = read_package_metadata(name)
+    if meta is None:
+        raise ValueError(f"no installed spindle package {name!r}")
+    skill_dirs = package_skill_dirs(name)
+    root = _skill_tree_root(skill_dirs, meta.package_dir)
+    content_digest = digest_path(root)
+    direct = _direct_url_for_spindle_package(name)
+    url = str(direct.get("url", "")) if direct is not None else ""
+    vcs = direct.get("vcs_info") if isinstance(direct, dict) else None
+    directory = direct.get("dir_info") if isinstance(direct, dict) else None
+    editable = bool(directory.get("editable")) if isinstance(directory, dict) else False
+    if isinstance(vcs, dict):
+        provider = str(vcs.get("vcs", "git"))
+        revision = str(vcs.get("commit_id") or vcs.get("requested_revision") or "")
+    elif url.startswith("file:"):
+        provider = "local"
+        revision = ""
+    else:
+        provider = "index"
+        revision = ""
+    source = SkillRef(
+        provider=provider,
+        locator=url or str(root.resolve()),
+        revision=revision or content_digest,
+        content_digest=content_digest,
+    )
+    return PackageRevision(
+        name=meta.name,
+        version=meta.version,
+        content_digest=content_digest,
+        source=source,
+        root=str(root.resolve()),
+        editable=editable,
+        skill_digests=tuple(
+            sorted(
+                (
+                    _skill_name_from_dir(skill_dir),
+                    digest_path(skill_dir),
+                )
+                for skill_dir in skill_dirs
+            )
+        ),
+    )
+
+
+def resolve_installed_requirement(requirement: str) -> PackageRevision:
+    """Resolve a declared requirement to the exact installed package revision."""
+
+    match = _REQUIREMENT_NAME.match(requirement)
+    if match is None:
+        raise ValueError(f"invalid package requirement {requirement!r}")
+    return resolve_package_revision(match.group(1))
+
+
+def _skill_tree_root(skill_dirs: list[Path], fallback: Path) -> Path:
+    if not skill_dirs:
+        return fallback.resolve()
+    common = Path(os.path.commonpath([str(path.resolve()) for path in skill_dirs]))
+    if len(skill_dirs) == 1:
+        return skill_dirs[0].resolve()
+    return common
+
+
+def _skill_name_from_dir(skill_dir: Path) -> str:
+    skill_md = skill_dir / "SKILL.md"
+    try:
+        text = skill_md.read_text(encoding="utf-8")
+    except OSError:
+        return skill_dir.name
+    if text.startswith("---"):
+        end = text.find("\n---", 3)
+        if end >= 0:
+            for line in text[3:end].splitlines():
+                key, separator, value = line.partition(":")
+                if separator and key.strip() == "name" and value.strip():
+                    return value.strip().strip('"').strip("'")
+    return skill_dir.name
+
+
+def _direct_url_for_spindle_package(name: str) -> dict | None:
+    for dist in importlib.metadata.distributions():
+        meta = None
+        pyproject = _resolve_pyproject(dist)
+        if pyproject is not None:
+            meta = _parse_package_metadata(pyproject)
+        if meta is None:
+            meta = _data_file_metadata(dist)
+        if meta is None or meta.name != name:
+            continue
+        raw = dist.read_text("direct_url.json")
+        if not raw:
+            return None
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            return None
+        return parsed if isinstance(parsed, dict) else None
+    return None

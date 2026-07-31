@@ -283,7 +283,6 @@ def test_cli_write_candidates_flag(tmp_path, monkeypatch, capsys):
     scout_d = tmp_path / "scout"
     scout_d.mkdir()
     (scout_d / "scout-pass.md").write_text("# scout\n")
-    import spindle.scout as scout_ivy
     import spindle.active as active_mod_local
     monkeypatch.setattr(active_mod_local, "source_dir", lambda: tmp_path)
     import spindle.peers as peers_mod_local

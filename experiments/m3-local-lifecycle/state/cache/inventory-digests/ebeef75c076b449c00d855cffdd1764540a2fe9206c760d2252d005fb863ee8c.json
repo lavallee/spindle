@@ -1,0 +1,7 @@
+{
+  "cache_id": "sha256:ebeef75c076b449c00d855cffdd1764540a2fe9206c760d2252d005fb863ee8c",
+  "content_digest": "sha256:8a3e5c92ff785b0ee79631c4a770719259691cdfb1cece9830280dc84ee8f7d5",
+  "metadata_digest": "sha256:ca7e4185856d63d5e14105c80f56a29344071227c0eb1aa7ee05bd9e81231e3d",
+  "schema": "spindle.inventory-digest-cache-entry/v1",
+  "source_path": "/home/marc/.local/share/omarchy/default/omarchy-skill"
+}

@@ -1,0 +1,184 @@
+{
+  "adapter_id": "claude-code-reference/v1",
+  "agents": [
+    {
+      "activation_receipt": "activations/19e0ec73b082d118c7d18504e7fd3f1de1b7896b6f402be151d7feccf99f71f3.json",
+      "activation_receipt_id": "19e0ec73b082d118c7d18504e7fd3f1de1b7896b6f402be151d7feccf99f71f3",
+      "adapter_id": "claude-code-reference/v1",
+      "agent_id": "c6b99d55-47b2-46ef-a6e4-c39ff77a94a3",
+      "effective_policy": "permission-mode:plan",
+      "effective_tools": [
+        "Task",
+        "Skill"
+      ],
+      "harness": "claude",
+      "harness_build": "2.1.220",
+      "parent_agent_id": null,
+      "served_model": "claude-opus-5"
+    },
+    {
+      "activation_receipt": "activations/641a6317e13d1cd30d59d1b3e65e037c11bd750ba6e548dd5a08f45c82076742.json",
+      "activation_receipt_id": "641a6317e13d1cd30d59d1b3e65e037c11bd750ba6e548dd5a08f45c82076742",
+      "adapter_id": "claude-code-reference/v1",
+      "agent_id": "c6b99d55-47b2-46ef-a6e4-c39ff77a94a3:toolu_017hPxzw9uhrLXC2S6K6FWeV",
+      "effective_policy": "permission-mode:plan",
+      "effective_tools": [
+        "Skill"
+      ],
+      "harness": "claude",
+      "harness_build": "2.1.220",
+      "parent_agent_id": "c6b99d55-47b2-46ef-a6e4-c39ff77a94a3",
+      "served_model": "claude-sonnet-5"
+    }
+  ],
+  "capability_gaps": [],
+  "certification_id": "sha256:96c11b9de1ad6f9623fc78a5b8b681edea1ab643b6b126dfc41f85246b38805c",
+  "harness": "claude",
+  "harness_build": "2.1.220",
+  "matrix": {
+    "adapter_id": "claude-code-reference/v1",
+    "capabilities": {
+      "bootstrap": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "effective-policy": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "effective-tools": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "inventory": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "model-identity": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "projection": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "receipt-integrity": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "restart": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "resume-reload": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "subagent-independence": {
+        "evidence": [
+          {
+            "path": "evidence/claude-runtime.json",
+            "sha256": "sha256:b0a2ec4c9e0c11e5a29fb83f96727d2968088678d3e3b3b1f21406e3d076d42d"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      }
+    },
+    "harness": "claude",
+    "harness_build": "2.1.220",
+    "matrix_id": "sha256:2215a436563dfad334700d97faebe1310ea91b9253ff45ba048fcdf1fb28fbe6",
+    "projection_modes": [
+      "skill-path",
+      "agent-instructions"
+    ],
+    "schema": "spindle.adapter-capability-matrix/v1"
+  },
+  "observation_digest": "sha256:d8f33bf6cd1325538472138b17e41b7dee6f1bdc1abcedb096de15012b83c8c6",
+  "schema": "spindle.adapter-certification/v1",
+  "status": "certified"
+}

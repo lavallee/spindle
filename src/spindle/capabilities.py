@@ -10,7 +10,6 @@ from __future__ import annotations
 import dataclasses
 
 from .packages import list_installed_packages
-from .models import Source
 
 
 def list_capabilities() -> dict[str, list[str]]:

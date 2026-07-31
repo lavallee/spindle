@@ -18,7 +18,16 @@ SKIP_DIRS = {
     "build",
     "dist",
 }
-SKIP_SUFFIXES = {".pyc", ".png", ".jpg", ".jpeg", ".gif", ".sqlite", ".db"}
+SKIP_SUFFIXES = {
+    ".pyc",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".sqlite",
+    ".db",
+    ".gz",
+}
 
 PRIVATE_PATTERNS = [
     ("legacy package name", re.compile(r"\b" + "iv" + "y" + r"\b", re.IGNORECASE)),

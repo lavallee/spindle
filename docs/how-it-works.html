@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How Spindle works — the data model and the bind pipeline</title>
-<meta name="description" content="The Spindle vocabulary — package, distribution, channel, surface, profile, blend, doctrine — and the six-stage bind pipeline that classifies a repo, resolves a coherent blend, renders it per harness and model, and materializes it where the runtime loads it.">
+<title>How Spindle works — lifecycle records, startup, and composition</title>
+<meta name="description" content="Spindle's record chain, ownership-safe startup loop, agent-local realization, and the composition pipeline that turns exact skill packages into verified runtime behavior.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="lib/artoo-kit/tokens.css">
 <link rel="stylesheet" href="lib/artoo-kit/base.css">
@@ -19,6 +19,7 @@
   <div class="nav-links">
     <a href="index.html">Overview</a>
     <a href="rationale.html">Rationale</a>
+    <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
     <a href="evaluation.html">Evaluation</a>
     <a href="guide.html">Guide</a>
@@ -30,18 +31,20 @@
 <main class="article">
   <header class="article-header">
     <div class="article-kicker">how it works</div>
-    <h1 class="article-title">From source skills to materialized blend.</h1>
-    <p class="article-dek">Spindle is an assembly line. Authored skills become
-    packages; packages ship in distributions; channels select them per surface;
-    resolution merges them into a blend; profiles render it; a lint gates it; and
-    materialization writes it where the agent loads it.</p>
+    <h1 class="article-title">From candidate intent to verified activation.</h1>
+    <p class="article-dek">Spindle is a control loop. Exact package bytes receive
+    bounded authority, composition resolves desired state, startup reconciles the
+    harness, each agent gets its own realization, and evidence determines whether
+    the skill should stay.</p>
   </header>
 
   <div class="toc">
     <b>On this page</b>
     <ol>
-      <li><a href="#vocabulary">The vocabulary</a></li>
+      <li><a href="#lifecycle-records">The lifecycle record chain</a></li>
+      <li><a href="#vocabulary">Composition vocabulary</a></li>
       <li><a href="#pipeline">The <code>bind</code> pipeline</a></li>
+      <li><a href="#startup">Startup and activation</a></li>
       <li><a href="#render">Rendering &amp; profiles</a></li>
       <li><a href="#doctrine">Doctrine</a></li>
       <li><a href="#safety">The safety floor</a></li>
@@ -49,9 +52,41 @@
     </ol>
   </div>
 
-  <h2 id="vocabulary">The vocabulary</h2>
-  <p>Seven nouns carry the whole system. They stack from what an author writes to
-  what an agent loads:</p>
+  <h2 id="lifecycle-records">The lifecycle record chain</h2>
+  <p>No single “installed skill” record can answer where bytes came from, why they
+  are authorized, what an agent loaded, and whether they helped. Spindle keeps
+  those questions separate:</p>
+
+  <div class="article-breakout">
+    <div class="chain">
+      <span class="node">SourceRef</span><span class="sep">→</span>
+      <span class="node">PackageRevision</span><span class="sep">→</span>
+      <span class="node">IntentCard</span><span class="sep">→</span>
+      <span class="node">Lease / Adoption</span><span class="sep">→</span>
+      <span class="node">SurfaceLock</span><span class="sep">→</span>
+      <span class="node">Realization</span><span class="sep">→</span>
+      <span class="node">Activation</span><span class="sep">→</span>
+      <span class="node">Evaluation</span>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Record</th><th>Question answered</th></tr></thead>
+    <tbody>
+      <tr><td><code>PackageRevision</code></td><td>Which exact source and skill bytes are under review?</td></tr>
+      <tr><td><code>IntentCard</code></td><td>What outcome, trigger boundary, authority, and context cost does the candidate claim?</td></tr>
+      <tr><td><code>Lease</code></td><td>Who may use these bytes temporarily, where, until when, and with what authority?</td></tr>
+      <tr><td><code>AdoptionRecord</code></td><td>Who accepted durable maintenance custody after which successful trial?</td></tr>
+      <tr><td><code>SurfaceLock</code></td><td>Which exact adopted and leased inputs should this harness expose?</td></tr>
+      <tr><td><code>AgentRealization</code></td><td>Which invariant core and evaluated overlay fit this actual agent coordinate?</td></tr>
+      <tr><td><code>ActivationReceipt</code></td><td>What model, tools, policy, and projection did the harness actually expose?</td></tr>
+      <tr><td><code>EvaluationClaim</code></td><td>Did this intervention help on this bounded artifact/runtime/task distribution?</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="vocabulary">Composition vocabulary</h2>
+  <p>The original composition nouns remain the machinery for authored, managed
+  blends:</p>
 
   <div class="article-breakout">
     <div class="chain">
@@ -102,7 +137,7 @@
     accumulate across all scopes.
   </div>
 
-  <h2 id="pipeline">The <code>bind</code> pipeline</h2>
+  <h2 id="pipeline">The <code>bind</code> composition pipeline</h2>
   <p><code>spindle bind &lt;repo&gt; --harness claude</code> runs six stages. It is
   a <b>fail-closed</b> pipeline: if rendering drops a guardrail or the lint finds a
   problem, nothing is materialized (unless you pass <code>--force</code>).</p>
@@ -214,7 +249,7 @@ review  = "judgment"</code></pre>
     <aside class="article-marginnote article-marginnote--def">
       <span class="term">install location</span>
       <code>claude → .claude/skills</code>,
-      <code>codex → .codex/skills</code>,
+      <code>codex → .agents/skills</code>,
       <code>pi → .pi/skills</code> (fallback <code>.&lt;harness&gt;/skills</code>).
     </aside>
   </div>
@@ -222,6 +257,46 @@ review  = "judgment"</code></pre>
   doctrine, and the channel versions, appended to a per-surface history so any
   prior coordinate is a rollback target. <code>spindle unbind</code> reverses it,
   removing exactly the links Spindle owns.</p>
+
+  <h2 id="startup">Startup and activation</h2>
+  <p>Materialization is desired state, not proof of what a running harness saw.
+  Before discovery, <code>spindle bootstrap</code> resolves active adoptions and
+  leases, inventories every observable scope, compares exact content identity,
+  and plans any ownership-safe repair. The portable <code>spindle launch</code>
+  wrapper performs that work before starting Claude or Codex.</p>
+
+  <p>Stable native hooks then recheck session start, resume/compaction, and
+  subagent start. Hook definitions contain no mutable pins: they invoke the same
+  Spindle bootstrap command while desired state stays in the surface lock. The
+  normal hook path is local and cache-only, emits one compact status marker, and
+  keeps full findings in a startup receipt.</p>
+
+  <div class="ledger">
+    <div>
+      <span class="tag">desired</span>
+      <h4>Surface lock</h4>
+      <ul>
+        <li>Exact adopted package and skill digests.</li>
+        <li>Active lease IDs and expiries.</li>
+        <li>Expected projection paths and ownership.</li>
+        <li>Explicit foreign-conflict decisions.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">observed</span>
+      <h4>Activation receipt</h4>
+      <ul>
+        <li>Projection actually loaded.</li>
+        <li>Model actually served to this agent.</li>
+        <li>Harness build and effective tool envelope.</li>
+        <li>Effective policy and permission denials.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>A pre-discovery mismatch can be repaired only when exact ownership matches.
+  The same mismatch found after discovery returns
+  <code>restart-required</code>. Foreign state is preserved in both cases.</p>
 
   <h2 id="render">Rendering &amp; profiles</h2>
   <p>Selection decides <em>which</em> skills; rendering decides <em>what text</em>
@@ -351,9 +426,9 @@ statement = "fabricate missing facts"</code></pre>
   </div>
 
   <nav class="pagenav">
-    <a class="prev" href="rationale.html">
+    <a class="prev" href="lifecycle.html">
       <span class="dir">← Back</span>
-      <span class="ttl">Why Spindle exists</span>
+      <span class="ttl">The skill lifecycle</span>
     </a>
     <a class="next" href="evaluation.html">
       <span class="dir">Next →</span>
@@ -362,7 +437,7 @@ statement = "fabricate missing facts"</code></pre>
   </nav>
 
   <footer class="colophon">
-    An open toolchain for composing agent skills · built with
+    An open lifecycle and control plane for agent skills · built with
     <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
     MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
   </footer>

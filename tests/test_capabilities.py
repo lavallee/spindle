@@ -12,7 +12,6 @@ import dataclasses
 import datetime
 from unittest.mock import patch
 
-import pytest
 
 from spindle import capabilities as caps_module
 from spindle.capabilities import list_capabilities, show_capability
@@ -22,6 +21,7 @@ from spindle.models import PackageMetadata, Source
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_pkg(
     name: str,
@@ -63,9 +63,12 @@ _FAKE_PKGS = [
 # list_capabilities — unit
 # ---------------------------------------------------------------------------
 
+
 class TestListCapabilities:
     def _call(self):
-        with patch.object(caps_module, "list_installed_packages", return_value=_FAKE_PKGS):
+        with patch.object(
+            caps_module, "list_installed_packages", return_value=_FAKE_PKGS
+        ):
             return list_capabilities()
 
     def test_returns_dict(self):
@@ -101,9 +104,12 @@ class TestListCapabilities:
 # show_capability — unit
 # ---------------------------------------------------------------------------
 
+
 class TestShowCapability:
     def _call(self, name: str):
-        with patch.object(caps_module, "list_installed_packages", return_value=_FAKE_PKGS):
+        with patch.object(
+            caps_module, "list_installed_packages", return_value=_FAKE_PKGS
+        ):
             return show_capability(name)
 
     def test_returns_dict_with_required_keys(self):
@@ -160,12 +166,15 @@ class TestShowCapability:
 # Integration — traces capability back to peer source (live sample-* install)
 # ---------------------------------------------------------------------------
 
+
 class TestLiveCapabilityTrace:
     """These tests require the sample-* packages to be editably installed."""
 
     def test_list_capabilities_non_empty(self):
         result = list_capabilities()
-        assert len(result) > 0, "No capabilities found — are sample-* packages installed?"
+        assert len(result) > 0, (
+            "No capabilities found — are sample-* packages installed?"
+        )
 
     def test_every_capability_has_at_least_one_package(self):
         result = list_capabilities()
@@ -184,18 +193,21 @@ class TestLiveCapabilityTrace:
 
     def test_all_live_capabilities_have_source_with_peer(self):
         """Every capability provided by a real sample-* package traces to at least one peer."""
-        cap_map = list_capabilities()
         missing_source: list[str] = []
         empty_peer: list[str] = []
 
-        for cap_name in cap_map:
-            detail = show_capability(cap_name)
-            if not detail["sources"]:
-                missing_source.append(cap_name)
-                continue
-            for src in detail["sources"]:
-                if not src.get("peer"):
-                    empty_peer.append(cap_name)
+        sample_packages = [
+            package
+            for package in caps_module.list_installed_packages()
+            if package.name.startswith("sample-")
+        ]
+        for package in sample_packages:
+            for capability in package.capabilities:
+                if not package.sources:
+                    missing_source.append(capability)
+                    continue
+                if any(not source.peer for source in package.sources):
+                    empty_peer.append(capability)
 
         assert missing_source == [], f"Capabilities with no sources: {missing_source}"
         assert empty_peer == [], f"Capabilities with empty peer: {empty_peer}"

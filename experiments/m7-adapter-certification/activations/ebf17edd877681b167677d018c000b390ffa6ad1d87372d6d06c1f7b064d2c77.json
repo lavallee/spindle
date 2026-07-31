@@ -1,0 +1,79 @@
+{
+  "activation_evidence": {
+    "effective": {
+      "policy": {
+        "authority": "observed",
+        "source": "evidence/codex-runtime.json#agents.parent",
+        "value": "sha256:258ef89aac8cee495fa6c7d0c58b857e6f9b0628a4644750624aa0f00b5ce3b0;approval=never;sandbox=read-only;network=restricted"
+      },
+      "tools": {
+        "authority": "observed",
+        "source": "evidence/codex-runtime.json#agents.parent",
+        "value": [
+          "composition:3000",
+          "observed:exec",
+          "observed:spawn_agent",
+          "observed:wait_agent"
+        ]
+      }
+    },
+    "harness": {
+      "build": {
+        "authority": "observed",
+        "source": "evidence/codex-runtime.json#agents.parent",
+        "value": "0.146.0"
+      }
+    },
+    "model": {
+      "served_canonical": {
+        "authority": "derived",
+        "source": "evidence/codex-runtime.json#agents.parent",
+        "value": "gpt-5.6-sol"
+      },
+      "served_raw": {
+        "authority": "observed",
+        "source": "evidence/codex-runtime.json#agents.parent",
+        "value": "gpt-5.6-sol"
+      }
+    },
+    "permission_denials": [],
+    "projection_loaded": {
+      "authority": "observed",
+      "source": "evidence/codex-runtime.json#agents.parent",
+      "value": true
+    }
+  },
+  "created_at": "2026-07-31T17:09:43Z",
+  "projection_plan": {
+    "adapter_id": "codex-reference/v1",
+    "agent_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+    "configured": {
+      "effort": null,
+      "harness_build": null,
+      "policy": null,
+      "role": null,
+      "tools": null
+    },
+    "harness": "codex",
+    "model": {
+      "configured": null,
+      "requested": null
+    },
+    "parent_agent_id": null,
+    "plan_id": "ae1e421666790e1f94b55a9ab22487f270f621234fe8277a3a9ecdc104233fbb",
+    "projection": {
+      "mode": "skill-path",
+      "target": ".agents/skills/m7-adapter-proof"
+    },
+    "realization": {
+      "package_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+      "path": "canary",
+      "realization_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+      "realization_receipt_id": "sha256:5c9754af28b832db33b43375cec5b95adee0fda70ca4ab8517a34c0fbb251496",
+      "skill": "m7-adapter-proof"
+    },
+    "session_id": "019fb921-0a59-7a50-a02c-fd6cb2644646"
+  },
+  "receipt_id": "ebf17edd877681b167677d018c000b390ffa6ad1d87372d6d06c1f7b064d2c77",
+  "schema": "spindle.activation-receipt/v1"
+}

@@ -1,0 +1,64 @@
+{
+  "blockers": [],
+  "current_lock_id": "sha256:cbc2adda7d63981f653142ed485306227d0732a4695ae4d751dc3d8e99295cc5",
+  "inventory_id": "sha256:0410faabec746a46963047f7490f57efe090b772701cdde9e0ffec72ac600041",
+  "lease": {
+    "agents": [
+      "parent"
+    ],
+    "cleanup_policy": "remove-owned-projection",
+    "expires_at": "2026-08-01T15:32:32Z",
+    "harness": "codex",
+    "kind": "session",
+    "lease_id": "sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa",
+    "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "posture": "read-only",
+    "renewal_policy": "none",
+    "schema": "spindle.lease/v1",
+    "scope": "session",
+    "skill": "spindle-lease-canary",
+    "skill_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "source": {
+      "content_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "locator": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/candidate/spindle-lease-canary",
+      "provider": "local",
+      "revision": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "schema": "spindle.skill-ref/v1",
+      "subpath": "."
+    },
+    "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary",
+    "starts_at": "2026-07-31T15:32:32Z",
+    "surface_id": "sha256:a4cd94198ac6b48d7c74aee439ff3eced93211da84b252b0649fead7bf527918",
+    "task_digest": "sha256:eee76947bcee951709c60714b8bc2fcb68f841f69b5961b64bcd3308356ebde4"
+  },
+  "operation": "release",
+  "plan_id": "sha256:b3d1cbc5e4a42175d75aebf21fcd71a7ee19f570bd1fb317c2d471a39ba78801",
+  "projection": {
+    "authority": "lease:sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa",
+    "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "projection_path": "/media/ubuntussd/home/lavallee/Projects/spindle/.agents/skills/spindle-lease-canary",
+    "skill": "spindle-lease-canary",
+    "source_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary"
+  },
+  "proposed_lock": {
+    "adoption_ids": [],
+    "binding_coordinate": "lease-only/v1",
+    "conflict_decisions": [],
+    "harness": "codex",
+    "lease_ids": [],
+    "lock_id": "sha256:db9c34de064f3699cf25da5b879e48a2d1a9cafce439f63bf951f419f1f8ccda",
+    "projections": [],
+    "repo_path": "/media/ubuntussd/home/lavallee/Projects/spindle",
+    "schema": "spindle.surface-lock/v1",
+    "surface_id": "sha256:a4cd94198ac6b48d7c74aee439ff3eced93211da84b252b0649fead7bf527918",
+    "surface_name": "spindle"
+  },
+  "schema": "spindle.lease-plan/v1",
+  "warnings": [
+    "__plugins__ [plugins] enabled Codex plugin skills require harness-reported inventory",
+    "__system__ [system] Codex built-in skills are harness-managed",
+    "find-skills [user] entry is outside Spindle ownership",
+    "omarchy [user] entry is outside Spindle ownership"
+  ]
+}

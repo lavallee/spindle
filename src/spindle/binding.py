@@ -20,29 +20,41 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import paths
+from . import realization as realization_mod
 from .composition import Composition
+from .lifecycle import digest_path
 
 
 @dataclass(frozen=True)
 class BindingRecord:
     surface: str
-    coordinate: str            # the composition coordinate (see compute_coordinate)
-    doctrine_coordinate: str   # doctrine version+hash this bind used
-    skills: list[str]          # skill names materialized, sorted
+    coordinate: str  # the composition coordinate (see compute_coordinate)
+    doctrine_coordinate: str  # doctrine version+hash this bind used
+    skills: list[str]  # skill names materialized, sorted
     channel_versions: dict[str, str]  # channel id -> version that fed this bind
-    bound_at: str              # ISO 8601 UTC
+    bound_at: str  # ISO 8601 UTC
     evaluation_receipt_id: str | None = None
     origin: dict[str, str] | None = None
     evaluation_tuple: dict[str, str] | None = None
     baseline_tuple: dict[str, str] | None = None
+    runtime_profiled_skills: list[str] | None = None
+    schema_version: int = 2
+    repo_path: str | None = None
+    harness: str | None = None
+    surface_id: str | None = None
+    surface_lock_id: str | None = None
+    skill_digests: dict[str, str] | None = None
+    skill_sources: dict[str, str] | None = None
+    package_digests: dict[str, str] | None = None
 
 
 def _now_iso() -> str:
     return datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def compute_coordinate(comp: Composition, *, doctrine_coordinate: str,
-                       channel_versions: dict[str, str]) -> str:
+def compute_coordinate(
+    comp: Composition, *, doctrine_coordinate: str, channel_versions: dict[str, str]
+) -> str:
     """A stable coordinate identifying this exact composition.
 
     Hashes the resolved skill set + the doctrine coordinate + per-channel versions,
@@ -51,7 +63,21 @@ def compute_coordinate(comp: Composition, *, doctrine_coordinate: str,
     ``<short-hash>`` — the resolvable address a rollback re-pins to.
     """
     payload = {
-        "skills": sorted(s.name for s in comp.skills),
+        "skills": [
+            {
+                "name": skill.name,
+                "command": skill.command,
+                "scope": skill.scope,
+                "source": skill.source,
+                "package": skill.package_name,
+                "package_version": skill.package_version,
+                "package_digest": skill.package_digest or None,
+                "content_digest": digest_path(skill.source_dir)
+                if skill.source_dir
+                else None,
+            }
+            for skill in sorted(comp.skills, key=lambda item: item.name)
+        ],
         "doctrine": doctrine_coordinate,
         "channels": dict(sorted(channel_versions.items())),
     }
@@ -63,19 +89,28 @@ def _binding_file(surface: str) -> Path:
     return paths.spindle_home() / "bindings" / f"{surface}.json"
 
 
-def record_binding(comp: Composition, *, doctrine_coordinate: str,
-                   channel_versions: dict[str, str],
-                   evaluation_receipt_id: str | None = None,
-                   origin: dict[str, str] | None = None,
-                   evaluation_tuple: dict[str, str] | None = None,
-                   baseline_tuple: dict[str, str] | None = None) -> BindingRecord:
+def record_binding(
+    comp: Composition,
+    *,
+    doctrine_coordinate: str,
+    channel_versions: dict[str, str],
+    evaluation_receipt_id: str | None = None,
+    origin: dict[str, str] | None = None,
+    evaluation_tuple: dict[str, str] | None = None,
+    baseline_tuple: dict[str, str] | None = None,
+    repo_path: str | None = None,
+    harness: str | None = None,
+    surface_id: str | None = None,
+    surface_lock_id: str | None = None,
+) -> BindingRecord:
     """Append a binding record for ``comp.surface`` and return it.
 
     History is preserved (prior records kept) so any earlier coordinate stays a
     valid rollback target.
     """
-    coord = compute_coordinate(comp, doctrine_coordinate=doctrine_coordinate,
-                               channel_versions=channel_versions)
+    coord = compute_coordinate(
+        comp, doctrine_coordinate=doctrine_coordinate, channel_versions=channel_versions
+    )
     rec = BindingRecord(
         surface=comp.surface,
         coordinate=coord,
@@ -85,14 +120,43 @@ def record_binding(comp: Composition, *, doctrine_coordinate: str,
         bound_at=_now_iso(),
         evaluation_receipt_id=evaluation_receipt_id,
         origin=dict(origin) if origin is not None else None,
-        evaluation_tuple=dict(evaluation_tuple) if evaluation_tuple is not None else None,
+        evaluation_tuple=dict(evaluation_tuple)
+        if evaluation_tuple is not None
+        else None,
         baseline_tuple=dict(baseline_tuple) if baseline_tuple is not None else None,
+        runtime_profiled_skills=sorted(
+            skill.name
+            for skill in comp.skills
+            if skill.source_dir
+            and realization_mod.has_runtime_profiles(skill.source_dir)
+        ),
+        repo_path=repo_path,
+        harness=harness,
+        surface_id=surface_id,
+        surface_lock_id=surface_lock_id,
+        skill_digests={
+            skill.name: digest_path(skill.source_dir)
+            for skill in comp.skills
+            if skill.source_dir
+        },
+        skill_sources={
+            skill.name: str(Path(skill.source_dir).resolve())
+            for skill in comp.skills
+            if skill.source_dir
+        },
+        package_digests={
+            skill.name: skill.package_digest or digest_path(skill.source_dir)
+            for skill in comp.skills
+            if skill.source_dir
+        },
     )
     p = _binding_file(comp.surface)
     p.parent.mkdir(parents=True, exist_ok=True)
     history = _read_history(comp.surface)
     history.append(rec)
-    p.write_text(json.dumps([asdict(r) for r in history], indent=2) + "\n", encoding="utf-8")
+    p.write_text(
+        json.dumps([asdict(r) for r in history], indent=2) + "\n", encoding="utf-8"
+    )
     return rec
 
 
@@ -114,10 +178,13 @@ def record_evaluated_binding(
     baseline_tuple = evaluation_receipt.get("baseline_tuple")
     if not isinstance(receipt_id, str) or not receipt_id:
         raise ValueError("evaluated binding requires an evaluation receipt id")
-    if not all(isinstance(value, dict) and value for value in (
-        origin, evaluation_tuple, baseline_tuple
-    )):
-        raise ValueError("evaluated binding requires origin and exact baseline/variant tuples")
+    if not all(
+        isinstance(value, dict) and value
+        for value in (origin, evaluation_tuple, baseline_tuple)
+    ):
+        raise ValueError(
+            "evaluated binding requires origin and exact baseline/variant tuples"
+        )
     return record_binding(
         comp,
         doctrine_coordinate=doctrine_coordinate,

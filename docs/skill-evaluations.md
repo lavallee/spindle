@@ -2,10 +2,12 @@
 
 ## Boundary
 
-`spindle bind` answers “can this surface load the intended skill without losing
-resources or guardrails?” `spindle eval` answers “does this skill improve behavior
-on this task family for this model and harness?” A bind is never an effectiveness
-claim.
+Composition and startup answer whether exact bytes should be available without
+losing resources or guardrails. Activation answers what one agent actually
+loaded under which model, tools, and policy. `spindle eval` separately asks
+whether the intervention improves—or is non-inferior with less steering—on a
+bounded task distribution and runtime coordinate. None of those records stands
+in for another.
 
 Spindle does not call a model provider directly. A manifest names an argv runner.
 The runner may delegate to an isolated executor, a benchmark harness, or a local
@@ -156,6 +158,124 @@ origin, variant tuple, and baseline tuple in binding history.
 `spindle.procedure-promotion/v1` receipt tying that evaluated tuple to the
 binding coordinate. Spindle owns both decisions. An external finding system can
 observe the receipts, but cannot evaluate or bind on Spindle's behalf.
+
+## Named-arm minimalism evaluations
+
+The original `schema_version = 1` format remains the small paired
+baseline/variant gate. Deletion-first distillation uses a separate contract so a
+legacy promotion rule cannot be silently reinterpreted:
+
+```toml
+schema = "spindle.minimalism-eval/v1"
+id = "review-minimalism-v1"
+skill = "review"
+runner = ["python", "runner.py"]
+candidate_arm = "empty-overlay"
+reference_arm = "incumbent"
+repeats = 3
+non_inferiority_margin = 0.03
+hard_floor = 0.70
+min_artifact_reduction_bytes = 1
+required_gates = ["availability", "activation", "routing", "authorization", "behavior", "adapter"]
+receipt_dir = "receipts"
+
+[coordinate]
+model = "served-model-id"
+harness = "codex"
+harness_build = "codex-cli-build"
+toolset_digest = "sha256:..."
+policy_digest = "sha256:..."
+active_blend_digest = "sha256:..."
+
+[[arms]]
+id = "none"
+kind = "no-skill"
+
+[[arms]]
+id = "core"
+kind = "invariant-core"
+artifact = "arms/core.md"
+
+[[arms]]
+id = "empty-overlay"
+kind = "candidate-overlay"
+artifact = "arms/empty.md"
+
+[[arms]]
+id = "incumbent"
+kind = "incumbent"
+artifact = "arms/full.md"
+
+[[arms]]
+id = "without-example"
+kind = "ablation"
+artifact = "arms/without-example.md"
+```
+
+Every case/arm pair runs `repeats` times in seeded randomized order. The task
+distribution digest covers case IDs, splits, fixture digests, tags, and repeat
+count. The runtime coordinate is complete rather than a model nickname: changing
+the model, harness build, tool envelope, permission policy, or active blend makes
+the receipt require rebaselining.
+
+The runner receives the ordinary case/run variables plus
+`SPINDLE_EVAL_REPEAT`, `SPINDLE_EVAL_ARM_KIND`, `SPINDLE_EVAL_ARTIFACT`, and a
+JSON `SPINDLE_EVAL_COORDINATE`. It must return all six gates independently:
+
+```json
+{
+  "score": 0.79,
+  "gates": {
+    "availability": {"status": "pass", "evidence": "inventory receipt ..."},
+    "activation": {"status": "pass", "evidence": "activation receipt ..."},
+    "routing": {"status": "pass", "evidence": "invocation evidence ..."},
+    "authorization": {"status": "pass", "evidence": "policy receipt ..."},
+    "behavior": {"status": "pass", "evidence": "grader receipt ..."},
+    "adapter": {"status": "pass", "evidence": "conformance receipt ..."}
+  },
+  "evidence": {"grader": "..."},
+  "metrics": {"corrections": 0}
+}
+```
+
+`pass`, `fail`, `unknown`, and `not-applicable` remain distinct. Unknown is
+never promoted as success. The held-out gate compares candidate/reference scores
+as repeated pairs, requires the one-sided 95% lower bound to remain within the
+predeclared non-inferiority margin, enforces the per-run hard floor and required
+runtime gates, and requires an artifact-size reduction. All arms, failures, null
+results, and gate evidence remain in the immutable receipt. A genuine zero-byte
+candidate overlay is valid when it passes those same gates.
+
+```bash
+spindle eval matrix validate minimalism.toml
+spindle eval matrix run minimalism.toml --split held_out
+spindle eval matrix freshness receipts/result.json \
+  --coordinate model=... --coordinate harness=... \
+  --coordinate harness_build=... --coordinate toolset_digest=... \
+  --coordinate policy_digest=... --coordinate active_blend_digest=...
+```
+
+### Classify and stage, never auto-adopt
+
+Static distillation classifies package files as behavioral steering, reference
+knowledge, deterministic procedure, tool integration, fixture, or obsolete
+workaround. It recommends deterministic resources for Chip/tools and keeps rich
+knowledge as progressive references. No package code executes.
+
+```bash
+spindle eval distill classify ./skill-package --json
+spindle eval distill plan ./skill-package --json
+spindle eval distill stage ./skill-package \
+  --proposal sha256:... --destination ./candidate-review --dry-run --json
+```
+
+Each generated proposal changes one Markdown section or one resource. Staging
+copies that one deletion into a new local candidate and writes a trial-revision
+receipt beside it; the source package and adoption state are unchanged. Routing
+proposals such as `extract-to-chip-or-tool` intentionally refuse local staging
+until that external custody decision is reviewed. A staged candidate must still
+be inspected, tried, evaluated, and explicitly adopted through the normal
+lifecycle.
 
 ## System Adapters
 

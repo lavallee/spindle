@@ -7,11 +7,9 @@ is never touched.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
-import spindle.ledger as ledger_mod
 from spindle.ledger import log_event, machine_id, materialize, show_state
 from spindle.paths import events_file, machine_id_file, state_file
 

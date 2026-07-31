@@ -28,16 +28,21 @@ def _events(*kinds_dists):
     for i, item in enumerate(kinds_dists):
         kind, dist, *rest = item
         version = rest[0] if rest else "0.1.0"
-        out.append(json.dumps({
-            "kind": kind,
-            "ts": f"2026-05-13T00:00:{i:02d}Z",
-            "distribution": dist,
-            "version": version,
-        }))
+        out.append(
+            json.dumps(
+                {
+                    "kind": kind,
+                    "ts": f"2026-05-13T00:00:{i:02d}Z",
+                    "distribution": dist,
+                    "version": version,
+                }
+            )
+        )
     return "\n".join(out) + "\n"
 
 
 # ---- machine_id ---------------------------------------------------------
+
 
 def test_machine_id_stable(home):
     a = fleet_mod.machine_id()
@@ -52,6 +57,7 @@ def test_machine_id_persisted_to_file(home):
 
 
 # ---- sync ---------------------------------------------------------------
+
 
 def test_sync_initializes_repo_and_copies_events(home, tmp_path):
     local = tmp_path / "ledger.jsonl"
@@ -101,7 +107,9 @@ def test_sync_pushes_to_configured_remote(home, tmp_path):
     # Confirm the bare repo has our commit
     log = subprocess.run(
         ["git", "--git-dir", str(bare), "log", "--oneline"],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     assert "sync " in log.stdout
 
@@ -115,16 +123,19 @@ def test_sync_remote_url_persists_across_runs(home, tmp_path):
     fleet_mod.fleet_sync(remote=str(bare), local_events=local)
 
     # Second sync with no --remote should still find origin
-    local.write_text(_events(
-        ("dist_install", "spindle-sample"),
-        ("dist_install", "spindle-sample", "0.1.0"),
-    ))
+    local.write_text(
+        _events(
+            ("dist_install", "spindle-sample"),
+            ("dist_install", "spindle-sample", "0.1.0"),
+        )
+    )
     result = fleet_mod.fleet_sync(local_events=local)
     assert result.remote == str(bare)
     assert result.pushed is True
 
 
 # ---- status -------------------------------------------------------------
+
 
 def test_status_empty(home):
     assert fleet_mod.fleet_status() == []
@@ -134,25 +145,31 @@ def test_status_lists_installed_distributions_per_machine(home, tmp_path):
     fleet = home / "fleet"
     (fleet / "events").mkdir(parents=True)
 
-    (fleet / "events" / "machine-a.jsonl").write_text(_events(
-        ("dist_install", "spindle-sample", "0.2.0"),
-    ))
-    (fleet / "events" / "machine-b.jsonl").write_text(_events(
-        ("dist_install", "spindle-sample", "0.2.0"),
-        ("dist_install", "spindle-sample", "0.3.0"),
-    ))
+    (fleet / "events" / "machine-a.jsonl").write_text(
+        _events(
+            ("dist_install", "spindle-sample", "0.2.0"),
+        )
+    )
+    (fleet / "events" / "machine-b.jsonl").write_text(
+        _events(
+            ("dist_install", "spindle-sample", "0.2.0"),
+            ("dist_install", "spindle-sample", "0.3.0"),
+        )
+    )
 
     rows = fleet_mod.fleet_status()
     by_id = {r.machine: r for r in rows}
     assert by_id["machine-a"].distributions == {"spindle-sample": "0.2.0"}
-    assert by_id["machine-b"].distributions == {"spindle-sample": "0.2.0", "spindle-sample": "0.3.0"}
+    assert by_id["machine-b"].distributions == {"spindle-sample": "0.3.0"}
 
 
 def test_status_dist_uninstall_removes(home):
     fleet = home / "fleet"
     (fleet / "events").mkdir(parents=True)
     (fleet / "events" / "m1.jsonl").write_text(
-        _events(("dist_install", "spindle-sample"), ("dist_uninstall", "spindle-sample"))
+        _events(
+            ("dist_install", "spindle-sample"), ("dist_uninstall", "spindle-sample")
+        )
     )
     rows = fleet_mod.fleet_status()
     assert rows[0].distributions == {}
@@ -170,6 +187,7 @@ def test_status_skips_corrupt_lines(home):
 
 # ---- concurrent-installs invariant --------------------------------------
 
+
 def test_two_machines_do_not_conflict(home, tmp_path):
     """Two machines pushing different per-machine files round-trips cleanly."""
     bare = tmp_path / "remote.git"
@@ -180,7 +198,10 @@ def test_two_machines_do_not_conflict(home, tmp_path):
     ledger_a = tmp_path / "ledger_a.jsonl"
     ledger_a.write_text(_events(("dist_install", "spindle-sample")))
     ra = fleet_mod.fleet_sync(
-        remote=str(bare), repo=repo_a, local_events=ledger_a, mid="machine-a",
+        remote=str(bare),
+        repo=repo_a,
+        local_events=ledger_a,
+        mid="machine-a",
     )
     assert ra.pushed is True
 
@@ -189,13 +210,19 @@ def test_two_machines_do_not_conflict(home, tmp_path):
     ledger_b = tmp_path / "ledger_b.jsonl"
     ledger_b.write_text(_events(("dist_install", "spindle-sample", "0.3.0")))
     rb = fleet_mod.fleet_sync(
-        remote=str(bare), repo=repo_b, local_events=ledger_b, mid="machine-b",
+        remote=str(bare),
+        repo=repo_b,
+        local_events=ledger_b,
+        mid="machine-b",
     )
     assert rb.pushed is True, rb.detail
 
     # Machine A pulls — should see both files now without conflict
     ra2 = fleet_mod.fleet_sync(
-        remote=str(bare), repo=repo_a, local_events=ledger_a, mid="machine-a",
+        remote=str(bare),
+        repo=repo_a,
+        local_events=ledger_a,
+        mid="machine-a",
     )
     assert ra2.pulled is True, ra2.detail
     assert (repo_a / "events" / "machine-a.jsonl").exists()
@@ -208,6 +235,7 @@ def test_two_machines_do_not_conflict(home, tmp_path):
 
 
 # ---- CLI ---------------------------------------------------------------
+
 
 def test_cli_fleet_status_empty(home, capsys):
     rc = main(["fleet", "status"])

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from spindle import distributions
 from spindle.models import DistributionMetadata

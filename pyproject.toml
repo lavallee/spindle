@@ -1,7 +1,7 @@
 [project]
 name = "spindle"
-version = "0.1.0"
-description = "Spindle composes source skills into surface-specific blends"
+version = "0.2.0"
+description = "Evidence-bearing lifecycle and control plane for agent skills"
 authors = [
     { name = "Marc Lavallee", email = "mlavallee@gmail.com" }
 ]

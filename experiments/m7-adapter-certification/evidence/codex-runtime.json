@@ -1,0 +1,94 @@
+{
+  "agents": {
+    "child": {
+      "agent_id": "019fb921-573c-7602-b611-0bccd7dd7d41",
+      "agent_path": "/root/m7_child_activation",
+      "effective_policy": {
+        "approval_policy": "never",
+        "permission_profile": {
+          "file_system": {
+            "entries": [
+              {
+                "access": "read",
+                "path": {
+                  "type": "special",
+                  "value": {
+                    "kind": "root"
+                  }
+                }
+              }
+            ],
+            "type": "restricted"
+          },
+          "network": "restricted",
+          "type": "managed"
+        },
+        "sandbox_policy": {
+          "type": "read-only"
+        }
+      },
+      "effective_policy_digest": "sha256:258ef89aac8cee495fa6c7d0c58b857e6f9b0628a4644750624aa0f00b5ce3b0",
+      "effective_tool_composition": "3000",
+      "effort": "medium",
+      "harness_build": "0.146.0",
+      "observed_tool_calls": [
+        "exec"
+      ],
+      "parent_agent_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+      "projection_evidence": "observed SKILL.md read yielding canary token",
+      "projection_loaded": true,
+      "served_model": "gpt-5.6-terra",
+      "session_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+      "source_log_sha256": "sha256:da5c6d60c7b16f922653a398faa57ffdfed1893b2fb292007b3c923905790d32"
+    },
+    "parent": {
+      "agent_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+      "agent_path": null,
+      "effective_policy": {
+        "approval_policy": "never",
+        "permission_profile": {
+          "file_system": {
+            "entries": [
+              {
+                "access": "read",
+                "path": {
+                  "type": "special",
+                  "value": {
+                    "kind": "root"
+                  }
+                }
+              }
+            ],
+            "type": "restricted"
+          },
+          "network": "restricted",
+          "type": "managed"
+        },
+        "sandbox_policy": {
+          "type": "read-only"
+        }
+      },
+      "effective_policy_digest": "sha256:258ef89aac8cee495fa6c7d0c58b857e6f9b0628a4644750624aa0f00b5ce3b0",
+      "effective_tool_composition": "3000",
+      "effort": "xhigh",
+      "harness_build": "0.146.0",
+      "observed_tool_calls": [
+        "exec",
+        "spawn_agent",
+        "wait_agent"
+      ],
+      "parent_agent_id": null,
+      "projection_evidence": "observed SKILL.md read yielding canary token",
+      "projection_loaded": true,
+      "served_model": "gpt-5.6-sol",
+      "session_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+      "source_log_sha256": "sha256:b26d00933ca8ec3ad8121361d5dada7110413ccd112ae93297742dcc6da3fd57"
+    }
+  },
+  "canary_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+  "evidence_id": "sha256:ebe17b577df7440df85f3b2a2eae713027ea9b38e6f33b81dbd18604bb79d3d5",
+  "harness": "codex",
+  "harness_build": "0.146.0",
+  "schema": "spindle.sanitized-runtime-evidence/v1",
+  "session_id": "019fb921-0a59-7a50-a02c-fd6cb2644646"
+}

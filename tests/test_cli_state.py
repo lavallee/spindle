@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
 from spindle.cli import main
 from spindle.ledger import log_event
-from spindle.paths import events_file, state_file
+from spindle.paths import state_file
 
 
 @pytest.fixture(autouse=True)

@@ -2,15 +2,65 @@
 
 > Single-file bundle intended for paste-in LLM context. It concatenates the whole
 > Spindle documentation site into one Markdown document. Source of truth:
-> https://github.com/lavallee/spindle · License: MIT · Describes Spindle v0.1.
+> https://github.com/lavallee/spindle · License: MIT · Describes Spindle v0.2.
 
-Spindle composes source skills into tight, surface-specific blends. It is a small,
-dependency-light Python toolchain for one loop: install skill **packages**, group
-them into **distributions**, resolve the right subset for a repo or agent
-**surface**, render that subset for a harness/model **profile**, lint it for
-coherence, and materialize the result where the agent runtime loads it — then prove
-a skill actually improves behavior (not merely that it loaded) with paired,
-held-out behavioral evaluations.
+Spindle is a small, dependency-light lifecycle and control plane for agent skills.
+It lets users inspect and try exact package bytes before adoption, borrow them
+temporarily, compose and verify the effective startup environment, realize minimal
+instructions per parent or child agent, evaluate bounded behavioral claims, and
+update, distill, roll back, or retire only state under exact custody.
+
+The implemented lifecycle is **inspect → try/borrow → compose → bootstrap →
+realize → activate → evaluate → adopt/update/distill/release/retire**. See
+the repository [vision](https://github.com/lavallee/spindle/blob/main/VISION.md),
+[roadmap](https://github.com/lavallee/spindle/blob/main/ROADMAP.md), and
+[completion goal](https://github.com/lavallee/spindle/blob/main/GOAL.md).
+
+The implemented startup boundary is `spindle bootstrap` / `spindle launch`:
+it compares an exact surface lock with every locally observable Claude or Codex
+skill scope, repairs only receipt-proven Spindle links, preserves foreign state,
+and writes immutable plans and receipts. Stable native hook kits are managed by
+`spindle hooks plan|install|status|remove`; their definitions contain no mutable
+pins, and a runtime heartbeat is kept distinct from mere configuration presence.
+Same-name foreign entries block unless `spindle conflict allow` records an exact,
+content-bound decision. See
+[Startup integrity and native hooks](startup-integrity.md) for the full command,
+trust, cache, decision, and custody contracts.
+
+The implemented pre-adoption lifecycle is `spindle inspect`, `spindle borrow`,
+`spindle try`, and `spindle release`. Local inspection executes and writes
+nothing. Remote Git/skills.sh-compatible inspection safely exports a commit-pinned
+snapshot and writes provenance/static-preflight evidence without activation.
+Borrow and try snapshot exact bytes into the content-addressed package cache and
+overlay the incumbent surface lock with an expiring lease rather than an
+adoption record. Executable, network, credential, and declared-tool expansion
+requires explicit approval; quarantine blocks future leases without rewriting
+history. Startup resolves expiry on every launch/resume/compact event and removes
+only the lease's owned projection before discovery. Disposable trials use
+read-only Claude/Codex launch postures and retain startup, activation, cleanup,
+and run receipts. See [Candidate inspection, pinned sources, trials, and
+expiring leases](local-lifecycle.md).
+
+The durable lifecycle promotes only a zero-exit exact trial with activation and
+cleanup evidence. `spindle adopt` creates a v2 adoption record; `update plan|try`
+tests a candidate beside the incumbent; and `rollback`, `disable`, `enable`,
+`deprecate`, and `retire` preserve history while mutating only receipt-owned
+runtime state. `health` reports source, package, cache, inventory, model, harness,
+toolset, and policy drift separately. Evaluation matrices can compare no-skill,
+invariant-core, candidate-overlay, incumbent, and ablation arms with repeated
+held-out non-inferiority and hard-floor gates. `eval distill` stages one bounded
+trial revision and never auto-adopts it.
+
+Harness capabilities are fail-closed and certified per exact build with `spindle
+adapter matrix|certify|verify`. The checked-in M7 evidence certifies Claude Code
+2.1.220 (Opus 5 parent, Sonnet 5 child) and Codex CLI 0.146.0 (GPT-5.6 Sol parent,
+Terra child), including independent projection/model/tool/policy activation
+receipts. Organization policy can constrain sources, authority, hooks,
+attestations, and certified builds. `state export|import|recover|gc` and `migrate
+plan|apply` provide deterministic custody, crash recovery, and legacy audits
+without silently adopting or deleting foreign state. See
+`adapter-compatibility.md`, `organization-policy.md`, and
+`migration-and-recovery.md`.
 
 ---
 
@@ -20,42 +70,40 @@ Agent "skills" — the reusable instruction files a coding agent loads to do a j
 well — multiply fast. Left unmanaged, every repository inherits the same growing
 pile: skills it will never use, skills that quietly contradict each other, and a
 context budget spent on instructions instead of work. Spindle treats a surface's
-skill set as something you **compose** and **verify**, not something you accumulate.
+skill set as something you **inspect**, **compose**, **verify**, and maintain—not
+something you install into an ambient directory and forget.
 
-The everyday workflow is one command:
+The everyday workflow begins before installation:
 
 ```bash
-# install the toolchain and a reference distribution of skills
 uv sync --extra dev
-spindle dist install examples/spindle-sample/distributions/spindle-sample
-spindle dist activate spindle-sample
 
-# see what you've got
-spindle doctrine show
-spindle skill list
+# explain a candidate without activating or executing it
+spindle inspect ./candidate/review \
+  --for "review this migration" --harness codex --here --json
 
-# compose + render + materialize the right blend for a repo
-spindle bind /path/to/repo --harness claude
-# → resolved 4 skills · lint ok · rendered (identity) · linked → .claude/skills/
+# preview one disposable read-only session over the current blend
+spindle try ./candidate/review --harness codex \
+  --task-file task.md --here --dry-run
+
+# verify desired state before harness discovery
+spindle bootstrap --harness codex --here --check
 ```
 
-That last command is the whole idea in miniature: **classify** the repo, **select**
-the channels it subscribes to, **resolve** them into one blend, **render** through
-the harness/model profiles, **lint** for coherence, and **materialize** the
-selected skills where the runtime can load them — failing closed if the blend isn't
-coherent.
+`inspect` is read-only. `try` and `borrow` create leases over content-addressed
+snapshots, not durable adoptions. Startup reconciles only exact receipt-owned
+state and preserves foreign entries. A successful trial becomes durable only
+through explicit `adopt`.
 
-Packages and distributions are ordinary pip-installable projects that declare
-themselves with `[tool.spindle.package]` and `[tool.spindle.distribution]`
-metadata, so the whole ecosystem grows through packaging you already understand.
-The public base ships a minimal reference distribution under
-`examples/spindle-sample`. Everything private — an organization's own packages,
-project registries, task sinks, marketplace providers — lives in separate adapter
-packages that depend on Spindle, never inside its core.
+Managed composition remains a first-class subsystem. Packages and distributions
+are ordinary pip-installable projects declaring `[tool.spindle.package]` and
+`[tool.spindle.distribution]`. `spindle bind` classifies a repository, resolves a
+tight channel-selected blend, renders it through harness/model profiles, verifies
+guardrails, and materializes only the receipt-owned result.
 
 ---
 
-## 2. Rationale — why compose skills at all?
+## 2. Rationale — beyond install and hope
 
 Agent skills are one of the best ideas to arrive in coding agents: a small file of
 hard-won instructions that makes the agent reliably good at a task. The trouble
@@ -63,7 +111,17 @@ starts not with any one skill but with the twentieth. The instinct is to install
 every useful skill globally so it's always available. It's the right instinct and
 the wrong result: a global pile is never vetted as a **set**. It was assembled one
 convenient addition at a time, by different authors, for different situations. That
-carries five hidden costs.
+carries a lifecycle gap plus five compounding composition costs.
+
+### Cost 0 — install and hope
+
+Copying a skill into a discovery directory conflates presence with intent,
+authority, activation, compatibility, usefulness, and maintenance ownership. It
+does not prove which bytes loaded, what else the harness saw, which model and tools
+were effective, whether behavior improved, or who will retest after an upgrade.
+Spindle separates those decisions: inspect before authority, try or borrow before
+adoption, verify startup and per-agent activation, then update, distill, roll back,
+or retire explicitly.
 
 ### Cost 1 — context budget
 
@@ -351,18 +409,20 @@ time.
 
 ## 4. Evaluation — availability is not improvement
 
-A bind proves a skill loaded without losing guardrails or budget. It says nothing
-about whether the skill made the agent *better*. Spindle draws a hard line and
-refuses to let a bind stand in for an effectiveness claim.
+A desired projection may be available without loading, load under the wrong model
+or policy, or activate correctly and still make behavior worse. Spindle reports
+availability, activation, routing, authorization, behavior, and adapter
+conformance separately.
 
-| `spindle bind` — availability | `spindle eval` — improvement |
+| startup / activation — runtime correctness | `spindle eval` — improvement |
 |---|---|
-| Can this surface load the skill? | Does the skill improve behavior? |
-| Without losing guardrails or budget? | On this task family, model, and harness? |
-| Coherent with the rest of the blend? | Versus running without it? |
-| Deterministic. **No model calls.** | Measured on **held-out** cases. |
+| Were exact bytes present? | Does the skill improve behavior? |
+| Did this agent load the intended realization? | On this task distribution and runtime coordinate? |
+| Did routing and authorization match? | Versus no skill, invariant core, or incumbent? |
+| Could the adapter prove the runtime facts? | Measured on **held-out** repeated cases. |
 
-> Rendering and binding prove a skill is available, not that it improves an agent.
+> Availability is not activation. Activation is not authorization. None of them is
+> improvement.
 
 ### 4.1 The paired experiment
 
@@ -409,7 +469,31 @@ The held-out mean is a necessary gate, not the whole decision — review case-le
 regressions, cost, latency, and human-correction time before adopting. Rejected and
 null receipts are kept as evidence for that exact skill hash.
 
-### 4.3 The runner is an argv contract
+### 4.3 Named arms and minimalism
+
+The paired format remains supported. The named-arm matrix adds **no-skill**,
+**invariant-core**, **candidate-overlay**, **incumbent**, and **ablation** arms.
+Every run retains six gates: availability, activation, routing, authorization,
+behavior, and adapter conformance. `unknown` never becomes success.
+
+A smaller or empty overlay qualifies only when repeated held-out pairs clear a
+predeclared one-sided non-inferiority bound, every run clears a hard floor, runtime
+gates pass, and the size reduction is material. A changed model, harness build,
+toolset, policy, package digest, active blend, or task distribution reopens the
+claim.
+
+```bash
+spindle eval matrix validate matrix.toml
+spindle eval matrix run matrix.toml
+spindle eval distill classify ./candidate/review
+spindle eval distill plan ./candidate/review --json
+```
+
+Distillation classifies steering, reference knowledge, deterministic procedures,
+tool integrations, fixtures, and obsolete workarounds. It stages one bounded
+trial revision and never auto-adopts it.
+
+### 4.4 The runner is an argv contract
 
 Spindle never calls a model provider. A manifest names an argv `runner`, and Spindle
 invokes it once per case per arm — with no shell — passing everything through
@@ -444,7 +528,7 @@ blocks promotion.
 }
 ```
 
-### 4.4 Receipts
+### 4.5 Receipts
 
 Each run writes a receipt keeping input hashes, pair order, exit state, duration,
 stdout/stderr *hashes*, scores, metrics, and the promotion decision — but not full
@@ -457,7 +541,7 @@ spindle eval run      examples/evaluation-sample/eval.toml
 spindle eval show     examples/evaluation-sample/receipts/<receipt>.json
 ```
 
-### 4.5 Initial task families
+### 4.6 Initial task families
 
 - **Diagnosis** — exact symptom reproduction, loop determinism, pre-edit hypothesis
   testing, regression sensitivity, completion, time, cost.
@@ -472,9 +556,49 @@ and a proposed edit that drops a guardrail is rejected outright.
 
 ---
 
-## 5. Guide — install, bind, build, extend
+## 5. Guide — try, verify, adopt, maintain
 
-### 5.1 Install & activate
+### 5.1 Inspect, try, and borrow
+
+```bash
+spindle inspect ./candidate/review \
+  --for "review this migration" --harness codex --here --json
+
+spindle try ./candidate/review --harness codex \
+  --task-file task.md --here --dry-run
+spindle try ./candidate/review --harness codex \
+  --task-file task.md --here
+
+spindle borrow ./candidate/review --harness codex \
+  --until 2h --here --dry-run
+spindle release sha256:<lease-id> --harness codex --here --dry-run
+```
+
+Local inspection imports and executes nothing. A remote inspection may populate
+only a verified provenance/source cache. Trials and borrows operate on exact
+snapshots and create leases, not adoptions. Executable resources, network,
+credentials, and tool expansion are separate grants.
+
+### 5.2 Verify startup and maintain custody
+
+```bash
+spindle inventory --effective --harness codex --here
+spindle bootstrap --harness codex --here --check
+spindle hooks install --harness codex --scope repo --here --dry-run
+
+spindle adopt sha256:<lease-id> --scope repo --here --dry-run --json
+spindle update try review --harness codex --task-file task.md --here
+spindle health --harness codex --here
+spindle rollback review --harness codex --reason regression --here
+spindle retire review --harness codex --reason obsolete --here --dry-run
+```
+
+Startup repairs only exact receipt-owned projections and preserves foreign state.
+Adoption is explicit promotion from a successful trial. Updates run beside the
+incumbent and do not inherit its evidence. Rollback and retirement preserve
+history while changing only exact owned runtime state.
+
+### 5.3 Managed distributions
 
 ```bash
 uv sync --extra dev
@@ -492,7 +616,7 @@ records the event. Activation writes the active distribution name into
 `$SPINDLE_HOME` (default `~/.spindle`); with a single distribution installed,
 Spindle uses it even before activation.
 
-### 5.2 Bind a repo — the daily step
+### 5.4 Bind a managed blend
 
 ```bash
 spindle bind /path/to/repo --harness claude
@@ -507,7 +631,7 @@ Claude). Useful flags: `--dry-run` (compute, don't write), `--no-render` (select
 only, skip profiles), `--force` (materialize despite lint problems — the escape
 hatch past the fail-closed gate; use sparingly).
 
-### 5.3 Work ahead: advance & liaison
+### 5.5 Work ahead: advance & liaison
 
 ```bash
 spindle advance run --from-registry     # precompute blends for every known surface
@@ -519,7 +643,7 @@ Because a bind is deterministic and cached, precomputing turns the per-repo step
 into a single batch job. The liaison records what a surface asked for, so a
 recurring one-off can graduate into a precomputed skill.
 
-### 5.4 Build your own
+### 5.6 Build your own
 
 ```bash
 spindle package new my-tools --dest ./packages/my-tools \
@@ -596,7 +720,50 @@ transform = "trim"
 tier = "frontier"
 ```
 
-### 5.5 Evaluate a skill
+### 5.7 Realize one skill per agent session
+
+A repository binding is shared, but parent and child agents can use different
+models, effort levels, roles, and tool envelopes. A runtime-aware skill adds
+`spindle-realization.toml` beside its invariant `SKILL.md` and keeps minimal,
+evaluated residues under `overlays/`.
+
+```toml
+schema_version = 1
+
+[[profile]]
+id = "codex-review"
+overlay = "overlays/codex-review.md"
+
+[profile.match]
+harness = "codex"
+model = "gpt-5.6-sol"
+effort = "high"
+role = "reviewer"
+```
+
+The task router chooses the model; Spindle follows the actual session coordinate:
+
+```bash
+spindle realize review \
+  --session-id reviewer-7 \
+  --harness codex \
+  --model gpt-5.6-sol \
+  --effort high \
+  --role reviewer \
+  --strict
+```
+
+The result is an immutable, content-addressed package plus an audit receipt under
+`$SPINDLE_HOME`. Every child resolves independently. Requested/served model
+mismatches, unknown coordinates, and ambiguous profiles receive only the invariant
+core and an unresolved receipt. No realization command rewrites the installed
+package or a workspace-global model file. A harness adapter loads the returned path
+into only that agent session.
+
+See `runtime-realization.md` for the full manifest, matching, receipt, and adapter
+contracts.
+
+### 5.8 Evaluate a skill
 
 ```bash
 spindle eval validate examples/evaluation-sample/eval.toml
@@ -607,7 +774,7 @@ spindle eval show     examples/evaluation-sample/receipts/<receipt>.json
 See §4 for the full contract. To improve a skill's prose against the same gate, use
 `spindle optimize`.
 
-### 5.6 Extending Spindle (open core)
+### 5.9 Extending Spindle (open core)
 
 The compose-render-materialize-evaluate machinery and the contracts are public; the
 infrastructure behind them is meant to be your own. The core ships local reference
@@ -623,6 +790,8 @@ reverse.
 | Gate sink | `SPINDLE_GATE_QUEUE` | local JSONL queue |
 | Scout runner | `SPINDLE_SCOUT_COMMAND` | illustrative default |
 | LLM render / propose | `ANTHROPIC_API_KEY` | absent → those steps skip, not fail |
+| Realization store | `SPINDLE_REALIZATIONS_DIR` | `$SPINDLE_HOME/realizations` |
+| Realization receipts | `SPINDLE_REALIZATION_RECEIPTS_DIR` | `$SPINDLE_HOME/realization-receipts` |
 
 Around the core sits an *optional* learning & marketplace layer — `scout`, `peers`,
 `verdict`, `roster`, `broker`, `gate`, `ingest`, `fleet`. Treat it as a set of
@@ -631,18 +800,22 @@ decision-gate and task queues, and cross-machine ledger sync. **These modules ar
 intentionally skeletal — contracts and reference stubs, not finished
 infrastructure.** Build the adapters your organization needs against them.
 
-### 5.7 CLI reference
+### 5.10 CLI reference
 
 | Area | Commands |
 |---|---|
 | Distributions | `dist list · show · install · uninstall · activate · new` |
 | Packages / skills | `package list · show · new` · `skill list · show` · `capability list · show` |
-| Compose | `appclass` · `bind` · `unbind` · `advance run` · `liaison request · log` |
+| Inspect / lease | `inspect` · `try` · `borrow` · `release` · `source` |
+| Compose / activate | `appclass` · `bind` · `bootstrap` · `launch` · `hooks` · `realize` · `inventory` · `why` · `diff` |
+| Maintain | `adopt` · `update plan · try` · `health` · `rollback` · `disable · enable · deprecate · retire` |
 | Doctrine | `doctrine show · validate` |
-| Evaluate / tune | `eval validate · run · show` · `optimize` · `rate` |
+| Evaluate / tune | `eval validate · run · show · matrix · distill` · `optimize` · `rate` |
+| Adapter / policy | `adapter matrix · certify · verify` · `policy show · check` |
 | Learn / market | `peers` · `verdict` · `roster` · `broker` · `acquisitions` · `scout` |
 | Infra sinks | `ingest` · `gate file · from-result` · `fleet status · sync` |
-| Housekeeping | `status` · `preempt · unpreempt` · `state show · rebuild` |
+| Custody | `state show · rebuild · export · import · recover · gc` · `migrate plan · apply` |
+| Legacy | `status` · `preempt · unpreempt` · `advance run` · `liaison request · log` |
 
 Run any command with `--help` for its flags.
 
@@ -682,5 +855,5 @@ Net files that land: global skill symlinks + `$SPINDLE_HOME/events.jsonl` &
 ---
 
 *Built as an [artoo](https://github.com/lavallee/artoo) artifact with the artoo-kit
-design system, hand-authored from the Spindle source. Describes Spindle v0.1 — a
-point-in-time snapshot of a young, evolving toolchain. MIT licensed.*
+design system, hand-authored from the Spindle source. Describes Spindle v0.2;
+adapter claims remain pinned to named build receipts. MIT licensed.*

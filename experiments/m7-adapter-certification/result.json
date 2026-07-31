@@ -1,0 +1,25 @@
+{
+  "canary_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+  "results": {
+    "claude": {
+      "activation_receipts": {
+        "child": "641a6317e13d1cd30d59d1b3e65e037c11bd750ba6e548dd5a08f45c82076742",
+        "parent": "19e0ec73b082d118c7d18504e7fd3f1de1b7896b6f402be151d7feccf99f71f3"
+      },
+      "certification": "certifications/96c11b9de1ad6f9623fc78a5b8b681edea1ab643b6b126dfc41f85246b38805c.json",
+      "certification_id": "sha256:96c11b9de1ad6f9623fc78a5b8b681edea1ab643b6b126dfc41f85246b38805c",
+      "observation": "claude-observation.json"
+    },
+    "codex": {
+      "activation_receipts": {
+        "child": "f91b9c06fe8c4472fd6f576e2f8d5e5975e66e009b3c65008286459642f49699",
+        "parent": "ebf17edd877681b167677d018c000b390ffa6ad1d87372d6d06c1f7b064d2c77"
+      },
+      "certification": "certifications/f4093c3fc577da9ec35e1da502e9e51ad27001683140a468c6276338bef6f48c.json",
+      "certification_id": "sha256:f4093c3fc577da9ec35e1da502e9e51ad27001683140a468c6276338bef6f48c",
+      "observation": "codex-observation.json"
+    }
+  },
+  "run_id": "sha256:198c163b7ca991e031b127f13d1b91937626208e325375e4d59044250ca5e3c8",
+  "schema": "spindle.adapter-certification-run/v1"
+}

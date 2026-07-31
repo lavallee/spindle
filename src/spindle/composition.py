@@ -29,17 +29,24 @@ AUTONOMY_MODES = (SELF_EVOLVING, DETERMINISTIC)
 @dataclass(frozen=True)
 class ComposedSkill:
     name: str
-    command: str          # slash command, e.g. "/clarify"
-    scope: str            # system | cluster | repo
-    source: str = ""      # channel / package it came from
+    command: str  # slash command, e.g. "/clarify"
+    scope: str  # system | cluster | repo
+    source: str = ""  # channel / package it came from
     irreversible: bool = False  # deploy/delete/spend/external-comms → must be A4-gated
     source_dir: str = ""  # canonical on-disk skill dir; what materialize symlinks (or, post-render, the rendered dir)
-    tier: str = ""        # P10 routing hint: judgment | execution | "" (unset). Advisory —
-                          # spindle annotates which model tier a skill wants; the harness routes.
-    chip: str = ""        # optional chip alias (touchpoint A). Advisory routing hint, mirroring
-                          # `tier`: names a chip a chip-host *could* wire this skill to. Inert
-                          # without a chip host — spindle never imports chip tooling; it only
-                          # carries the string through resolve/render/materialize untouched.
+    tier: str = ""  # P10 routing hint: judgment | execution | "" (unset). Advisory —
+    # spindle annotates which model tier a skill wants; the harness routes.
+    chip: str = (
+        ""  # optional chip alias (touchpoint A). Advisory routing hint, mirroring
+    )
+    # `tier`: names a chip a chip-host *could* wire this skill to. Inert
+    # without a chip host — spindle never imports chip tooling; it only
+    # carries the string through resolve/render/materialize untouched.
+    package_name: str = (
+        ""  # immutable package custody; survives harness/model rendering
+    )
+    package_version: str = ""
+    package_digest: str = ""
 
 
 @dataclass(frozen=True)
@@ -52,8 +59,8 @@ class Shadow:
     """
 
     command: str
-    winner: str        # skill name that took the slot
-    loser: str         # skill name that was shadowed
+    winner: str  # skill name that took the slot
+    loser: str  # skill name that was shadowed
     winner_scope: str
     loser_scope: str
     same_scope: bool
@@ -61,10 +68,12 @@ class Shadow:
 
 @dataclass
 class Composition:
-    surface: str                                  # consuming repo / agent id
-    autonomy_mode: str                            # self_evolving | deterministic
+    surface: str  # consuming repo / agent id
+    autonomy_mode: str  # self_evolving | deterministic
     skills: list[ComposedSkill] = field(default_factory=list)
-    absolutes_in_force: list[str] = field(default_factory=list)  # doctrine absolute ids enforced
+    absolutes_in_force: list[str] = field(
+        default_factory=list
+    )  # doctrine absolute ids enforced
     shadows: list[Shadow] = field(default_factory=list)  # every override recorded (D3)
 
 
@@ -72,11 +81,13 @@ class Composition:
 class ChannelLayer:
     """One subscribed channel's contribution to a surface's composition."""
 
-    scope: str                                    # system | cluster | repo
+    scope: str  # system | cluster | repo
     skills: list[ComposedSkill] = field(default_factory=list)
-    absolutes: list[str] = field(default_factory=list)  # absolute ids in force at this scope
-    name: str = ""                                # channel name (for version tracking)
-    version: str = ""                             # channel version (feeds the binding coordinate)
+    absolutes: list[str] = field(
+        default_factory=list
+    )  # absolute ids in force at this scope
+    name: str = ""  # channel name (for version tracking)
+    version: str = ""  # channel version (feeds the binding coordinate)
 
 
 # Precedence is a POLICY, not baked in: the order from least- to most-specific.
@@ -116,14 +127,16 @@ def resolve(
                 # The later writer (more- or equal-specific) wins the slot; record
                 # the override so nothing is silently swallowed (D3). same_scope
                 # means an accidental collision (e.g. two clusters), not an override.
-                shadows.append(Shadow(
-                    command=s.command,
-                    winner=s.name,
-                    loser=prior.name,
-                    winner_scope=s.scope,
-                    loser_scope=prior.scope,
-                    same_scope=(s.scope == prior.scope),
-                ))
+                shadows.append(
+                    Shadow(
+                        command=s.command,
+                        winner=s.name,
+                        loser=prior.name,
+                        winner_scope=s.scope,
+                        loser_scope=prior.scope,
+                        same_scope=(s.scope == prior.scope),
+                    )
+                )
             by_slot[slot] = s
         absolutes.update(layer.absolutes)
 
@@ -146,7 +159,9 @@ def resolve_and_lint(
     precedence: tuple[str, ...] = DEFAULT_PRECEDENCE,
 ) -> tuple[Composition, list[str]]:
     """Resolve then lint — the compose-time gate in one call."""
-    comp = resolve(layers, surface=surface, autonomy_mode=autonomy_mode, precedence=precedence)
+    comp = resolve(
+        layers, surface=surface, autonomy_mode=autonomy_mode, precedence=precedence
+    )
     return comp, lint(comp, doc)
 
 
@@ -185,7 +200,9 @@ def lint(comp: Composition, doc: Doctrine) -> list[str]:
             by_command[s.command].append(s.name)
     for command, owners in sorted(by_command.items()):
         if len(owners) > 1:
-            problems.append(f"command {command!r} claimed by multiple skills: {', '.join(sorted(owners))}")
+            problems.append(
+                f"command {command!r} claimed by multiple skills: {', '.join(sorted(owners))}"
+            )
 
     # 3. same-scope shadows — accidental collisions resolve() had to break arbitrarily
     for sh in comp.shadows:

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Using Spindle — install, bind, build, extend</title>
-<meta name="description" content="A practical guide: install and activate a distribution, bind a repo, precompute blends, build your own packages, distributions, channels, and profiles, evaluate skills, and plug in your own task, gate, and scout sinks.">
+<title>Using Spindle — try, verify, adopt, maintain</title>
+<meta name="description" content="A practical guide to inspecting and trying skills, temporary leases, startup verification, adoption and updates, evaluation, recovery, and authored distributions.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="lib/artoo-kit/tokens.css">
 <link rel="stylesheet" href="lib/artoo-kit/base.css">
@@ -19,6 +19,7 @@
   <div class="nav-links">
     <a href="index.html">Overview</a>
     <a href="rationale.html">Rationale</a>
+    <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
     <a href="evaluation.html">Evaluation</a>
     <a href="guide.html">Guide</a>
@@ -31,28 +32,96 @@
   <header class="article-header">
     <div class="article-kicker">guide</div>
     <h1 class="article-title">Using Spindle.</h1>
-    <p class="article-dek">The daily workflow is one command. Everything else —
-    building your own skills, tuning per surface, and wiring Spindle into your own
-    infrastructure — is optional depth you reach for when you need it.</p>
+    <p class="article-dek">Start with a read-only intent card, try exact bytes in
+    one disposable session, borrow only when useful, and adopt only after the
+    runtime evidence is sound. Composition and authoring are deeper paths, not
+    prerequisites for trying a skill.</p>
   </header>
 
   <div class="toc">
     <b>On this page</b>
     <ol>
-      <li><a href="#install">Install &amp; activate</a></li>
-      <li><a href="#bind">Bind a repo (the daily step)</a></li>
+      <li><a href="#try">Inspect, try, and borrow</a></li>
+      <li><a href="#startup">Verify startup</a></li>
+      <li><a href="#maintain">Adopt, update, and retire</a></li>
+      <li><a href="#install">Managed distributions</a></li>
+      <li><a href="#bind">Bind a managed blend</a></li>
       <li><a href="#ahead">Work ahead: advance &amp; liaison</a></li>
       <li><a href="#build">Build your own</a></li>
       <li><a href="#evaluate">Evaluate a skill</a></li>
+      <li><a href="#custody">Policy, certification, and recovery</a></li>
       <li><a href="#extending">Extending Spindle</a></li>
       <li><a href="#cli">CLI reference</a></li>
     </ol>
   </div>
 
-  <h2 id="install">Install &amp; activate</h2>
-  <p>Spindle is a Python toolchain; skills arrive as pip-installable
-  distributions. Install one, then mark it active so every later command reads its
-  doctrine, channels, and profiles:</p>
+  <h2 id="try">Inspect, try, and borrow</h2>
+  <p>Local inspection imports nothing, runs nothing, and writes no candidate state.
+  A remote inspection may populate only a verified provenance/source cache; it
+  does not activate the candidate.</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle inspect ./candidate/review \
+    --for "review this migration" --harness codex --here --json
+
+<span class="c"># preview, then run one disposable read-only session</span>
+<span class="p">$</span> spindle try ./candidate/review --harness codex \
+    --task-file task.md --here --dry-run
+<span class="p">$</span> spindle try ./candidate/review --harness codex \
+    --task-file task.md --here
+
+<span class="c"># keep the exact snapshot temporarily without adopting it</span>
+<span class="p">$</span> spindle borrow ./candidate/review --harness codex \
+    --until 2h --here --dry-run
+<span class="p">$</span> spindle release sha256:&lt;lease-id&gt; --harness codex --here --dry-run</code></pre>
+  </div>
+  <p><code>try</code> retains startup, activation, run, and cleanup receipts but no
+  adoption. <code>borrow</code> adds one exact, expiring lease over the current
+  blend. Executable resources, network, credentials, and tool expansion are
+  separate grants; an inspection result is never permission to execute them.</p>
+
+  <h2 id="startup">Verify startup</h2>
+  <p>Use the portable pre-discovery boundary even when native hooks are available.
+  It compares the exact surface lock with the effective harness inventory and
+  reconciles only receipt-owned projections:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle inventory --effective --harness codex --here
+<span class="p">$</span> spindle bootstrap --harness codex --here --check
+<span class="p">$</span> spindle bootstrap --harness codex --here --reconcile-owned
+<span class="p">$</span> spindle launch codex --here --
+
+<span class="c"># stable definitions; mutable pins remain in Spindle state</span>
+<span class="p">$</span> spindle hooks plan --harness codex --scope repo --here
+<span class="p">$</span> spindle hooks install --harness codex --scope repo --here --dry-run
+<span class="p">$</span> spindle hooks status --harness codex --scope repo --here --effective</code></pre>
+  </div>
+  <p>Foreign state is inventoried and preserved. A same-name collision blocks
+  strict startup unless an exact path-and-content decision exists. A mismatch
+  found after discovery reports <code>restart-required</code>.</p>
+
+  <h2 id="maintain">Adopt, update, and retire</h2>
+  <p>A successful zero-exit lease can be promoted into durable maintenance
+  custody. Updates are tested beside the incumbent and never inherit its
+  evaluation claims:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle adopt sha256:&lt;lease-id&gt; --scope repo --here --dry-run --json
+<span class="p">$</span> spindle health --harness codex --here
+<span class="p">$</span> spindle update plan --harness codex --here --json
+<span class="p">$</span> spindle update try review --harness codex --task-file task.md --here
+<span class="p">$</span> spindle rollback review --harness codex --reason regression --here
+<span class="p">$</span> spindle retire review --harness codex --reason obsolete --here --dry-run</code></pre>
+  </div>
+  <p>Rollback and status changes append decisions rather than rewrite history.
+  Retirement removes only the current projection proven by an ownership receipt.
+  Use <code>vendor</code> or <code>distill</code> to inspect alternate custody paths
+  without changing adoption.</p>
+
+  <h2 id="install">Managed distributions</h2>
+  <p>Spindle also supports authored, pip-installable distributions carrying
+  packages, doctrine, channels, and profiles. This is the composition path for a
+  managed skill set, not a prerequisite for candidate trials:</p>
   <div class="terminal">
     <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
 <pre><code><span class="p">$</span> uv sync --extra dev
@@ -68,10 +137,12 @@
 <span class="p">$</span> spindle capability list</code></pre>
   </div>
   <div class="article-mrow">
-    <p>Installing a distribution links its skills into your global skills directory
-    and records the event to Spindle's ledger. Activation writes the active
-    distribution name into <code>$SPINDLE_HOME</code>; with a single distribution
-    installed, Spindle will use it even before you activate.</p>
+    <p><code>dist install</code> is the durable compatibility path: it installs the
+    distribution, links its skills into Spindle's global skill surface, and
+    records the event and ownership. Activation selects the doctrine, channels,
+    and profiles used for managed composition. Use <code>inspect</code>,
+    <code>try</code>, or <code>borrow</code> when you do not want a durable global
+    install.</p>
     <aside class="article-marginnote article-marginnote--def">
       <span class="term">$SPINDLE_HOME</span>
       Per-machine state — bindings, rendered cache, the active pointer, ledgers.
@@ -79,10 +150,10 @@
     </aside>
   </div>
 
-  <h2 id="bind">Bind a repo — the daily step</h2>
-  <p>This is the one command that stands between "skills installed" and "skills
-  in use." It classifies the repo, resolves its blend, renders it for the harness
-  and model, lints it, and materializes it:</p>
+  <h2 id="bind">Bind a managed blend</h2>
+  <p><code>bind</code> classifies a repository, resolves its active distribution
+  channels, renders the selected skills for the harness and model, checks the
+  blend, and materializes it with exact ownership:</p>
   <div class="terminal">
     <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
 <pre><code><span class="p">$</span> spindle bind /path/to/repo --harness claude
@@ -220,8 +291,41 @@ tier = "frontier"</code></pre>
 <span class="p">$</span> spindle eval show     examples/evaluation-sample/receipts/&lt;receipt&gt;.json</code></pre>
   </div>
   <p>The full contract — the runner's env vars, the result JSON, and the promotion
-  gate — is on the <a href="evaluation.html">Evaluation</a> page. To improve a
-  skill's prose against that same gate, use <code>spindle optimize</code>.</p>
+  gate — is on the <a href="evaluation.html">Evaluation</a> page. Named-arm
+  matrices add no-skill, invariant-core, candidate-overlay, incumbent, and
+  ablation comparisons with explicit runtime gates:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle eval matrix validate matrix.toml
+<span class="p">$</span> spindle eval matrix run matrix.toml
+<span class="p">$</span> spindle eval distill classify ./candidate/review
+<span class="p">$</span> spindle eval distill plan ./candidate/review --json</code></pre>
+  </div>
+  <p>Use <code>spindle optimize</code> for the older paired-edit path. Use
+  <code>eval distill stage</code> for one bounded deletion proposal; staging never
+  changes adoption.</p>
+
+  <h2 id="custody">Policy, certification, and recovery</h2>
+  <p>Harness claims are tied to one build. Organization policy can restrict source
+  providers, authority ceilings, required hooks and attestations, exact adapter
+  builds, and certification requirements:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle adapter matrix --harness codex --build 0.146.0
+<span class="p">$</span> spindle adapter verify certification.json
+<span class="p">$</span> spindle policy check --harness codex \
+    --harness-build 0.146.0 --here --json
+
+<span class="c"># deterministic custody and crash recovery</span>
+<span class="p">$</span> spindle state export spindle-state.tar.gz --dry-run --json
+<span class="p">$</span> spindle state recover --json
+<span class="p">$</span> spindle state gc --json
+<span class="p">$</span> spindle migrate plan --harness codex --here --json</code></pre>
+  </div>
+  <p>Import merges only absent or byte-identical files. Recovery rebuilds mutable
+  indexes from immutable receipts. GC applies an exact rechecked plan over
+  unreferenced verified cache bytes. Migration audits legacy state without
+  adopting or deleting it.</p>
 
   <h2 id="extending">Extending Spindle</h2>
   <p>Spindle is open-core: the compose-render-materialize-evaluate machinery and
@@ -265,12 +369,15 @@ tier = "frontier"</code></pre>
     <tbody>
       <tr><td>Distributions</td><td><code>dist list · show · install · uninstall · activate · new</code></td></tr>
       <tr><td>Packages / skills</td><td><code>package list · show · new</code> · <code>skill list · show</code> · <code>capability list · show</code></td></tr>
-      <tr><td>Compose</td><td><code>appclass</code> · <code>bind</code> · <code>unbind</code> · <code>advance run</code> · <code>liaison request · log</code></td></tr>
+      <tr><td>Inspect / lease</td><td><code>inspect</code> · <code>try</code> · <code>borrow</code> · <code>release</code> · <code>source</code></td></tr>
+      <tr><td>Compose / activate</td><td><code>bind</code> · <code>bootstrap</code> · <code>launch</code> · <code>hooks</code> · <code>realize</code> · <code>inventory</code> · <code>why</code> · <code>diff</code></td></tr>
+      <tr><td>Maintain</td><td><code>adopt</code> · <code>update plan · try</code> · <code>health</code> · <code>rollback</code> · <code>disable · enable · deprecate · retire</code></td></tr>
       <tr><td>Doctrine</td><td><code>doctrine show · validate</code></td></tr>
-      <tr><td>Evaluate / tune</td><td><code>eval validate · run · show</code> · <code>optimize</code> · <code>rate</code></td></tr>
+      <tr><td>Evaluate / tune</td><td><code>eval validate · run · show · matrix · distill</code> · <code>optimize</code> · <code>rate</code></td></tr>
+      <tr><td>Adapter / policy</td><td><code>adapter matrix · certify · verify</code> · <code>policy show · check</code></td></tr>
       <tr><td>Learn / market</td><td><code>peers</code> · <code>verdict</code> · <code>roster</code> · <code>broker</code> · <code>acquisitions</code> · <code>scout</code></td></tr>
       <tr><td>Infra sinks</td><td><code>ingest</code> · <code>gate file · from-result</code> · <code>fleet status · sync</code></td></tr>
-      <tr><td>Housekeeping</td><td><code>status</code> · <code>preempt · unpreempt</code> · <code>state show · rebuild</code></td></tr>
+      <tr><td>Custody</td><td><code>state show · rebuild · export · import · recover · gc</code> · <code>migrate plan · apply</code></td></tr>
     </tbody>
   </table>
   <p>Run any command with <code>--help</code> for its flags, or read the
@@ -288,7 +395,7 @@ tier = "frontier"</code></pre>
   </nav>
 
   <footer class="colophon">
-    An open toolchain for composing agent skills · built with
+    An open lifecycle and control plane for agent skills · built with
     <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
     MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
   </footer>

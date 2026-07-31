@@ -7,6 +7,21 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-31
+
+- Added ownership-safe effective inventory, startup bootstrap, stable native
+  Claude/Codex hooks, exact conflict decisions, and startup receipts.
+- Added read-only intent inspection, pinned-source preflight, disposable trials,
+  expiring borrow leases, and explicit lease-to-adoption promotion.
+- Added update-as-trial, health, rollback, disable/deprecate/retire, tuple-bound
+  minimalism evaluation, and bounded distillation staging.
+- Added build-specific adapter conformance and certification, organization
+  policy, deterministic state export/import, cache GC, migration audit, and
+  immutable-receipt crash recovery.
+- Reworked the README and documentation site around the implemented lifecycle,
+  including a lifecycle overview, current operational guide, named-arm
+  evaluation, and machine-readable documentation.
+
 - Procedure evaluations can preserve exact Milton/Chip origin and explicit
   baseline/variant implementation-profile-model-harness tuples.
 - Eligible evaluations can enter `record_evaluated_binding`; idempotent

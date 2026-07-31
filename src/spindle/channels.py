@@ -26,6 +26,7 @@ else:  # pragma: no cover
 
 from . import active as active_mod
 from .composition import ChannelLayer, ComposedSkill
+from .lifecycle import PackageRevision
 
 # A provider loads one channel into a layer, or None if the surface's harness has
 # no channel at that (scope, name). Signature: (scope, name, harness) -> layer?.
@@ -57,15 +58,15 @@ def _frontmatter_chip(src: str | Path) -> str:
 class Surface:
     """A skill consumer. ``clusters`` are app-class keys from spindle.appclass."""
 
-    name: str                       # repo / agent id, e.g. "barn-owl"
-    harness: str                    # claude | codex | pi | …
-    autonomy_mode: str              # self_evolving | deterministic
+    name: str  # repo / agent id, e.g. "barn-owl"
+    harness: str  # claude | codex | pi | …
+    autonomy_mode: str  # self_evolving | deterministic
     clusters: tuple[str, ...] = ()  # app-class keys this surface belongs to
-    model: str | None = None        # model/tier key the skills are tuned to render for
-                                    # (frontier | opus-4.8 | …); None = no model tuning.
-                                    # Selection is per (scope × harness); model is a
-                                    # *rendering* axis (density), applied at the render
-                                    # stage like harness dialect — not a channel key.
+    model: str | None = None  # model/tier key the skills are tuned to render for
+    # (frontier | opus-4.8 | …); None = no model tuning.
+    # Selection is per (scope × harness); model is a
+    # *rendering* axis (density), applied at the render
+    # stage like harness dialect — not a channel key.
 
 
 def subscribed_channels(surface: Surface) -> list[tuple[str, str]]:
@@ -98,14 +99,21 @@ def select_layers(surface: Surface, provider: ChannelProvider) -> list[ChannelLa
 
 # ---- filesystem provider ------------------------------------------------
 
-def channel_manifest_path(source_dir: Path, scope: str, name: str, harness: str) -> Path:
+
+def channel_manifest_path(
+    source_dir: Path, scope: str, name: str, harness: str
+) -> Path:
     """Where a channel's manifest lives:
     ``<source_dir>/channels/<scope>/<name>/<harness>/channel.toml``."""
     return Path(source_dir) / "channels" / scope / name / harness / "channel.toml"
 
 
-def fs_provider(skill_index: dict[str, str | Path], *,
-                source_dir: Path | None = None) -> ChannelProvider:
+def fs_provider(
+    skill_index: dict[str, str | Path],
+    *,
+    source_dir: Path | None = None,
+    package_revisions: dict[str, PackageRevision] | None = None,
+) -> ChannelProvider:
     """A ChannelProvider backed by on-disk channel manifests.
 
     A ``channel.toml`` declares ``version``, ``absolutes`` (ids in force at that
@@ -123,6 +131,7 @@ def fs_provider(skill_index: dict[str, str | Path], *,
     ``source_dir`` defaults to the active distribution's source dir.
     """
     base = Path(source_dir) if source_dir is not None else None
+    revisions = package_revisions or {}
 
     def provider(scope: str, name: str, harness: str) -> Optional[ChannelLayer]:
         root = base if base is not None else active_mod.source_dir()
@@ -138,10 +147,22 @@ def fs_provider(skill_index: dict[str, str | Path], *,
             if src is None:
                 continue
             chip = str(chips.get(sname, "")) or _frontmatter_chip(src)
-            skills.append(ComposedSkill(
-                name=sname, command=f"/{sname}", scope=scope, source_dir=str(src),
-                tier=str(tiers.get(sname, "")), chip=chip,
-            ))
+            revision = revisions.get(sname)
+            skills.append(
+                ComposedSkill(
+                    name=sname,
+                    command=f"/{sname}",
+                    scope=scope,
+                    source_dir=str(src),
+                    tier=str(tiers.get(sname, "")),
+                    chip=chip,
+                    package_name=revision.name if revision is not None else "",
+                    package_version=revision.version if revision is not None else "",
+                    package_digest=revision.content_digest
+                    if revision is not None
+                    else "",
+                )
+            )
         return ChannelLayer(
             scope=scope,
             name=f"{scope}:{name}",

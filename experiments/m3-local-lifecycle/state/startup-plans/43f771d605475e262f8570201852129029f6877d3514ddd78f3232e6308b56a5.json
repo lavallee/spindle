@@ -1,0 +1,53 @@
+{
+  "actions": [
+    {
+      "action_id": "sha256:c6197648d466b1bbe8642ef421d945bb2514770278de236e1e0e6e3cefa7bdc4",
+      "kind": "remove",
+      "ownership_id": "sha256:f7c0c0954c780e5e31ce45ba9191fc788689bde6b5c428dff3d2ded3d872694e",
+      "package_digest": null,
+      "projection_path": "/media/ubuntussd/home/lavallee/Projects/spindle/.claude/skills/spindle-lease-canary",
+      "reason": "owned projection is absent from or differs from desired state",
+      "schema": "spindle.startup-action/v1",
+      "skill": "spindle-lease-canary",
+      "source_digest": null,
+      "source_path": null
+    }
+  ],
+  "adapter_build": "spindle-core/v1",
+  "already_discovered": false,
+  "blockers": [],
+  "decision": "blocked",
+  "event_source": "lease-release",
+  "foreign_conflicts": [],
+  "harness": "claude",
+  "inventory_id": "sha256:0d920fb7a8d67d14a58b15a3ae830c61f5fbb8069bbb8ecc5573529cce4a41b8",
+  "lease_status": {
+    "active": [],
+    "expired": []
+  },
+  "lock_id": "sha256:e0f75bd105c2382892c815d3b3586fb0e3e85db77376dfe25a81d6abefd3104b",
+  "plan_id": "sha256:43f771d605475e262f8570201852129029f6877d3514ddd78f3232e6308b56a5",
+  "prior_startup_inventory_id": null,
+  "prior_startup_receipt_id": null,
+  "repo_path": "/media/ubuntussd/home/lavallee/Projects/spindle",
+  "runtime_facts": {},
+  "schema": "spindle.startup-plan/v1",
+  "surface_id": "sha256:91c57a162797fd5ca2f04c269f73db4017a27bbce9b2c7cac030d463b527df81",
+  "surface_name": "spindle",
+  "warnings": [
+    {
+      "path": null,
+      "reason": "Claude plugin skills are namespaced and harness-managed",
+      "scope": "plugins",
+      "skill": "__plugins__",
+      "state": "opaque"
+    },
+    {
+      "path": null,
+      "reason": "Claude managed and bundled skills require harness-reported inventory",
+      "scope": "managed",
+      "skill": "__managed__",
+      "state": "opaque"
+    }
+  ]
+}

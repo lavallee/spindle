@@ -19,6 +19,11 @@ from spindle.skills import (
 )
 
 
+@pytest.fixture(autouse=True)
+def isolated_spindle_home(tmp_path, monkeypatch):
+    monkeypatch.setenv("SPINDLE_HOME", str(tmp_path / "spindle-state"))
+
+
 class TestLegacyAliasNameMapping:
     """Test configured prefix alias mapping."""
 
@@ -63,16 +68,16 @@ class TestCreateOrUpdateAlias:
         assert ("alias_skill (alias)", "installed") in results
 
     def test_update_existing_alias_symlink(self, tmp_path):
-        """Should update an existing alias symlink if it points elsewhere."""
+        """Should update an alias Spindle previously created."""
         target_link = tmp_path / "target_skill"
         target_link.mkdir()
         old_target = tmp_path / "old_target"
         old_target.mkdir()
 
-        alias_link = tmp_path / "alias_skill"
-        alias_link.symlink_to(old_target)
-
         results: list[tuple[str, str]] = []
+        alias_link = tmp_path / "alias_skill"
+        _create_or_update_alias(alias_link, old_target, "alias_skill", False, results)
+        results.clear()
         _create_or_update_alias(alias_link, target_link, "alias_skill", False, results)
 
         assert alias_link.is_symlink()
@@ -84,10 +89,10 @@ class TestCreateOrUpdateAlias:
         target_link = tmp_path / "target_skill"
         target_link.mkdir()
 
-        alias_link = tmp_path / "alias_skill"
-        alias_link.symlink_to(target_link)
-
         results: list[tuple[str, str]] = []
+        alias_link = tmp_path / "alias_skill"
+        _create_or_update_alias(alias_link, target_link, "alias_skill", False, results)
+        results.clear()
         _create_or_update_alias(alias_link, target_link, "alias_skill", False, results)
 
         assert ("alias_skill (alias)", "skipped:already-current") in results
@@ -134,7 +139,9 @@ class TestInstallWithLegacyShim:
         skill_dir.mkdir(parents=True)
         mock_discover.return_value = [_spec("spindle-grill", skill_dir)]
 
-        with mock.patch("spindle.skills.claude_skills_dir", return_value=tmp_path / "installed"):
+        with mock.patch(
+            "spindle.skills.claude_skills_dir", return_value=tmp_path / "installed"
+        ):
             install_skills(legacy_shim=False)
 
         installed_skills = list((tmp_path / "installed").glob("*"))
@@ -142,7 +149,9 @@ class TestInstallWithLegacyShim:
         assert installed_skills[0].name == "spindle-grill"
 
     @mock.patch("spindle.skills.discover_skills")
-    def test_install_with_legacy_shim_mapped_skills(self, mock_discover, tmp_path, monkeypatch):
+    def test_install_with_legacy_shim_mapped_skills(
+        self, mock_discover, tmp_path, monkeypatch
+    ):
         """With legacy_shim and sample-* skills, aliases should be created."""
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_FROM", "sample-")
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_TO", "spindle-")
@@ -150,7 +159,9 @@ class TestInstallWithLegacyShim:
         skill_dir.mkdir(parents=True)
         mock_discover.return_value = [_spec("sample-grill", skill_dir)]
 
-        with mock.patch("spindle.skills.claude_skills_dir", return_value=tmp_path / "installed"):
+        with mock.patch(
+            "spindle.skills.claude_skills_dir", return_value=tmp_path / "installed"
+        ):
             install_skills(legacy_shim=True)
 
         installed_dir = tmp_path / "installed"
@@ -158,10 +169,14 @@ class TestInstallWithLegacyShim:
         assert (installed_dir / "sample-grill").exists()
         assert (installed_dir / "spindle-grill").exists()
 
-        assert os.readlink(installed_dir / "spindle-grill") == str(installed_dir / "sample-grill")
+        assert os.readlink(installed_dir / "spindle-grill") == str(
+            installed_dir / "sample-grill"
+        )
 
     @mock.patch("spindle.skills.discover_skills")
-    def test_install_with_legacy_shim_unmapped_skills(self, mock_discover, tmp_path, monkeypatch):
+    def test_install_with_legacy_shim_unmapped_skills(
+        self, mock_discover, tmp_path, monkeypatch
+    ):
         """With legacy_shim but spindle-* skills, no aliases needed (current behavior)."""
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_FROM", "sample-")
         monkeypatch.setenv("SPINDLE_LEGACY_ALIAS_TO", "spindle-")
@@ -169,7 +184,9 @@ class TestInstallWithLegacyShim:
         skill_dir.mkdir(parents=True)
         mock_discover.return_value = [_spec("spindle-grill", skill_dir)]
 
-        with mock.patch("spindle.skills.claude_skills_dir", return_value=tmp_path / "installed"):
+        with mock.patch(
+            "spindle.skills.claude_skills_dir", return_value=tmp_path / "installed"
+        ):
             install_skills(legacy_shim=True)
 
         installed_dir = tmp_path / "installed"
@@ -192,16 +209,12 @@ class TestUninstallWithLegacyShim:
         mock_discover.return_value = [_spec("sample-grill", skill_dir)]
 
         installed_dir = tmp_path / "installed"
-        installed_dir.mkdir()
+        with mock.patch("spindle.skills.claude_skills_dir", return_value=installed_dir):
+            install_skills(legacy_shim=True)
+            results = uninstall_skills()
 
         main_link = installed_dir / "sample-grill"
-        main_link.symlink_to(skill_dir)
-
         alias_link = installed_dir / "spindle-grill"
-        alias_link.symlink_to(main_link)
-
-        with mock.patch("spindle.skills.claude_skills_dir", return_value=installed_dir):
-            results = uninstall_skills()
 
         assert not main_link.exists()
         assert not alias_link.exists()

@@ -1,0 +1,57 @@
+schema = "spindle.minimalism-eval/v1"
+id = "m6-empty-overlay"
+skill = "migration-review"
+runner = ["python", "runner.py"]
+candidate_arm = "empty-overlay"
+reference_arm = "incumbent"
+repeats = 3
+timeout_seconds = 10
+seed = 20260731
+non_inferiority_margin = 0.03
+hard_floor = 0.70
+min_artifact_reduction_bytes = 1
+required_gates = ["availability", "activation", "routing", "authorization", "behavior", "adapter"]
+receipt_dir = "receipts"
+
+[coordinate]
+model = "fixture-frontier-v1"
+harness = "fixture-adapter"
+harness_build = "fixture-adapter-1"
+toolset_digest = "sha256:fixture-tools"
+policy_digest = "sha256:fixture-read-only"
+active_blend_digest = "sha256:fixture-blend"
+
+[[arms]]
+id = "no-skill"
+kind = "no-skill"
+
+[[arms]]
+id = "invariant-core"
+kind = "invariant-core"
+artifact = "arms/core.md"
+
+[[arms]]
+id = "empty-overlay"
+kind = "candidate-overlay"
+
+[[arms]]
+id = "incumbent"
+kind = "incumbent"
+artifact = "arms/incumbent.md"
+
+[[arms]]
+id = "without-example"
+kind = "ablation"
+artifact = "arms/without-example.md"
+
+[[cases]]
+id = "held-rollback"
+split = "held_out"
+fixture = "fixtures/held-rollback.json"
+tags = ["rollback"]
+
+[[cases]]
+id = "held-locking"
+split = "held_out"
+fixture = "fixtures/held-locking.json"
+tags = ["locking"]

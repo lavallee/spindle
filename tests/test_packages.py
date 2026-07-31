@@ -217,3 +217,63 @@ skills = ["s1"]
     assert meta is not None
     assert meta.name == "demo" and meta.skills == ["s1"]
     assert meta.package_dir == site  # <package_dir>/<module>/skills/<skill> resolves
+
+
+def test_resolve_package_revision_pins_vcs_commit_and_content(tmp_path, monkeypatch):
+    root = tmp_path / "demo" / "skills"
+    one = root / "one"
+    two = root / "two"
+    for name, path in (("one", one), ("two", two)):
+        path.mkdir(parents=True)
+        (path / "SKILL.md").write_text(f"---\nname: {name}\n---\n")
+    meta = PackageMetadata(
+        name="demo",
+        version="1.0.0",
+        distribution="demo-dist",
+        skills=["one", "two"],
+        capabilities=[],
+        sources=[],
+        package_dir=tmp_path / "demo",
+    )
+    monkeypatch.setattr(packages, "read_package_metadata", lambda _name: meta)
+    monkeypatch.setattr(packages, "package_skill_dirs", lambda _name: [one, two])
+    monkeypatch.setattr(
+        packages,
+        "_direct_url_for_spindle_package",
+        lambda _name: {
+            "url": "https://example.com/demo.git",
+            "vcs_info": {
+                "vcs": "git",
+                "requested_revision": "v1.0.0",
+                "commit_id": "abc123def456",
+            },
+            "dir_info": {"editable": True},
+        },
+    )
+
+    first = packages.resolve_package_revision("demo")
+    (two / "SKILL.md").write_text("---\nname: two\n---\nchanged\n")
+    second = packages.resolve_package_revision("demo")
+
+    assert first.source.provider == "git"
+    assert first.source.revision == "abc123def456"
+    assert first.editable is True
+    assert first.version == second.version == "1.0.0"
+    assert first.content_digest != second.content_digest
+    assert dict(first.skill_digests)["one"] == dict(second.skill_digests)["one"]
+    assert dict(first.skill_digests)["two"] != dict(second.skill_digests)["two"]
+
+
+def test_resolve_installed_requirement_uses_resolved_package_name(monkeypatch):
+    seen = []
+
+    def resolve(name):
+        seen.append(name)
+        return object()
+
+    monkeypatch.setattr(packages, "resolve_package_revision", resolve)
+
+    result = packages.resolve_installed_requirement("demo-package[extra]>=2,<3")
+
+    assert result is not None
+    assert seen == ["demo-package"]

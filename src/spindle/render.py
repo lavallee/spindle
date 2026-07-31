@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Callable
 
 from . import paths
+from . import realization as realization_mod
 from .channels import Surface
 from .composition import Composition
 
@@ -76,9 +77,14 @@ def verify_preserved(source: str, rendered: str) -> list[str]:
     return [g for g in extract_guardrails(source) if _normalize(g) not in rnorm]
 
 
-def cache_key(doctrine_coordinate: str, profile: Profile, content: str,
-              model_profile: Profile | None = None, *,
-              resource_fingerprint: str | None = None) -> str:
+def cache_key(
+    doctrine_coordinate: str,
+    profile: Profile,
+    content: str,
+    model_profile: Profile | None = None,
+    *,
+    resource_fingerprint: str | None = None,
+) -> str:
     """Stable key over (doctrine × harness-profile × model-profile × skill content) —
     the rendered-content store address. Any change to doctrine, either profile's
     version, the model axis, or the source skill invalidates the cache by producing a
@@ -106,7 +112,9 @@ def resource_fingerprint(skill_dir: str | Path) -> str:
     """
     root = Path(skill_dir)
     h = hashlib.sha256()
-    for path in sorted(p for p in root.rglob("*") if p.is_file() and p.name != "SKILL.md"):
+    for path in sorted(
+        p for p in root.rglob("*") if p.is_file() and p.name != "SKILL.md"
+    ):
         h.update(path.relative_to(root).as_posix().encode("utf-8"))
         h.update(b"\0")
         h.update(path.read_bytes())
@@ -118,9 +126,14 @@ def render_store_root() -> Path:
     return paths.spindle_home() / "rendered"
 
 
-def render_skill(skill_dir: str | Path, profile: Profile, doctrine_coordinate: str,
-                 *, model_profile: Profile | None = None,
-                 store_root: Path | None = None) -> Path:
+def render_skill(
+    skill_dir: str | Path,
+    profile: Profile,
+    doctrine_coordinate: str,
+    *,
+    model_profile: Profile | None = None,
+    store_root: Path | None = None,
+) -> Path:
     """Render one skill's SKILL.md, verify guardrails, write to the cache-keyed store,
     and return the rendered skill dir.
 
@@ -145,14 +158,24 @@ def render_skill(skill_dir: str | Path, profile: Profile, doctrine_coordinate: s
     missing = verify_preserved(source, rendered)
     if missing:
         raise RenderError(
-            [f"{skill_dir.name}: render dropped guardrail clause {m!r}" for m in missing]
+            [
+                f"{skill_dir.name}: render dropped guardrail clause {m!r}"
+                for m in missing
+            ]
         )
 
     resources = resource_fingerprint(skill_dir)
-    out = (store_root
-           / cache_key(doctrine_coordinate, profile, source, model_profile,
-                       resource_fingerprint=resources)
-           / skill_dir.name)
+    out = (
+        store_root
+        / cache_key(
+            doctrine_coordinate,
+            profile,
+            source,
+            model_profile,
+            resource_fingerprint=resources,
+        )
+        / skill_dir.name
+    )
     out.mkdir(parents=True, exist_ok=True)
     # Copy resources on every hit. The content-addressed key prevents mutation
     # across source variants; the repeat copy repairs a partially written cache.
@@ -166,27 +189,37 @@ def render_skill(skill_dir: str | Path, profile: Profile, doctrine_coordinate: s
     return out
 
 
-_IDENTITY_PROFILE = Profile(harness="identity", version="0", transform=identity_transform)
+_IDENTITY_PROFILE = Profile(
+    harness="identity", version="0", transform=identity_transform
+)
 
 
-def make_render_fn(profiles: dict[str, Profile], doctrine_coordinate: str,
-                   *, model_profiles: dict[str, Profile] | None = None,
-                   store_root: Path | None = None):
+def make_render_fn(
+    profiles: dict[str, Profile],
+    doctrine_coordinate: str,
+    *,
+    model_profiles: dict[str, Profile] | None = None,
+    store_root: Path | None = None,
+):
     """Build a binder RenderFn from harness ``profiles`` and optional ``model_profiles``.
 
-    A surface picks its harness profile by ``surface.harness`` and its model profile
-    by ``surface.model`` (the rendering-density axis). A skill is rendered when
-    *either* axis applies; when neither does it passes through verbatim
-    (selection-only). When only the model axis applies, the harness step is identity,
-    so model tuning works on any harness. Any guardrail-drop across the composition
-    raises RenderError, so the binder fails closed.
+    A surface picks its harness profile by ``surface.harness`` and its legacy model
+    profile by ``surface.model`` (the rendering-density axis). A runtime-aware skill
+    with ``spindle-realization.toml`` deliberately skips that repository-wide model
+    transform: its installed package remains stable and its model/role overlay is
+    selected later for each agent session. Harness dialect rendering may still run
+    and copies the complete package. Skills without a runtime manifest retain the
+    legacy model-axis behavior.
+
+    Any guardrail-drop across the composition raises RenderError, so the binder
+    fails closed.
     """
     model_profiles = model_profiles or {}
 
     def render(comp: Composition, surface: Surface) -> Composition:
         hprofile = profiles.get(surface.harness)
-        mprofile = model_profiles.get(surface.model) if surface.model else None
-        if hprofile is None and mprofile is None:
+        surface_mprofile = model_profiles.get(surface.model) if surface.model else None
+        if hprofile is None and surface_mprofile is None:
             return comp
         hprofile = hprofile or _IDENTITY_PROFILE
         new_skills = []
@@ -195,9 +228,25 @@ def make_render_fn(profiles: dict[str, Profile], doctrine_coordinate: str,
             if not s.source_dir:
                 new_skills.append(s)
                 continue
+            # Runtime-aware packages own their model/effort/role axis. Applying a
+            # bind-time model transform here would make one shared repository render
+            # race or overrule concurrent parent/child session realizations.
+            mprofile = (
+                None
+                if realization_mod.has_runtime_profiles(s.source_dir)
+                else surface_mprofile
+            )
+            if profiles.get(surface.harness) is None and mprofile is None:
+                new_skills.append(s)
+                continue
             try:
-                out = render_skill(s.source_dir, hprofile, doctrine_coordinate,
-                                   model_profile=mprofile, store_root=store_root)
+                out = render_skill(
+                    s.source_dir,
+                    hprofile,
+                    doctrine_coordinate,
+                    model_profile=mprofile,
+                    store_root=store_root,
+                )
                 new_skills.append(replace(s, source_dir=str(out)))
             except RenderError as e:
                 problems.extend(e.problems)
