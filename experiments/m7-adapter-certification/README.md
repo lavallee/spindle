@@ -59,8 +59,8 @@ uv run spindle adapter verify certifications/f4093c3f*.json
 The full 0.x checkpoint is `832 passed`, `ruff check .` clean, and `git diff
 --check` clean. A fresh-wheel smoke test produced:
 
-- wheel SHA-256 `3a844163b26cda7103e46f17cd8f6f6e19d9703cc23ba569f3e7898f881c54d4`;
-- source archive SHA-256 `aca502cc2555b217a9e74b3d49c573185f0fec4f06fc2e74766b6643ddedc6d3`.
+- wheel SHA-256 `8fa3ab95798761de588b6a888381448dd834b46979a2e2802abc00adde3db76c`;
+- source archive SHA-256 `be55f2bb2f2ef5c4b6c029d35ffbc01ea6885622b28c29f5fa001c5f4a53a106`.
 
 These artifact digests describe this worktree build, not a published release.
 Any changed source tree, harness build, model, tool composition, policy, active

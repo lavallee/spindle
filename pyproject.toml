@@ -26,7 +26,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/lavallee/spindle"
 Repository = "https://github.com/lavallee/spindle.git"
-Documentation = "https://github.com/lavallee/spindle#readme"
+Documentation = "https://lavallee.github.io/spindle/"
 Issues = "https://github.com/lavallee/spindle/issues"
 
 [project.optional-dependencies]

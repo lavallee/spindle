@@ -539,7 +539,7 @@ Implementation evidence:
 - Spindle remains in the `0.x` development line at `0.2.0`. Full validation:
   `832 passed`; `ruff check .` and `git diff --check` pass. A clean wheel
   installation imported 0.2.0 and verified both certifications; the wheel
-  SHA-256 was `3a844163…` and source archive SHA-256 was `aca502cc…`.
+  SHA-256 was `8fa3ab95…` and source archive SHA-256 was `be55f2bb…`.
 
 ### Deliver
 

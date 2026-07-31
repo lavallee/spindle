@@ -65,6 +65,7 @@ def test_readme_and_agent_docs_lead_with_the_implemented_0_2_lifecycle():
     assert "The current product direction expands" not in bundle
     assert "evidence-bearing lifecycle and control plane" in artifact
     assert "Evidence-bearing lifecycle and control plane" in project
+    assert 'Documentation = "https://lavallee.github.io/spindle/"' in project
 
 
 def test_operational_examples_keep_mutation_and_retirement_explicit():
