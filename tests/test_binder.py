@@ -293,6 +293,68 @@ def test_bind_preserves_noncolliding_active_lease_projection(tmp_path, monkeypat
     }
 
 
+def test_bind_and_unbind_preserve_all_nonbinding_lifecycle_projections(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(binding_mod.paths, "spindle_home", lambda: tmp_path / "state")
+    repo = tmp_path / "demo"
+    repo.mkdir()
+    source = _make_skill_src(tmp_path, "operator")
+    link = repo / ".agents" / "skills" / "spindle"
+    link.parent.mkdir(parents=True)
+    link.symlink_to(source)
+    sid = surface_id(repo, "codex")
+    digest = digest_path(source)
+    projection = ExpectedProjection(
+        skill="spindle",
+        projection_path=str(link.absolute()),
+        source_path=str(source.resolve()),
+        source_digest=digest,
+        package_digest=digest,
+        authority="operator:spindle:0.2.0",
+    )
+    write_surface_lock(
+        SurfaceLock(
+            surface_id=sid,
+            surface_name="demo",
+            repo_path=str(repo.resolve()),
+            harness="codex",
+            binding_coordinate="operator-only/v1",
+            projections=(projection,),
+        )
+    )
+    OwnershipStore().record(
+        OwnershipRecord(
+            surface_id=sid,
+            surface_name="demo",
+            harness="codex",
+            skill="spindle",
+            projection_path=str(link.absolute()),
+            source_path=str(source.resolve()),
+            source_digest=digest,
+            package_digest=digest,
+            creation_receipt_id="operator:spindle:0.2.0",
+        )
+    )
+    surface = Surface(name="demo", harness="codex", autonomy_mode="deterministic")
+
+    result = binder.bind(surface, repo, _provider_factory(tmp_path), _doctrine())
+    bound = read_surface_lock(sid)
+    binder.unbind("demo", repo, "codex")
+    unbound = read_surface_lock(sid)
+
+    assert result.ok
+    assert bound is not None
+    assert {item.skill for item in bound.projections} == {
+        "grill",
+        "repo-tool",
+        "spindle",
+    }
+    assert unbound is not None
+    assert [item.skill for item in unbound.projections] == ["spindle"]
+    assert link.resolve() == source.resolve()
+
+
 # ---- render integration -------------------------------------------------
 
 

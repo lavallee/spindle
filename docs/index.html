@@ -64,26 +64,29 @@
     </aside>
   </div>
 
-  <h2>Two minutes in</h2>
+  <h2>Two minutes in—from inside your harness</h2>
   <div class="terminal">
     <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
 <pre><code><span class="c"># install the toolchain</span>
 <span class="p">$</span> uv sync --extra dev
 
-<span class="c"># understand a candidate without activating or executing it</span>
-<span class="p">$</span> spindle inspect ./candidate/review \
-    --for "review this migration" --harness codex --here --json
+<span class="c"># preview, then project the minimal operator and stable hooks</span>
+<span class="p">$</span> spindle harness setup --harness codex --here --dry-run
+<span class="p">$</span> spindle harness setup --harness codex --here
 
-<span class="c"># preview one disposable session over the actual current blend</span>
-<span class="p">$</span> spindle try ./candidate/review --harness codex \
-    --task-file task.md --here --dry-run
+<span class="c"># start a new Codex session, then ask it directly</span>
+<span class="p">›</span> Use $spindle to inspect a review skill for this migration.
 
-<span class="c"># verify exact desired state before harness discovery</span>
-<span class="p">$</span> spindle bootstrap --harness codex --here --check
-<span class="o">Spindle: expected skills verified · foreign state preserved · receipt written</span></code></pre>
+<span class="c"># or, in Claude Code</span>
+<span class="p">›</span> /spindle inspect a review skill for this migration.
+<span class="o">Spindle reads live context · previews mutations · preserves foreign state</span></code></pre>
   </div>
 
-  <p>The control loop is the product: intent → temporary authority → exact
+  <p>The 187-word operator does not duplicate the product manual. It reads a
+  compact, machine-generated context contract containing current custody,
+  conflicts, hook evidence, authorization boundaries, and exact next commands.
+  Harness discovery and hook execution remain separate gates. The control loop
+  is the product: intent → temporary authority → exact
   composition → startup verification → per-agent realization and activation →
   bounded evaluation → adopt, update, distill, release, or retire. See the
   <a href="lifecycle.html">lifecycle</a> for the complete chain.</p>
@@ -112,8 +115,8 @@
     </a>
     <a class="card" href="guide.html">
       <h3>Use it →</h3>
-      <p>Try a candidate, manage startup hooks, adopt and update safely, recover
-      state, then author distributions when you need them.</p>
+      <p>Install the harness operator, try a candidate, manage startup evidence,
+      adopt and update safely, then author distributions when you need them.</p>
     </a>
   </div>
 

@@ -11,6 +11,10 @@ For the whole documentation in one file, read the bundle:
 
 ## Core idea
 
+- The primary UX is harness-native: `spindle harness setup --harness <codex|claude>
+  --here` projects a minimal operator invoked as `$spindle` in Codex or
+  `/spindle` in Claude Code. It reads current facts and command contracts from
+  `spindle harness context`, rather than duplicating a CLI manual in skill prose.
 - Installation does not prove intent, authority, activation, compatibility,
   usefulness, or maintenance ownership. Spindle keeps those decisions separate.
 - The lifecycle is **inspect → try/borrow → compose → bootstrap → realize →
@@ -51,8 +55,9 @@ For the whole documentation in one file, read the bundle:
   control loop, six-stage bind pipeline, safety floor, and caching.
 - [Evaluation](evaluation.html): separate runtime gates, legacy paired cases,
   named arms, non-inferiority minimalism, distillation, and durable receipts.
-- [Guide](guide.html): inspect/try/borrow, startup hooks, adoption/update/retire,
-  policy/certification/recovery, and the deeper distribution-authoring path.
+- [Guide](guide.html): harness-native setup and invocation, inspect/try/borrow,
+  startup hooks, adoption/update/retire, policy/certification/recovery, and the
+  deeper distribution-authoring path.
 - [Runtime realization](runtime-realization.md): package manifest, exact session
   routing, immutable stores, conservative fallback, receipts, and adapter boundary.
 - [Startup integrity](startup-integrity.md): pre-launch bootstrap, stable native

@@ -57,10 +57,15 @@ def test_readme_and_agent_docs_lead_with_the_implemented_0_2_lifecycle():
     project = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
     assert "evidence-bearing lifecycle and control plane" in readme
+    assert "spindle harness setup --harness codex --here --dry-run" in readme
+    assert "$spindle inspect" in readme
+    assert "/spindle inspect" in readme
     assert "try before adopting" in readme.lower()
     assert "evolving into" not in readme
     assert "Spindle v0.2" in llms
     assert "inspect → try/borrow → compose → bootstrap" in llms
+    assert "spindle harness context" in llms
+    assert "spindle harness setup" in bundle
     assert "Describes Spindle v0.2" in bundle
     assert "The current product direction expands" not in bundle
     assert "evidence-bearing lifecycle and control plane" in artifact
@@ -76,3 +81,5 @@ def test_operational_examples_keep_mutation_and_retirement_explicit():
     assert "retire review --harness codex --reason obsolete" in guide
     assert "retire review --harness codex --reason obsolete" in lifecycle
     assert "eval matrix validate matrix.toml" in guide
+    assert "harness setup --harness codex --here --dry-run" in guide
+    assert "configured-unverified" in guide

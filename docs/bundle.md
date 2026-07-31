@@ -16,6 +16,14 @@ the repository [vision](https://github.com/lavallee/spindle/blob/main/VISION.md)
 [roadmap](https://github.com/lavallee/spindle/blob/main/ROADMAP.md), and
 [completion goal](https://github.com/lavallee/spindle/blob/main/GOAL.md).
 
+The primary UX lives inside the coding harness. `spindle harness setup
+--harness <codex|claude> --here` snapshots and projects a minimal operator plus
+stable startup hooks. Invoke it as `$spindle` in Codex or `/spindle` in Claude
+Code. The operator calls `spindle harness context --here --json` for current
+custody, conflicts, hook evidence, authorization, and exact dry-run/apply
+commands; it does not duplicate the CLI manual in skill prose. `harness status`
+and `harness remove` expose version/trust/heartbeat state and exact owned cleanup.
+
 The implemented startup boundary is `spindle bootstrap` / `spindle launch`:
 it compares an exact surface lock with every locally observable Claude or Codex
 skill scope, repairs only receipt-proven Spindle links, preserves foreign state,
@@ -73,10 +81,16 @@ context budget spent on instructions instead of work. Spindle treats a surface's
 skill set as something you **inspect**, **compose**, **verify**, and maintain—not
 something you install into an ambient directory and forget.
 
-The everyday workflow begins before installation:
+The everyday workflow begins inside the harness:
 
 ```bash
 uv sync --extra dev
+
+spindle harness setup --harness codex --here --dry-run
+spindle harness setup --harness codex --here
+
+# new Codex session:       $spindle inspect a review skill for this task
+# new Claude Code session: /spindle inspect a review skill for this task
 
 # explain a candidate without activating or executing it
 spindle inspect ./candidate/review \
@@ -806,6 +820,7 @@ infrastructure.** Build the adapters your organization needs against them.
 |---|---|
 | Distributions | `dist list · show · install · uninstall · activate · new` |
 | Packages / skills | `package list · show · new` · `skill list · show` · `capability list · show` |
+| Harness operator | `harness setup · status · context · remove` |
 | Inspect / lease | `inspect` · `try` · `borrow` · `release` · `source` |
 | Compose / activate | `appclass` · `bind` · `bootstrap` · `launch` · `hooks` · `realize` · `inventory` · `why` · `diff` |
 | Maintain | `adopt` · `update plan · try` · `health` · `rollback` · `disable · enable · deprecate · retire` |

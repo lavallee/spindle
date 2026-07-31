@@ -44,11 +44,39 @@ inspect → try/borrow → compose → bootstrap → realize → activate → ev
 See the [rationale](https://lavallee.github.io/spindle/rationale.html) for the full
 argument, including why that extra step pays for itself.
 
-## Quick start: try before adopting
+## Quick start: drive Spindle from your harness
 
 ```bash
 uv sync --extra dev
 
+# Preview and install the small project-local operator plus stable startup hooks.
+spindle harness setup --harness codex --here --dry-run
+spindle harness setup --harness codex --here
+
+# Start a new session. In Codex, ask:  $spindle inspect a review skill for this task
+# In Claude Code, ask:                /spindle inspect a review skill for this task
+```
+
+The operator skill is only the control surface: it asks
+`spindle harness context --here --json` for current state and exact command
+contracts instead of carrying a copy of the CLI manual in model context. Setup
+snapshots its exact bytes, projects it to `.agents/skills/spindle` for Codex or
+`.claude/skills/spindle` for Claude Code, and structurally merges stable startup
+hooks. It preserves foreign harness state and does not adopt any other skill.
+The operator projection is a machine-local generated symlink: do not commit it.
+Review the generated project hook configuration separately; commit it when it is
+shared team policy, or ignore it when the setup is intentionally local-only.
+
+Use `spindle harness status --harness codex --here` to distinguish a current
+operator, configured hooks, and a hook that a trusted harness session actually
+ran. `configured-unverified`, `blocked`, and `restart-required` are not reported
+as observed success. A nested Claude session launched from Codex (or the reverse)
+is routed from the nearest harness process rather than inherited environment
+markers alone.
+
+## From the CLI: try before adopting
+
+```bash
 # Understand a local or pinned candidate without executing it.
 spindle inspect ./candidate/review \
   --for "review this migration" --harness codex --here --json

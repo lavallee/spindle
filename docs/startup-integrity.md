@@ -5,6 +5,28 @@ state. A surface lock names the exact projections Spindle expects; immutable
 ownership receipts prove which links Spindle may repair or remove. Everything
 else is preserved as foreign state.
 
+## Harness-native operator
+
+For the ordinary in-session UX, preview and install the bundled operator plus
+the stable repo-scoped hook kit together:
+
+```bash
+spindle harness setup --harness codex --here --dry-run
+spindle harness setup --harness codex --here
+spindle harness status --harness codex --here
+
+# after starting a new session
+# Codex:       $spindle show current skill state
+# Claude Code: /spindle show current skill state
+```
+
+Setup caches exact operator bytes and creates a receipt-owned project skill. It
+does not treat unrelated ambient conflicts as a reason to withhold the diagnostic
+surface: the operator may be `current` while the full surface remains `blocked`.
+`status` keeps operator custody, hook definition, trust/enablement, and observed
+heartbeat separate. Remove with `spindle harness remove --harness <name> --here
+--dry-run`; only the exact owned projection and hook fragments are eligible.
+
 ## Portable pre-launch boundary
 
 Run bootstrap before the harness discovers skills:

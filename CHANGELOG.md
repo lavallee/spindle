@@ -7,6 +7,13 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- Added `spindle harness setup|status|context|remove` and a minimal bundled
+  operator skill for driving the lifecycle as `$spindle` in Codex or `/spindle`
+  in Claude Code, with exact ownership, stable hooks, nested-harness routing,
+  dry-run removal, and separate operator/configuration/heartbeat state.
+- Binding and unbinding now preserve all non-binding lifecycle projections,
+  including operator, lease, and adoption custody.
+
 ## [0.2.0] - 2026-07-31
 
 - Added ownership-safe effective inventory, startup bootstrap, stable native

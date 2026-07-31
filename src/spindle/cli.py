@@ -40,6 +40,7 @@ from . import materialize as materialize_mod
 from . import maintenance as maintenance_mod
 from . import minimalism as minimalism_mod
 from . import optimize as optimize_mod
+from . import operator as operator_mod
 from . import packages as packages_mod
 from . import paths as paths_mod
 from . import peers as peers_mod
@@ -2631,6 +2632,131 @@ def cmd_launch(args) -> int:
     return completed.returncode
 
 
+# ---- harness-native operator UX ----------------------------------------
+
+
+def _print_harness_result(payload: dict) -> None:
+    print(f"harness action: {payload.get('action', 'status')}")
+    plan = payload.get("plan")
+    if isinstance(plan, dict):
+        workspace = plan.get("workspace")
+        if isinstance(workspace, dict):
+            projection = workspace.get("operator_projection", {})
+            hook = workspace.get("hook_configuration", {})
+            print(f"  operator: {projection.get('path', '(unavailable)')}")
+            print(f"  hooks:    {hook.get('path', '(unavailable)')}")
+    operator = payload.get("operator")
+    if isinstance(operator, dict):
+        print(f"  operator: {operator.get('state', 'unknown')}")
+        print(f"  invoke:   {operator.get('invocation', '(unavailable)')}")
+        hook = operator.get("hooks")
+        if isinstance(hook, dict):
+            print(f"  hooks:    {hook.get('state', 'unknown')}")
+    if payload.get("operator_ready") and not payload.get("surface_ready", True):
+        print("  surface:  blocked; operator is available for diagnosis")
+    if payload.get("next"):
+        print(f"  next:     {payload['next']}")
+    elif payload.get("requires_new_session"):
+        print("  next:     start a new harness session and review hook trust")
+
+
+def cmd_harness_setup(args) -> int:
+    try:
+        payload = operator_mod.setup_operator(
+            args.repo,
+            args.harness,
+            surface_name=args.name,
+            dry_run=args.dry_run,
+        )
+    except lifecycle_mod.LifecycleError as exc:
+        print(f"harness setup blocked: {exc}", file=sys.stderr)
+        return 2
+    display = "Codex" if args.harness == "codex" else "Claude Code"
+    invocation = "$spindle" if args.harness == "codex" else "/spindle"
+    if payload["action"].startswith("would-"):
+        payload["next"] = (
+            f"Apply this plan without --dry-run, then start a new {display} "
+            f"session and invoke {invocation}."
+        )
+    elif payload["requires_new_session"]:
+        payload["next"] = (
+            f"Start a new {display} session and invoke {invocation}; review hook "
+            "trust when the harness asks."
+        )
+    elif payload["action"] != "blocked":
+        payload["next"] = f"Invoke {invocation} in the current session."
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        _print_harness_result(payload)
+    if payload["action"] == "blocked":
+        return 2
+    return 1 if payload["action"] == "partial" else 0
+
+
+def cmd_harness_status(args) -> int:
+    try:
+        operator = operator_mod.operator_status(args.repo, args.harness)
+    except lifecycle_mod.LifecycleError as exc:
+        print(f"harness status blocked: {exc}", file=sys.stderr)
+        return 2
+    payload = {"action": "status", "operator": operator}
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        _print_harness_result(payload)
+    healthy_hooks = {"observed", "observed-warn"}
+    return (
+        0
+        if operator["state"] == "current"
+        and operator["hooks"]["state"] in healthy_hooks
+        else 1
+    )
+
+
+def cmd_harness_context(args) -> int:
+    try:
+        payload = operator_mod.harness_context(args.repo, args.harness)
+    except lifecycle_mod.LifecycleError as exc:
+        print(f"harness context blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        surface = payload["surface"]
+        operator = payload["operator"]
+        print(
+            f"{surface['name']} [{surface['harness']}]  "
+            f"operator {operator['state']}  hooks {payload['runtime']['hook_state']}"
+        )
+        print(
+            f"  desired: {surface['lock_id'] or '(none)'}  "
+            f"inventory: {surface['inventory_id']}"
+        )
+        for command in payload["recommended"]:
+            print(f"  next: {command}")
+    return 0
+
+
+def cmd_harness_remove(args) -> int:
+    try:
+        payload = operator_mod.remove_operator(
+            args.repo,
+            args.harness,
+            dry_run=args.dry_run,
+        )
+    except lifecycle_mod.LifecycleError as exc:
+        print(f"harness removal blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        _print_harness_result(payload)
+    if payload["action"] == "blocked":
+        return 2
+    return 1 if payload["action"] == "partial" else 0
+
+
 # ---- native hook kit management ----------------------------------------
 
 
@@ -4524,6 +4650,63 @@ def main(argv=None) -> int:
         policy.add_argument("--harness-build")
         policy.add_argument("--json", action="store_true")
         policy.set_defaults(func=cmd_policy)
+
+    sp = sub.add_parser(
+        "harness",
+        help="install and drive Spindle from inside Codex or Claude Code",
+    )
+    harness_commands = sp.add_subparsers(dest="harness_action", required=True)
+    for action, action_help, action_func in (
+        (
+            "setup",
+            "project the Spindle operator skill and native startup hooks",
+            cmd_harness_setup,
+        ),
+        (
+            "status",
+            "inspect operator version, projection custody, and hook state",
+            cmd_harness_status,
+        ),
+        (
+            "context",
+            "emit the compact current-state and action contract for an agent",
+            cmd_harness_context,
+        ),
+        (
+            "remove",
+            "remove only the exactly owned operator projection and hook fragments",
+            cmd_harness_remove,
+        ),
+    ):
+        harness_parser = harness_commands.add_parser(action, help=action_help)
+        harness_parser.add_argument(
+            "--harness",
+            choices=["claude", "codex"],
+            required=action != "context",
+            help=(
+                "active harness; context auto-detects it from the session when omitted"
+            ),
+        )
+        harness_parser.add_argument(
+            "--repo", default=".", help="surface path (default current dir)"
+        )
+        harness_parser.add_argument(
+            "--here",
+            action="store_const",
+            const=".",
+            dest="repo",
+            help="use current dir",
+        )
+        harness_parser.add_argument("--json", action="store_true")
+        if action == "setup":
+            harness_parser.add_argument(
+                "--name", help="surface name (defaults to repo dir name)"
+            )
+        if action in {"setup", "remove"}:
+            harness_parser.add_argument(
+                "--dry-run", action="store_true", help="plan without writing"
+            )
+        harness_parser.set_defaults(func=action_func)
 
     sp = sub.add_parser(
         "bootstrap",

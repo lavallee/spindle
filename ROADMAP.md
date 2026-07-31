@@ -137,6 +137,20 @@ Implementation evidence:
   and Codex definitions, preserves unrelated configuration and file mode, owns
   only exact installed fragments, serializes ownership-index updates, and keeps
   configured state, harness trust, and observed heartbeats separate.
+- `spindle harness setup|status|context|remove` makes that lifecycle drivable
+  from the primary UX surface. It projects one 187-word owned operator as
+  `$spindle` in Codex or `/spindle` in Claude Code; current state, authorization,
+  and exact action contracts stay in the deterministic CLI. Setup remains
+  available as a diagnostic foothold when unrelated ambient conflicts block the
+  full surface, and removal touches only receipt-owned operator/hook state.
+- Nested live testing demonstrated why environment markers alone are
+  insufficient: a Claude child inherits its Codex parent's markers. Runtime
+  detection now prefers the nearest named harness process and otherwise fails
+  closed. Claude Code 2.1.220 Sonnet and Codex CLI 0.146.0 Terra both discovered
+  the operator and executed its context command. Claude's native hook recorded
+  the pre-existing user-scope conflicts as blocked; Codex project hooks remained
+  configured-unverified in noninteractive `codex exec`, preserving the trust gap
+  instead of treating installed configuration as an observed heartbeat.
 - `spindle conflict allow|list|revoke` records exact surface, harness, skill,
   absolute path, and content digest decisions. A content or path change makes an
   allowance inapplicable; ambiguous ownership can never be allowed.
@@ -537,9 +551,11 @@ Implementation evidence:
   retirement. The compatibility, organization-policy, and migration/recovery
   guides name the safety and evidence boundaries.
 - Spindle remains in the `0.x` development line at `0.2.0`. Full validation:
-  `832 passed`; `ruff check .` and `git diff --check` pass. A clean wheel
+  `846 passed`; `ruff check .` and `git diff --check` pass. A clean wheel
   installation imported 0.2.0 and verified both certifications; the wheel
-  SHA-256 was `8fa3ab95…` and source archive SHA-256 was `be55f2bb…`.
+  included the bundled operator assets. Its SHA-256 was `26e1177e…`; the source
+  archive also built successfully. The sdist hash is intentionally not embedded
+  in a file contained by that same archive.
 
 ### Deliver
 

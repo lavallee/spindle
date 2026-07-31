@@ -41,6 +41,7 @@
   <div class="toc">
     <b>On this page</b>
     <ol>
+      <li><a href="#harness">Drive it from Codex or Claude Code</a></li>
       <li><a href="#try">Inspect, try, and borrow</a></li>
       <li><a href="#startup">Verify startup</a></li>
       <li><a href="#maintain">Adopt, update, and retire</a></li>
@@ -53,6 +54,38 @@
       <li><a href="#extending">Extending Spindle</a></li>
       <li><a href="#cli">CLI reference</a></li>
     </ol>
+  </div>
+
+  <h2 id="harness">Drive it from Codex or Claude Code</h2>
+  <p>Install one small project-local operator as the ordinary control surface.
+  It reads live lifecycle state and exact command contracts from the CLI, so its
+  prose stays small while Spindle evolves:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash + harness</span></div>
+<pre><code><span class="p">$</span> spindle harness setup --harness codex --here --dry-run
+<span class="p">$</span> spindle harness setup --harness codex --here
+
+<span class="c"># after starting a new Codex session</span>
+<span class="p">›</span> $spindle show me which skills are active and why
+
+<span class="c"># Claude Code uses its native slash invocation</span>
+<span class="p">›</span> /spindle try this review skill once; do not adopt it</code></pre>
+  </div>
+  <p><code>harness setup</code> snapshots the operator's exact bytes into the
+  Spindle cache, projects an owned symlink into <code>.agents/skills/spindle</code>
+  or <code>.claude/skills/spindle</code>, and merges stable project startup hooks.
+  It can bootstrap even when unrelated ambient conflicts already block strict
+  startup; the operator then reports those conflicts rather than hiding or
+  deleting them. The operator link points to a machine-local immutable cache and
+  should not be committed. Review the hook configuration separately: commit it
+  as shared project policy, or ignore it for a local-only setup.</p>
+  <div class="callout">
+    <span class="callout-title">Three separate checks</span>
+    <code>harness status</code> reports operator version/custody, hook definition,
+    and observed hook heartbeat separately. For Codex, trust the project layer
+    and exact command through <code>/hooks</code>; definition presence alone is
+    <code>configured-unverified</code>. Run <code>harness remove --dry-run</code>
+    to preview removal of only Spindle-owned state.
   </div>
 
   <h2 id="try">Inspect, try, and borrow</h2>
@@ -370,6 +403,7 @@ tier = "frontier"</code></pre>
       <tr><td>Distributions</td><td><code>dist list · show · install · uninstall · activate · new</code></td></tr>
       <tr><td>Packages / skills</td><td><code>package list · show · new</code> · <code>skill list · show</code> · <code>capability list · show</code></td></tr>
       <tr><td>Inspect / lease</td><td><code>inspect</code> · <code>try</code> · <code>borrow</code> · <code>release</code> · <code>source</code></td></tr>
+      <tr><td>Harness operator</td><td><code>harness setup · status · context · remove</code></td></tr>
       <tr><td>Compose / activate</td><td><code>bind</code> · <code>bootstrap</code> · <code>launch</code> · <code>hooks</code> · <code>realize</code> · <code>inventory</code> · <code>why</code> · <code>diff</code></td></tr>
       <tr><td>Maintain</td><td><code>adopt</code> · <code>update plan · try</code> · <code>health</code> · <code>rollback</code> · <code>disable · enable · deprecate · retire</code></td></tr>
       <tr><td>Doctrine</td><td><code>doctrine show · validate</code></td></tr>

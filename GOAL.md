@@ -17,6 +17,12 @@ borrow leases; exact per-agent realization and activation evidence; explicit
 adoption; update-as-trial, health, rollback, disable, quarantine, and retirement;
 and tuple-aware evaluation and distillation.
 
+Make that lifecycle directly operable from the harness: ship a minimal
+project-local Spindle operator for Codex and Claude Code that queries live CLI
+state and action contracts, routes correctly in nested mixed-harness sessions,
+previews every mutation, and never treats operator installation or hook
+configuration as proof of skill activation or runtime observation.
+
 Work milestone by milestone in ROADMAP.md dependency order, completing the
 highest unblocked vertical slice before expanding scope. Preserve foreign and
 user-managed harness state. Never delete or overwrite an artifact without an
@@ -67,6 +73,10 @@ All of the following must be true:
     for explicitly non-addressed observation metadata.
 12. The public documentation, CLI help, examples, and migration guide describe
     the implemented behavior accurately.
+13. A user can invoke `$spindle` in Codex or `/spindle` in Claude Code to inspect
+    current lifecycle state and drive exact dry-run/apply commands; mixed-harness
+    nesting routes to the active child, and status separates operator custody,
+    hook configuration, and observed startup evidence.
 
 ## Operating contract
 

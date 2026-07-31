@@ -103,21 +103,22 @@ def bind(
     )
     sid = surface_id(repo_path, surface.harness)
     current_lock = read_surface_lock(sid)
-    leased = tuple(
+    retained = tuple(
         projection
         for projection in (current_lock.projections if current_lock else ())
-        if projection.authority.startswith("lease:")
+        if projection.authority != "binding"
     )
-    leased_names = {projection.skill for projection in leased}
-    colliding_leases = sorted(
-        skill.name for skill in comp.skills if skill.name in leased_names
+    retained_names = {projection.skill for projection in retained}
+    colliding_retained = sorted(
+        skill.name for skill in comp.skills if skill.name in retained_names
     )
-    if colliding_leases:
+    if colliding_retained:
         return BindResult(
             surface=surface.name,
             ok=False,
             problems=[
-                "active lease owns desired skill name: " + ", ".join(colliding_leases)
+                "non-binding lifecycle state owns desired skill name: "
+                + ", ".join(colliding_retained)
             ],
             composition=comp,
         )
@@ -171,7 +172,7 @@ def bind(
                     for skill in comp.skills
                     if skill.source_dir
                 ),
-                *leased,
+                *retained,
             ),
             adoption_ids=current_lock.adoption_ids if current_lock else (),
             lease_ids=current_lock.lease_ids if current_lock else (),
@@ -222,7 +223,7 @@ def unbind(
         retained = tuple(
             projection
             for projection in (current_lock.projections if current_lock else ())
-            if projection.authority.startswith("lease:")
+            if projection.authority != "binding"
         )
         write_surface_lock(
             SurfaceLock(

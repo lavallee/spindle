@@ -274,7 +274,30 @@ when a harness supports only a pre-launch wrapper and post-start observation.
 
 ## User experience
 
-The lifecycle should answer ordinary questions directly:
+The primary surface should be the harness where the work is already happening,
+backed by the CLI as a deterministic engine:
+
+```bash
+spindle harness setup --harness codex --here --dry-run
+spindle harness setup --harness codex --here
+
+# new Codex session:       $spindle show which skills are active and why
+# new Claude Code session: /spindle try this review skill once
+```
+
+The operator skill must stay minimal. It should query a compact live context and
+action contract rather than reproduce CLI documentation in model context. Its
+job is to translate user intent into the smallest exact lifecycle action, preview
+mutations, and refresh evidence afterward. Operator availability, native hook
+configuration, observed startup, target-skill activation, authorization, and
+behavior remain distinct gates.
+
+Harness routing must follow the active session, not merely the union of inherited
+environment variables: a Claude child launched from Codex legitimately exposes
+both marker sets. Prefer active runtime evidence and fail closed to an explicit
+adapter selection when it is unavailable.
+
+The same lifecycle should remain directly addressable from the CLI:
 
 ```bash
 spindle find "review this migration" --here

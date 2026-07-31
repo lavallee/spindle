@@ -55,6 +55,21 @@
     </div>
   </div>
 
+  <h2>The harness is the front door</h2>
+  <p><code>spindle harness setup --harness codex --here</code> or its
+  <code>claude</code> counterpart projects a minimal, versioned operator into the
+  harness's native project-skill directory. Invoke it as <code>$spindle</code> in
+  Codex or <code>/spindle</code> in Claude Code. The operator calls
+  <code>spindle harness context --here --json</code> for the live surface lock,
+  effective inventory, custody, blockers, hook heartbeat, authorization rule,
+  and exact dry-run/apply commands. It does not carry a stale second copy of the
+  lifecycle in model context.</p>
+  <p>When one harness launches another, inherited environment markers can name
+  both. Spindle uses the nearest named harness process as stronger runtime
+  evidence and otherwise fails closed for an explicit <code>--harness</code>.
+  Installing the operator proves neither that a hook ran nor that another skill
+  was activated, useful, or adopted.</p>
+
   <h2>Intent before authority</h2>
   <p><code>spindle inspect</code> builds an intent card without importing or
   executing candidate code. It separates package facts from contextual fit,
