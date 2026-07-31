@@ -24,6 +24,15 @@ custody, conflicts, hook evidence, authorization, and exact dry-run/apply
 commands; it does not duplicate the CLI manual in skill prose. `harness status`
 and `harness remove` expose version/trust/heartbeat state and exact owned cleanup.
 
+Install that control surface from `lyra-forge/marketplace`: Codex uses `codex
+plugin marketplace add lyra-forge/marketplace` followed by `codex plugin add
+spindle@lyra-forge`; Claude Code uses `claude plugin marketplace add
+lyra-forge/marketplace` followed by `claude plugin install
+spindle@lyra-forge`. The dual-manifest plugin carries a deterministic launcher
+for its exact pinned source. Start with `$spindle:spindle` in Codex or
+`/spindle:spindle` in Claude Code, then use the shorter project-local invocation
+after setup and a new session.
+
 The implemented startup boundary is `spindle bootstrap` / `spindle launch`:
 it compares an exact surface lock with every locally observable Claude or Codex
 skill scope, repairs only receipt-proven Spindle links, preserves foreign state,

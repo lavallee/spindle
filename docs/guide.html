@@ -57,9 +57,29 @@
   </div>
 
   <h2 id="harness">Drive it from Codex or Claude Code</h2>
-  <p>Install one small project-local operator as the ordinary control surface.
-  It reads live lifecycle state and exact command contracts from the CLI, so its
-  prose stays small while Spindle evolves:</p>
+  <p>Install Spindle from the public marketplace, then let its namespaced
+  operator inspect and set up one small project-local operator as the ordinary
+  control surface. The catalog name is shared, but each harness has its own
+  marketplace manifest and commands:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash + harness</span></div>
+<pre><code><span class="c"># Codex: install once, then start a new session</span>
+<span class="p">$</span> codex plugin marketplace add lyra-forge/marketplace
+<span class="p">$</span> codex plugin add spindle@lyra-forge
+<span class="p">›</span> $spindle:spindle set up Spindle for this repository
+
+<span class="c"># Claude Code: install once, then start a new session</span>
+<span class="p">$</span> claude plugin marketplace add lyra-forge/marketplace
+<span class="p">$</span> claude plugin install spindle@lyra-forge
+<span class="p">›</span> /spindle:spindle set up Spindle for this repository</code></pre>
+  </div>
+  <p>The plugin includes the exact pinned Spindle source and a deterministic
+  launcher, so it needs no separate Python package install. Python 3.11 or newer
+  is required. Marketplace skills are namespaced to avoid conflicts; after
+  project setup and a new session, use the shorter <code>$spindle</code> in
+  Codex or <code>/spindle</code> in Claude Code.</p>
+  <p>The project-local operator reads live lifecycle state and exact command
+  contracts from the CLI, so its prose stays small while Spindle evolves:</p>
   <div class="terminal">
     <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash + harness</span></div>
 <pre><code><span class="p">$</span> spindle harness setup --harness codex --here --dry-run

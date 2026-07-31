@@ -67,24 +67,28 @@
   <h2>Two minutes in—from inside your harness</h2>
   <div class="terminal">
     <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
-<pre><code><span class="c"># install the toolchain</span>
-<span class="p">$</span> uv sync --extra dev
+<pre><code><span class="c"># install from the public catalog in Codex</span>
+<span class="p">$</span> codex plugin marketplace add lyra-forge/marketplace
+<span class="p">$</span> codex plugin add spindle@lyra-forge
+<span class="p">›</span> $spindle:spindle set up Spindle for this repository
 
-<span class="c"># preview, then project the minimal operator and stable hooks</span>
-<span class="p">$</span> spindle harness setup --harness codex --here --dry-run
-<span class="p">$</span> spindle harness setup --harness codex --here
+<span class="c"># or install from the same catalog in Claude Code</span>
+<span class="p">$</span> claude plugin marketplace add lyra-forge/marketplace
+<span class="p">$</span> claude plugin install spindle@lyra-forge
+<span class="p">›</span> /spindle:spindle set up Spindle for this repository
 
-<span class="c"># start a new Codex session, then ask it directly</span>
-<span class="p">›</span> Use $spindle to inspect a review skill for this migration.
-
-<span class="c"># or, in Claude Code</span>
-<span class="p">›</span> /spindle inspect a review skill for this migration.
+<span class="c"># after setup and a new session, use the project-local operator</span>
+<span class="p">›</span> $spindle inspect a review skill for this migration.
 <span class="o">Spindle reads live context · previews mutations · preserves foreign state</span></code></pre>
   </div>
 
-  <p>The 187-word operator does not duplicate the product manual. It reads a
+  <p>The small operator does not duplicate the product manual. It reads a
   compact, machine-generated context contract containing current custody,
   conflicts, hook evidence, authorization boundaries, and exact next commands.
+  The marketplace plugin carries a deterministic launcher for its exact pinned
+  Spindle source, so no separate Python package install is required; Python 3.11
+  or newer is required. Claude and Codex use separate manifests and install
+  commands, while sharing the operator and CLI implementation.
   Harness discovery and hook execution remain separate gates. The control loop
   is the product: intent → temporary authority → exact
   composition → startup verification → per-agent realization and activation →

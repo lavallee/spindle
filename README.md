@@ -44,7 +44,35 @@ inspect → try/borrow → compose → bootstrap → realize → activate → ev
 See the [rationale](https://lavallee.github.io/spindle/rationale.html) for the full
 argument, including why that extra step pays for itself.
 
-## Quick start: drive Spindle from your harness
+## Install from the public marketplace
+
+The same Spindle plugin is available from `lyra-forge/marketplace` in both
+harnesses. Their marketplace commands and manifests are similar, but not
+interchangeable:
+
+```bash
+# Claude Code
+claude plugin marketplace add lyra-forge/marketplace
+claude plugin install spindle@lyra-forge
+
+# Codex
+codex plugin marketplace add lyra-forge/marketplace
+codex plugin add spindle@lyra-forge
+```
+
+Start a new session after installation. The installed plugin is namespaced, so
+its initial invocation is `$spindle:spindle` in Codex or
+`/spindle:spindle` in Claude Code. Ask it to set up Spindle for the current
+repository; it will inspect first and preview the owned operator and startup-hook
+changes. After setup and one more new session, the project-local control surface
+is the shorter `$spindle` or `/spindle`.
+
+The plugin carries a deterministic launcher for the exact pinned Spindle source,
+so this path does not require a separate Python package installation. Python 3.11
+or newer is required. See the [public marketplace](https://github.com/lyra-forge/marketplace)
+for catalog update and uninstall instructions.
+
+## Quick start from a source checkout
 
 ```bash
 uv sync --extra dev

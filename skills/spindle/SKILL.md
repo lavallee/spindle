@@ -5,10 +5,12 @@ description: Operate Spindle's evidence-bearing lifecycle for agent skills. Use 
 
 # Spindle
 
-Drive the installed CLI; do not reproduce its lifecycle logic.
+Drive the bundled CLI; do not reproduce its lifecycle logic.
 
 1. Run `spindle harness context --here --json` in the relevant repository. If
-   detection is ambiguous, add `--harness codex` or `--harness claude`.
+   `spindle` is unavailable, run `scripts/spindle` beside this file by its
+   resolved path. If detection is ambiguous, add `--harness codex` or
+   `--harness claude`.
 2. Use its state, blockers, receipts, and action contracts as current facts.
    Availability is not activation; activation is not evidence of improvement.
 3. Choose the smallest action matching the request. Prefer inspection or a

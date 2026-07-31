@@ -58,6 +58,10 @@ def test_readme_and_agent_docs_lead_with_the_implemented_0_2_lifecycle():
 
     assert "evidence-bearing lifecycle and control plane" in readme
     assert "spindle harness setup --harness codex --here --dry-run" in readme
+    assert "codex plugin add spindle@lyra-forge" in readme
+    assert "claude plugin install spindle@lyra-forge" in readme
+    assert "$spindle:spindle" in readme
+    assert "/spindle:spindle" in readme
     assert "$spindle inspect" in readme
     assert "/spindle inspect" in readme
     assert "try before adopting" in readme.lower()
@@ -65,6 +69,7 @@ def test_readme_and_agent_docs_lead_with_the_implemented_0_2_lifecycle():
     assert "Spindle v0.2" in llms
     assert "inspect → try/borrow → compose → bootstrap" in llms
     assert "spindle harness context" in llms
+    assert "codex plugin add spindle@lyra-forge" in llms
     assert "spindle harness setup" in bundle
     assert "Describes Spindle v0.2" in bundle
     assert "The current product direction expands" not in bundle

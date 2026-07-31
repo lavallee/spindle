@@ -11,6 +11,11 @@ For the whole documentation in one file, read the bundle:
 
 ## Core idea
 
+- Install from `lyra-forge/marketplace` with `codex plugin marketplace add
+  lyra-forge/marketplace` plus `codex plugin add spindle@lyra-forge`, or the
+  corresponding Claude Code `claude plugin marketplace add` and `claude plugin
+  install` commands. The dual-manifest plugin carries an exact-source launcher;
+  its initial namespaced skill is `$spindle:spindle` or `/spindle:spindle`.
 - The primary UX is harness-native: `spindle harness setup --harness <codex|claude>
   --here` projects a minimal operator invoked as `$spindle` in Codex or
   `/spindle` in Claude Code. It reads current facts and command contracts from

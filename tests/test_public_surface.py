@@ -41,6 +41,14 @@ PRIVATE_PATTERNS = [
     ("private runner", re.compile(r"\b" + "fa" + "b" + r"\b")),
 ]
 
+# These exact public distribution identifiers are part of the supported install
+# contract. Keep the exception narrow so internal names do not become general
+# public vocabulary again.
+PUBLIC_DISTRIBUTION_IDENTIFIERS = (
+    "ly" + "ra-" + "fo" + "rge/marketplace",
+    "spindle@" + "ly" + "ra-" + "fo" + "rge",
+)
+
 
 def _iter_text_files():
     for path in ROOT.rglob("*"):
@@ -61,6 +69,8 @@ def test_public_tree_has_no_private_surface_strings():
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             text = path.read_text(encoding="utf-8", errors="ignore")
+        for identifier in PUBLIC_DISTRIBUTION_IDENTIFIERS:
+            text = text.replace(identifier, "")
         rel = path.relative_to(ROOT)
         for label, pattern in PRIVATE_PATTERNS:
             for match in pattern.finditer(text):

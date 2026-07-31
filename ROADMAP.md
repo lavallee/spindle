@@ -138,7 +138,7 @@ Implementation evidence:
   only exact installed fragments, serializes ownership-index updates, and keeps
   configured state, harness trust, and observed heartbeats separate.
 - `spindle harness setup|status|context|remove` makes that lifecycle drivable
-  from the primary UX surface. It projects one 187-word owned operator as
+  from the primary UX surface. It projects one minimal owned operator as
   `$spindle` in Codex or `/spindle` in Claude Code; current state, authorization,
   and exact action contracts stay in the deterministic CLI. Setup remains
   available as a diagnostic foothold when unrelated ambient conflicts block the

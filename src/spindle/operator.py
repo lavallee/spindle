@@ -69,6 +69,10 @@ class OperatorPlan:
 
 def bundled_skill_path() -> Path:
     target = Path(__file__).parent / "builtin" / "skills" / "spindle"
+    if not (target / "SKILL.md").is_file():
+        # Editable source trees keep the plugin-facing skill canonical. The
+        # wheel build force-includes these bytes at the package path above.
+        target = Path(__file__).resolve().parents[2] / "skills" / "spindle"
     if target.is_symlink() or not (target / "SKILL.md").is_file():
         raise LifecycleError("installed Spindle package lacks its operator skill")
     return target

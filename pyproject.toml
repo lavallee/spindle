@@ -49,3 +49,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/spindle"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"skills/spindle" = "spindle/builtin/skills/spindle"
