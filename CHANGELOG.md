@@ -7,6 +7,13 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- Added job-scoped leases for external dispatchers: `spindle job
+  grant|release|status --for-job <id>` leases an explicit skill set to one
+  dispatched job over the standing surface binding, records the job id on each
+  lease receipt (optional `job_id` on `spindle.lease/v1`; absent-field identity
+  preserved for existing receipts), releases idempotently by job id, and leans
+  on TTL plus startup reconciliation when a job dies without releasing. See
+  `docs/job-scoped-leases.md` for the dispatcher bridge contract.
 - Added `spindle harness setup|status|context|remove` and a minimal bundled
   operator skill for driving the lifecycle as `$spindle` in Codex or `/spindle`
   in Claude Code, with exact ownership, stable hooks, nested-harness routing,
