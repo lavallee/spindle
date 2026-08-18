@@ -831,6 +831,7 @@ def _prepare_lease_plan(
     posture: str,
     agents: tuple[str, ...],
     task_digest: str | None = None,
+    job_id: str | None = None,
     now: datetime | None = None,
     offline: bool = False,
     preflight_options: dict | None = None,
@@ -868,6 +869,7 @@ def _prepare_lease_plan(
         agents=agents,
         renewal_policy="none" if kind == "session" else "manual",
         task_digest=task_digest,
+        job_id=job_id,
     )
     projected_skill = projection_name or (
         f"{candidate.skill}--candidate-{skill_digest.removeprefix('sha256:')[:8]}"
@@ -1268,6 +1270,239 @@ def cmd_release(args) -> int:
         print(f"  lease: {args.lease_id}")
         if payload.get("event"):
             print(f"  event: {payload['event']['event_id']}")
+    return 0
+
+
+# ---- job-scoped leases (external dispatcher integration) ----------------
+
+# One job's leases must outlive dispatcher crashes only until reconciliation,
+# so the default TTL is a bounded job-lifetime ceiling, not an open-ended loan.
+DEFAULT_JOB_LEASE_TTL = "4h"
+
+
+def _attached_job_leases(
+    surface: str, job_id: str
+) -> dict[str, lifecycle_mod.Lease]:
+    """Map skill name to the job's lease currently attached to one surface lock."""
+    lock = lifecycle_mod.read_surface_lock(surface)
+    if lock is None:
+        return {}
+    store = leases_mod.LeaseStore()
+    attached: dict[str, lifecycle_mod.Lease] = {}
+    for lease_id in lock.lease_ids:
+        lease = store.get(lease_id)
+        if lease.job_id == job_id:
+            attached[lease.skill] = lease
+    return attached
+
+
+def cmd_job_grant(args) -> int:
+    repo = Path(args.repo).resolve()
+    now = datetime.now(tz=UTC).replace(microsecond=0)
+    try:
+        expiry = leases_mod.parse_expiry(args.until, now=now)
+    except lifecycle_mod.LifecycleError as exc:
+        print(f"job grant blocked: {exc}", file=sys.stderr)
+        return 2
+    references: list[str] = []
+    for reference in args.skill:
+        if reference not in references:
+            references.append(reference)
+    surface = lifecycle_mod.surface_id(repo, args.harness)
+    results: list[dict] = []
+    blocked = False
+    for reference in references:
+        try:
+            candidate, _receipt = _resolve_candidate(reference, offline=args.offline)
+            existing = _attached_job_leases(surface, args.job).get(candidate.skill)
+            if existing is not None and existing.active_at(now):
+                results.append(
+                    {
+                        "skill": candidate.skill,
+                        "action": "already-granted",
+                        "lease_id": existing.lease_id,
+                        "expires_at": existing.expires_at,
+                    }
+                )
+                continue
+            candidate, current, inventory, plan, _card, preflight = (
+                _prepare_lease_plan(
+                    reference,
+                    repo=repo,
+                    harness=args.harness,
+                    surface_name=args.name,
+                    kind="borrow",
+                    expiry=expiry,
+                    posture=args.posture,
+                    agents=tuple(args.agent or ("*",)),
+                    job_id=args.job,
+                    now=now,
+                    offline=args.offline,
+                    preflight_options=_preflight_options(args),
+                )
+            )
+            if args.dry_run:
+                results.append(
+                    {
+                        "skill": plan.lease.skill,
+                        "action": "would-grant",
+                        "plan": plan.to_dict(),
+                    }
+                )
+                if plan.blockers:
+                    blocked = True
+                continue
+            startup, activation = _apply_lease_plan(
+                repo,
+                candidate,
+                current,
+                inventory,
+                plan,
+                preflight,
+                model=args.model,
+            )
+            results.append(
+                {
+                    "skill": plan.lease.skill,
+                    "action": "granted",
+                    "lease_id": plan.lease.lease_id,
+                    "expires_at": plan.lease.expires_at,
+                    "projection_path": plan.projection.projection_path,
+                    "startup_receipt_id": startup.receipt.receipt_id,
+                    "activation_receipt_id": activation.receipt_id,
+                    "warnings": list(plan.warnings),
+                }
+            )
+        except (lifecycle_mod.LifecycleError, adapters_mod.AdapterError) as exc:
+            blocked = True
+            results.append(
+                {"skill": reference, "action": "blocked", "error": str(exc)}
+            )
+    payload = {
+        "action": "job-grant",
+        "for_job": args.job,
+        "surface_id": surface,
+        "harness": args.harness,
+        "expires_at": leases_mod.iso_utc(expiry),
+        "skills": results,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(f"job grant: {args.job}")
+        print(f"  expires: {payload['expires_at']}")
+        for entry in results:
+            line = f"  {entry['skill']}: {entry['action']}"
+            if entry.get("lease_id"):
+                line += f" ({entry['lease_id']})"
+            if entry.get("error"):
+                line += f" — {entry['error']}"
+            print(line)
+    return 2 if blocked else 0
+
+
+def cmd_job_release(args) -> int:
+    override_repo = Path(args.repo).resolve() if args.repo else None
+    store = leases_mod.LeaseStore()
+    results: list[dict] = []
+    blocked = False
+    for lease in store.list():
+        if lease.job_id != args.job:
+            continue
+        if (
+            override_repo is not None
+            and lifecycle_mod.surface_id(override_repo, lease.harness)
+            != lease.surface_id
+        ):
+            continue
+        lock = lifecycle_mod.read_surface_lock(lease.surface_id)
+        if lock is None or lease.lease_id not in lock.lease_ids:
+            results.append(
+                {
+                    "skill": lease.skill,
+                    "lease_id": lease.lease_id,
+                    "action": "already-released",
+                }
+            )
+            continue
+        try:
+            released = _release_lease(
+                lease.lease_id,
+                repo=override_repo or Path(lock.repo_path),
+                harness=None,
+                dry_run=args.dry_run,
+            )
+            results.append(
+                {
+                    "skill": lease.skill,
+                    "lease_id": lease.lease_id,
+                    "action": released["action"],
+                    "event_id": (released.get("event") or {}).get("event_id"),
+                }
+            )
+        except lifecycle_mod.LifecycleError as exc:
+            blocked = True
+            results.append(
+                {
+                    "skill": lease.skill,
+                    "lease_id": lease.lease_id,
+                    "action": "blocked",
+                    "error": str(exc),
+                }
+            )
+    payload = {"action": "job-release", "for_job": args.job, "leases": results}
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(f"job release: {args.job}")
+        if not results:
+            print("  no leases recorded for this job")
+        for entry in results:
+            line = f"  {entry['skill']}: {entry['action']} ({entry['lease_id']})"
+            if entry.get("error"):
+                line += f" — {entry['error']}"
+            print(line)
+    return 2 if blocked else 0
+
+
+def cmd_job_status(args) -> int:
+    store = leases_mod.LeaseStore()
+    now = datetime.now(tz=UTC)
+    entries: list[dict] = []
+    for lease in store.list():
+        if lease.job_id != args.job:
+            continue
+        lock = lifecycle_mod.read_surface_lock(lease.surface_id)
+        attached = lock is not None and lease.lease_id in lock.lease_ids
+        if lease.active_at(now):
+            state = "active" if attached else "released"
+        else:
+            # Past expiry the lease is dead either way; "expired" also covers a
+            # detached lease that startup reconciliation already cleaned up.
+            state = "expired"
+        entries.append(
+            {
+                "skill": lease.skill,
+                "lease_id": lease.lease_id,
+                "surface_id": lease.surface_id,
+                "harness": lease.harness,
+                "expires_at": lease.expires_at,
+                "attached": attached,
+                "state": state,
+            }
+        )
+    payload = {"action": "job-status", "for_job": args.job, "leases": entries}
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(f"job status: {args.job}")
+        if not entries:
+            print("  no leases recorded for this job")
+        for entry in entries:
+            print(
+                f"  {entry['skill']}: {entry['state']} "
+                f"(expires {entry['expires_at']}, {entry['lease_id']})"
+            )
     return 0
 
 
@@ -4449,6 +4684,100 @@ def main(argv=None) -> int:
     sp.add_argument("--dry-run", action="store_true", help="show cleanup plan only")
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(func=cmd_release)
+
+    sp = sub.add_parser(
+        "job",
+        help="task-scoped skill leases keyed to one external dispatcher job",
+    )
+    job_commands = sp.add_subparsers(dest="job_command", required=True)
+    job_grant = job_commands.add_parser(
+        "grant",
+        help="lease an explicit skill set to one job over the standing surface state",
+    )
+    job_grant.add_argument(
+        "--for-job",
+        required=True,
+        dest="job",
+        help="job identity issued by the external dispatcher",
+    )
+    job_grant.add_argument(
+        "--skill",
+        action="append",
+        required=True,
+        help="skill path, installed skill/package, or <package>#<skill> (repeatable)",
+    )
+    job_grant.add_argument(
+        "--until",
+        default=DEFAULT_JOB_LEASE_TTL,
+        help=(
+            "expiry instant or duration such as 30m, 2h, 7d "
+            f"(default {DEFAULT_JOB_LEASE_TTL})"
+        ),
+    )
+    job_grant.add_argument(
+        "--repo", default=".", help="surface path (default current dir)"
+    )
+    job_grant.add_argument(
+        "--here", action="store_const", const=".", dest="repo", help="use current dir"
+    )
+    job_grant.add_argument("--name", help="surface name (defaults to repo dir name)")
+    job_grant.add_argument("--harness", default="claude", choices=["claude", "codex"])
+    job_grant.add_argument(
+        "--model", help="configured model coordinate for activation evidence"
+    )
+    job_grant.add_argument(
+        "--agent",
+        action="append",
+        help="agent identity permitted by the leases (repeatable; default any)",
+    )
+    job_grant.add_argument(
+        "--posture",
+        default="read-only",
+        choices=["read-only", "sandboxed", "full"],
+        help="authority posture (default read-only)",
+    )
+    _add_candidate_source_options(job_grant)
+    job_grant.add_argument(
+        "--dry-run", action="store_true", help="show the exact per-skill plans only"
+    )
+    job_grant.add_argument("--json", action="store_true")
+    job_grant.set_defaults(func=cmd_job_grant)
+
+    job_release = job_commands.add_parser(
+        "release",
+        help="release every lease held by one job (idempotent, safe after expiry)",
+    )
+    job_release.add_argument(
+        "--for-job",
+        required=True,
+        dest="job",
+        help="job identity issued by the external dispatcher",
+    )
+    job_release.add_argument(
+        "--repo",
+        default=None,
+        help="only release the job's leases on this surface (default: all surfaces)",
+    )
+    job_release.add_argument(
+        "--here", action="store_const", const=".", dest="repo", help="use current dir"
+    )
+    job_release.add_argument(
+        "--dry-run", action="store_true", help="show cleanup plans only"
+    )
+    job_release.add_argument("--json", action="store_true")
+    job_release.set_defaults(func=cmd_job_release)
+
+    job_status = job_commands.add_parser(
+        "status", help="show every lease keyed to one job"
+    )
+    job_status.add_argument(
+        "--for-job",
+        required=True,
+        dest="job",
+        help="job identity issued by the external dispatcher",
+    )
+    job_status.add_argument("--json", action="store_true")
+    job_status.set_defaults(func=cmd_job_status)
 
     sp = sub.add_parser(
         "source", help="inspect and control package source trust state"

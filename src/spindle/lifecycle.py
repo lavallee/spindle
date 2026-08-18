@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import tempfile
 from dataclasses import dataclass
@@ -27,6 +28,10 @@ SURFACE_LOCK_SCHEMA = "spindle.surface-lock/v1"
 OWNERSHIP_RECEIPT_SCHEMA = "spindle.ownership-receipt/v1"
 OWNERSHIP_INDEX_SCHEMA = "spindle.ownership-index/v1"
 CONFLICT_DECISION_SCHEMA = "spindle.conflict-decision/v1"
+
+# One dispatcher-issued job identity (an external job runner's id). Kept to one
+# conservative path-and-shell-safe atom so receipts and CLI filters stay exact.
+_JOB_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 
 _IGNORED_CONTENT_NAMES = frozenset(
     {
@@ -337,6 +342,7 @@ class Lease:
     renewal_policy: str = "manual"
     cleanup_policy: str = "remove-owned-projection"
     task_digest: str | None = None
+    job_id: str | None = None
 
     def __post_init__(self) -> None:
         for label, value in (
@@ -358,6 +364,11 @@ class Lease:
         _validate_digest("surface_id", self.surface_id)
         if self.task_digest is not None:
             _validate_digest("task_digest", self.task_digest)
+        if self.job_id is not None and _JOB_ID_PATTERN.fullmatch(self.job_id) is None:
+            raise LifecycleError(
+                "lease job_id must be 1-128 characters of A-Z, a-z, 0-9, "
+                "'.', '_', ':', or '-'"
+            )
         if not Path(self.source_path).is_absolute():
             raise LifecycleError("lease source_path must be absolute")
         if self.kind not in {"session", "borrow", "update"}:
@@ -407,6 +418,10 @@ class Lease:
             "cleanup_policy": self.cleanup_policy,
             "task_digest": self.task_digest,
         }
+        if self.job_id is not None:
+            # Emitted only when present so pre-job lease receipts keep the
+            # exact content identity they were recorded under.
+            payload["job_id"] = self.job_id
         return {"lease_id": self.lease_id, **payload} if include_id else payload
 
     @classmethod
@@ -440,6 +455,9 @@ class Lease:
                 str(raw["task_digest"])
                 if raw.get("task_digest") is not None
                 else None
+            ),
+            job_id=(
+                str(raw["job_id"]) if raw.get("job_id") is not None else None
             ),
         )
         if raw.get("lease_id") not in {None, lease.lease_id}:

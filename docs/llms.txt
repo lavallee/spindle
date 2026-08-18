@@ -71,6 +71,9 @@ For the whole documentation in one file, read the bundle:
 - [Candidate lifecycle](local-lifecycle.md): read-only intent cards, pinned Git
   sources, static trust preflight, quarantine, exact borrow/try leases, expiry
   reconciliation, cleanup, and receipt custody.
+- [Job-scoped leases](job-scoped-leases.md): the external dispatcher contract —
+  `spindle job grant|release|status --for-job`, explicit skill lists, composition
+  over the standing binding, and TTL-plus-startup crash cleanup.
 - [Adapter compatibility](adapter-compatibility.md): fail-closed build matrices,
   Claude/Codex certifications, mixed-model parent/child evidence, and
   reproduction boundaries.
