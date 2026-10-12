@@ -112,6 +112,14 @@ class ResolvedCandidate:
     fetched: bool
 
 
+@dataclass(frozen=True)
+class ResolvedSnapshot:
+    reference: RemoteReference
+    source_receipt: SourceReceipt
+    snapshot: Path
+    fetched: bool
+
+
 def is_remote_reference(value: str) -> bool:
     return value.startswith(("github:", "skills.sh:", "git+", "git:"))
 
@@ -171,6 +179,30 @@ def resolve_remote_candidate(
         )
 
 
+def resolve_remote_snapshot(
+    reference: str,
+    *,
+    offline: bool = False,
+    source_cache: Path | None = None,
+    snapshot_root: Path | None = None,
+    receipt_root: Path | None = None,
+    max_archive_bytes: int = MAX_ARCHIVE_BYTES,
+) -> ResolvedSnapshot:
+    """Resolve a whole source tree without selecting one skill inside it."""
+    requested = parse_reference(reference)
+    cache = source_cache or paths.source_cache_dir()
+    repository_key = content_id({"locator": requested.locator}).removeprefix("sha256:")
+    with _source_mutex(cache / "locks" / f"{repository_key}.lock"):
+        return _resolve_snapshot_unlocked(
+            reference,
+            offline=offline,
+            source_cache=cache,
+            snapshot_root=snapshot_root,
+            receipt_root=receipt_root,
+            max_archive_bytes=max_archive_bytes,
+        )
+
+
 def _resolve_remote_candidate_unlocked(
     reference: str,
     *,
@@ -179,6 +211,30 @@ def _resolve_remote_candidate_unlocked(
     snapshot_root: Path | None,
     receipt_root: Path | None,
 ) -> ResolvedCandidate:
+    resolved = _resolve_snapshot_unlocked(
+        reference,
+        offline=offline,
+        source_cache=source_cache,
+        snapshot_root=snapshot_root,
+        receipt_root=receipt_root,
+    )
+    return _resolved_candidate(
+        resolved.reference,
+        resolved.source_receipt,
+        resolved.snapshot,
+        fetched=resolved.fetched,
+    )
+
+
+def _resolve_snapshot_unlocked(
+    reference: str,
+    *,
+    offline: bool,
+    source_cache: Path,
+    snapshot_root: Path | None,
+    receipt_root: Path | None,
+    max_archive_bytes: int = MAX_ARCHIVE_BYTES,
+) -> ResolvedSnapshot:
     requested = parse_reference(reference)
     cache = source_cache
     snapshots = snapshot_root or paths.source_snapshots_dir()
@@ -210,7 +266,7 @@ def _resolve_remote_candidate_unlocked(
             content_digest=known.content_digest,
         )
         _write_receipt(receipts, receipt)
-        return _resolved_candidate(requested, receipt, snapshot, fetched=False)
+        return ResolvedSnapshot(requested, receipt, snapshot, False)
 
     if bare.exists() and (bare.is_symlink() or not bare.is_dir()):
         raise LifecycleError("Git source cache path is not a regular directory")
@@ -273,7 +329,7 @@ def _resolve_remote_candidate_unlocked(
             content_digest=existing.content_digest,
         )
     else:
-        _export_snapshot(bare, commit, snapshot)
+        _export_snapshot(bare, commit, snapshot, max_archive_bytes)
         receipt = SourceReceipt(
             provider=requested.provider,
             locator=requested.locator,
@@ -284,7 +340,7 @@ def _resolve_remote_candidate_unlocked(
             content_digest=digest_path(snapshot),
         )
     _write_receipt(receipts, receipt)
-    return _resolved_candidate(requested, receipt, snapshot, fetched=fetched)
+    return ResolvedSnapshot(requested, receipt, snapshot, fetched)
 
 
 def _resolved_candidate(
@@ -393,7 +449,9 @@ def _git_output(*arguments: str) -> str:
     return output
 
 
-def _export_snapshot(bare: Path, commit: str, destination: Path) -> None:
+def _export_snapshot(
+    bare: Path, commit: str, destination: Path, max_bytes: int = MAX_ARCHIVE_BYTES
+) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     temp_root = Path(tempfile.mkdtemp(prefix=".source-", dir=destination.parent))
     archive = temp_root / "source.tar"
@@ -410,9 +468,9 @@ def _export_snapshot(bare: Path, commit: str, destination: Path) -> None:
             commit,
         )
         del completed
-        if archive.stat().st_size > MAX_ARCHIVE_BYTES:
+        if archive.stat().st_size > max_bytes:
             raise LifecycleError("Git source archive exceeds the configured size limit")
-        _safe_extract(archive, payload)
+        _safe_extract(archive, payload, max_bytes)
         try:
             payload.rename(destination)
         except FileExistsError:
@@ -423,7 +481,9 @@ def _export_snapshot(bare: Path, commit: str, destination: Path) -> None:
         raise LifecycleError("Git source snapshot export was incomplete")
 
 
-def _safe_extract(archive: Path, destination: Path) -> None:
+def _safe_extract(
+    archive: Path, destination: Path, max_bytes: int = MAX_ARCHIVE_BYTES
+) -> None:
     total = 0
     with tarfile.open(archive, mode="r:") as bundle:
         members = bundle.getmembers()
@@ -433,7 +493,7 @@ def _safe_extract(archive: Path, destination: Path) -> None:
         symlinks: set[PurePosixPath] = set()
         for member in members:
             total += max(member.size, 0)
-            if total > MAX_ARCHIVE_BYTES:
+            if total > max_bytes:
                 raise LifecycleError("Git source archive exceeds extraction limits")
             relative = PurePosixPath(member.name)
             if (

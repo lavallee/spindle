@@ -28,6 +28,7 @@ from . import evaluation as evaluation_mod
 from . import fleet as fleet_mod
 from . import gates as gates_mod
 from . import hooks as hooks_mod
+from . import house_cli
 from . import ingest as ingest_mod
 from . import inventory as inventory_mod
 from . import intent as intent_mod
@@ -5807,6 +5808,8 @@ def main(argv=None) -> int:
             migration.add_argument("plan_id")
         migration.add_argument("--json", action="store_true")
         migration.set_defaults(func=cmd_migrate)
+
+    house_cli.register(sub)
 
     parse_argv = list(argv) if argv is not None else sys.argv[1:]
     launch_args: list[str] = []

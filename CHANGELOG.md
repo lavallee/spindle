@@ -7,6 +7,22 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- Added the house: one versioned directory holding the rules every harness
+  loads, a small kernel of always-installed skills, and named project patterns.
+  `spindle house init|setup|status|rules|patterns` installs it per machine for
+  Claude Code, Codex, and Hermes, and `spindle house setup --here --pattern`
+  vendors a pattern's rules and skills into a repository.
+- Added the catalog: `spindle catalog sync|list|update` indexes skills from
+  commit-pinned Git sources and local directories without installing or running
+  anything, and reports what a newer upstream commit would change before the
+  pin moves.
+- Added on-demand sourcing: `spindle find` ranks catalog skills for a task,
+  `spindle use` hands one over as a path or text, `spindle report` records the
+  outcome, and `spindle usage` shows per-skill results, which feed back into
+  ranking. `spindle brief` gives a job runner the prompt section and the record
+  for a commission in one call. An optional Jev judge turns the lexical
+  shortlist into a selection. See `docs/house-and-sourcing.md`.
+
 ## [0.3.0] - 2026-10-12
 
 - Added conjunctive outcome gates for paired evaluations: an optional
