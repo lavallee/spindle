@@ -390,3 +390,45 @@ def test_unjudged_brief_points_at_find_instead_of_offering_text_matches(
                  "--job", "job-42"]) == 0
     stats = sourcing.usage_summary()["home/bughunt"]
     assert (stats["loaded"], stats["accepted"]) == (1, 1)
+
+
+def test_expander_output_is_parsed_and_every_failure_means_no_expansion(tmp_path):
+    from spindle import expand
+
+    assert expand.parse("1. systematic debugging\n- Flaky test triage\n\n"
+                        '"systematic debugging"\nx\n' + "y" * 90) == [
+        "systematic debugging", "Flaky test triage"]
+    assert expand.expand("task", None) == ([], "")
+    script = tmp_path / "ok"
+    script.write_text("#!/bin/sh\ncat >/dev/null\necho root cause analysis\n", "utf-8")
+    script.chmod(0o755)
+    assert expand.expand("task", script) == (["root cause analysis"], "")
+    bad = tmp_path / "bad"
+    bad.write_text("#!/bin/sh\nexit 3\n", "utf-8")
+    bad.chmod(0o755)
+    assert expand.expand("task", bad) == ([], "expander exited 3")
+    assert expand.expand("task", tmp_path / "missing")[0] == []
+
+
+def test_expanded_phrases_recover_a_skill_the_task_text_misses(estate, capsys):
+    index = catalog.sync(house.load())
+    task = "The nightly job goes red now and then; make it green and keep it green."
+    assert "home/bughunt" not in [c["ref"] for c in sourcing.search(index, task)]
+    found = sourcing.search(index, task, phrases=["diagnose flaky failing test"])
+    assert found[0]["ref"] == "home/bughunt"
+
+    root = estate / "depot" / "house"
+    (root / "bin").mkdir()
+    script = root / "bin" / "queries"
+    script.write_text("#!/bin/sh\ncat >/dev/null\necho diagnose flaky failing test\n",
+                      "utf-8")
+    script.chmod(0o755)
+    with root.joinpath("house.toml").open("a", encoding="utf-8") as handle:
+        handle.write('\n[sourcing]\nexpand = "bin/queries"\n')
+    capsys.readouterr()
+    assert main(["find", "--judge", "none", "--json", task]) == 0
+    selection = json.loads(capsys.readouterr().out)
+    assert selection["expanded_queries"] == ["diagnose flaky failing test"]
+    assert selection["candidates"][0]["ref"] == "home/bughunt"
+    assert main(["find", "--judge", "none", "--expand", "none", "--json", task]) == 0
+    assert json.loads(capsys.readouterr().out)["expanded_queries"] == []

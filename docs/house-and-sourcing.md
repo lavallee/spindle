@@ -129,6 +129,21 @@ right neighbourhood but cannot tell "relevant" from "shares words with the
 task", so without a judge `find` returns a *shortlist* marked `lexical` and
 whoever receives it does the judging.
 
+A commission and a skill description often share no words, so the house can name
+a *search expander*:
+
+```toml
+[sourcing]
+expand = "bin/skill-queries"     # relative to the house directory
+```
+
+It is any executable that reads the task on stdin and prints a few short search
+phrases, one per line, naming the kinds of skill that would help; usually a
+small model call. `find` ranks the catalog once per phrase and once for the task
+text, then fuses the rankings by reciprocal rank. A missing command, a non-zero
+exit, a timeout, or empty output means no expansion, and `--expand none` skips
+it. Task text reaches whatever the command calls.
+
 With a judge, `find` makes a selection. The built-in judge is the Jev decision
 model: one call asks, per candidate, whether loading that skill would materially
 improve the work, and gets back a calibrated probability. Candidates at or above
