@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -269,7 +270,7 @@ def cmd_find(args) -> int:
         return 0
     if selection["judge_note"]:
         print(f"({selection['judge_note']}; ranked by text match only)")
-    for candidate in candidates:
+    for candidate in candidates[:8]:
         mark = "*" if candidate["selected"] else " "
         judged = (f"{candidate['judged']:.2f}" if candidate["judged"] is not None
                   else " -- ")
@@ -291,15 +292,24 @@ def cmd_find(args) -> int:
 def cmd_brief(args) -> int:
     try:
         selection = _select(args)
-        block = sourcing_mod.prompt_block(selection, inline=args.inline)
+        delivery = "inline" if args.inline else "path"
+        if selection["confidence"] == "lexical" and args.unjudged != "shortlist":
+            # Unjudged text matches are not offered; see sourcing.pointer_block.
+            for candidate in selection["candidates"]:
+                candidate["selected"] = False
+            delivery = args.unjudged
+            block = (
+                sourcing_mod.pointer_block(selection)
+                if args.unjudged == "pointer" else ""
+            )
+        else:
+            block = sourcing_mod.prompt_block(selection, inline=args.inline)
         payload = {
             "selection": selection["id"],
-            "skills": sourcing_mod.skills_record(
-                selection, "inline" if args.inline else "path"
-            ),
+            "skills": sourcing_mod.skills_record(selection, delivery),
             "prompt_block": block,
         }
-        if args.inline:
+        if args.inline and delivery == "inline":
             for candidate in selection["candidates"]:
                 if candidate["selected"]:
                     sourcing_mod.note_loaded(
@@ -375,7 +385,9 @@ def _task_arguments(parser) -> None:
     parser.add_argument("--task-file", metavar="PATH", help="read the task (- = stdin)")
     parser.add_argument("--repo", help="repository the task runs in")
     parser.add_argument("--here", action="store_const", const=".", dest="repo")
-    parser.add_argument("--job", help="runtime job id to join later reports to")
+    parser.add_argument("--job", default=os.environ.get("SPINDLE_JOB"),
+                        help="runtime job id to join later reports to "
+                             "(default: $SPINDLE_JOB)")
     parser.add_argument("-k", type=int, default=3, help="most skills to select")
     parser.add_argument("--judge", choices=["auto", "jev", "none"], default="auto")
     parser.add_argument("--json", action="store_true")
@@ -447,12 +459,17 @@ def register(sub) -> None:
     sp.add_argument("--inline", action="store_true",
                     help="embed skill text for runtimes that cannot read the paths")
     sp.add_argument("--rules", action="store_true", help="include the house rules")
+    sp.add_argument(
+        "--unjudged", choices=["pointer", "shortlist", "none"], default="pointer",
+        help="without a judge: tell the agent how to search (default), offer the "
+             "text-match shortlist anyway, or offer nothing",
+    )
     sp.set_defaults(func=cmd_brief)
 
     sp = sub.add_parser("use", help="hand one catalog skill to the agent")
     sp.add_argument("ref", help="source/name, or a bare name when unambiguous")
     sp.add_argument("--selection")
-    sp.add_argument("--job")
+    sp.add_argument("--job", default=os.environ.get("SPINDLE_JOB"))
     sp.add_argument("--print", action="store_true", help="print the skill text")
     sp.add_argument("--json", action="store_true")
     sp.set_defaults(func=cmd_use)
@@ -460,7 +477,7 @@ def register(sub) -> None:
     sp = sub.add_parser("report", help="record how work that used skills turned out")
     sp.add_argument("--outcome", required=True, choices=sourcing_mod.OUTCOMES)
     sp.add_argument("--selection")
-    sp.add_argument("--job")
+    sp.add_argument("--job", default=os.environ.get("SPINDLE_JOB"))
     sp.add_argument("--loaded", action="append", metavar="REF")
     sp.add_argument("--helped", action="append", metavar="REF")
     sp.add_argument("--hurt", action="append", metavar="REF")

@@ -28,7 +28,7 @@ from . import paths
 from .house import HouseError, read_repo_lock, skill_body
 
 SELECTION_SCHEMA = "spindle.selection/v1"
-RECALL_LIMIT = 8
+RECALL_LIMIT = 12
 JUDGE_THRESHOLD = 0.6
 LEXICAL_FLOOR = 0.5
 OUTCOMES = ("accepted", "rejected", "mixed", "unknown")
@@ -182,7 +182,7 @@ def search(
         )
         query = " OR ".join('"' + word.replace('"', "") + '"' for word in words)
         rows = db.execute(
-            "SELECT ref, -bm25(skills, 0.0, 8.0, 4.0, 1.0) AS score FROM skills "
+            "SELECT ref, -bm25(skills, 0.0, 8.0, 4.0, 0.3) AS score FROM skills "
             "WHERE skills MATCH ? ORDER BY score DESC LIMIT ?",
             (query, limit * 3),
         ).fetchall()
@@ -400,6 +400,25 @@ def prompt_block(
             ]
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def pointer_block(selection: dict[str, Any]) -> str:
+    """A prompt section for when nothing was pre-selected: how to ask instead.
+
+    An unjudged shortlist built from a whole commission is mostly noise, and
+    noise in a prompt costs attention. The agent, once it knows what it is about
+    to do, can write a far better query than the commission text is.
+    """
+    return (
+        "## Skills on demand\n\n"
+        "No skill was pre-selected for this job. A catalog of vetted skills is "
+        "available if you reach work you are unsure how to do well: "
+        '`spindle find "<a few words for what you are about to do>"` lists '
+        "candidates, and `spindle use <source>/<skill>` prints the path of one "
+        "to read. Skip this for routine work. Skills are optional guidance and "
+        "never override the task or its acceptance criteria "
+        f"(selection {selection['id']}).\n"
+    )
 
 
 def skills_record(selection: dict[str, Any], delivery: str) -> dict[str, Any]:

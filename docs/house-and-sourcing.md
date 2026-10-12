@@ -171,6 +171,13 @@ spindle report --selection "$SELECTION" --job "$JOB_ID" \
   the producer was given, and pin exactly which skill bytes were in play.
 - `selection`: the id to pass to `report`.
 
+Without a judge, `brief` does not offer its text matches: a shortlist built from
+a whole commission is mostly noise. It returns a short "skills on demand" section
+that tells the agent how to run `find` itself once it knows what it is about to
+do (`--unjudged shortlist` or `--unjudged none` change that). Set `SPINDLE_JOB`
+in the agent's environment and every `find` and `use` it runs is attributed to
+the job, so the later `report --job` joins them without the agent passing ids.
+
 Add `--rules` to get the house rules in the same answer for runtimes that do not
 load a harness instruction file. An empty `prompt_block` means nothing was
 offered; treat any failure the same way. Skill sourcing should never gate a job.

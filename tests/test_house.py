@@ -345,6 +345,7 @@ def test_brief_inline_embeds_text_and_counts_as_loaded(estate, capsys):
     assert main(["catalog", "sync"]) == 0
     capsys.readouterr()
     assert main(["brief", "--judge", "none", "--inline", "--rules", "--json",
+                 "--unjudged", "shortlist",
                  "--job", "j9", "diagnose a flaky failing test"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert "### Skill: home/bughunt" in payload["prompt_block"]
@@ -365,3 +366,27 @@ def test_house_init_records_the_pointer(estate, monkeypatch, capsys):
     assert 'jev_key_file = "/k"' in (estate / "state" / "house.toml").read_text("utf-8")
     assert main(["house", "rules"]) == 0
     assert "Keep moving." in capsys.readouterr().out
+
+
+def test_unjudged_brief_points_at_find_instead_of_offering_text_matches(
+    estate, capsys, monkeypatch
+):
+    assert main(["catalog", "sync"]) == 0
+    capsys.readouterr()
+    assert main(["brief", "--judge", "none", "--json", "diagnose a flaky test"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["prompt_block"].startswith("## Skills on demand")
+    assert "spindle find" in payload["prompt_block"]
+    assert payload["skills"]["offered"] == [] and payload["skills"]["delivery"] == "pointer"
+
+    assert main(["brief", "--judge", "none", "--unjudged", "none", "--json",
+                 "diagnose a flaky test"]) == 0
+    assert json.loads(capsys.readouterr().out)["prompt_block"] == ""
+
+    # An agent inside a job inherits the job id, so what it reads is attributed.
+    monkeypatch.setenv("SPINDLE_JOB", "job-42")
+    assert main(["use", "home/bughunt"]) == 0
+    assert main(["report", "--outcome", "accepted", "--selection", payload["selection"],
+                 "--job", "job-42"]) == 0
+    stats = sourcing.usage_summary()["home/bughunt"]
+    assert (stats["loaded"], stats["accepted"]) == (1, 1)
