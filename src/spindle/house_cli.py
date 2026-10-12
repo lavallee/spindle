@@ -81,6 +81,18 @@ def cmd_house_setup(args) -> int:
     return 1 if any(row["action"] == "conflict" for row in rows) else 0
 
 
+def cmd_house_remove(args) -> int:
+    try:
+        rows = house_mod.remove_machine(
+            tuple(args.harness or house_mod.HARNESSES), dry_run=args.dry_run
+        )
+    except (house_mod.HouseError, OSError) as exc:
+        return _fail(exc)
+    prefix = "dry run; nothing changed\n" if args.dry_run else ""
+    _emit(rows, args.json, prefix + _rows_text(rows))
+    return 0
+
+
 def cmd_house_status(args) -> int:
     try:
         house = house_mod.load()
@@ -389,6 +401,11 @@ def register(sub) -> None:
     h.add_argument("--dry-run", action="store_true")
     h.add_argument("--json", action="store_true")
     h.set_defaults(func=cmd_house_setup)
+    h = hs.add_parser("remove", help="undo the machine setup for a harness")
+    h.add_argument("--harness", action="append", choices=house_mod.HARNESSES)
+    h.add_argument("--dry-run", action="store_true")
+    h.add_argument("--json", action="store_true")
+    h.set_defaults(func=cmd_house_remove)
     h = hs.add_parser("status", help="what is installed and whether it is current")
     h.add_argument("--repo")
     h.add_argument("--here", action="store_const", const=".", dest="repo")

@@ -58,7 +58,8 @@ Text outside the managed block is never touched. A link is created or retargeted
 only when it is missing, dead, recorded as installed by an earlier `setup`, or an
 older Spindle render; anything else is reported as a conflict and left alone.
 `--prune-dangling` also removes dead symlinks from those skill directories.
-`--dry-run` shows the plan. After editing the house, bump `version` and run
+`--dry-run` shows the plan, and `spindle house remove` undoes the setup for a
+harness. After editing the house, bump `version` and run
 `setup` again; `status` reports rules that are stale or were edited by hand.
 
 ### Projects

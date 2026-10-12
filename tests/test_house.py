@@ -118,6 +118,33 @@ def test_setup_is_idempotent_updates_rules_and_drops_removed_kernel_skills(estat
     assert not (estate / "home/.claude/skills/review-eng").is_symlink()
 
 
+def test_remove_undoes_setup_but_leaves_a_retargeted_link_and_other_text(estate):
+    home = estate / "home"
+    home.joinpath(".claude/CLAUDE.md").write_text("# Mine\n", "utf-8")
+    built = house.load()
+    house.setup_machine(built, ("claude",))
+    moved = home / ".claude/skills/orient"
+    moved.unlink()
+    moved.symlink_to(estate / "depot" / "packages" / "data")  # the user's choice now
+
+    again = house.setup_machine(built, ("claude",))
+    assert ("orient", "conflict") in {(r["name"], r["action"]) for r in again}
+
+    assert main(["house", "remove", "--harness", "claude"]) == 0
+    assert home.joinpath(".claude/CLAUDE.md").read_text("utf-8") == "# Mine\n"
+    assert moved.is_symlink()
+    assert not (home / ".claude/skills/review-eng").is_symlink()
+    assert house.remove_machine(("claude",)) == []
+
+
+def test_repo_setup_needs_a_pattern_the_first_time(estate):
+    repo = estate / "repo"
+    repo.mkdir()
+    with pytest.raises(house.HouseError, match="--pattern"):
+        house.setup_repo(house.load(), repo)
+    assert list(repo.iterdir()) == []
+
+
 def test_status_reports_a_hand_edited_block(estate):
     built = house.load()
     house.setup_machine(built, ("claude",))

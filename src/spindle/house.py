@@ -351,10 +351,14 @@ def _save_record(record: dict[str, Any]) -> None:
 
 
 def _replaceable(link: Path, owned: dict[str, str]) -> bool:
-    """A link this setup may retarget: ours, dead, or an older Spindle render."""
-    if str(link) in owned or not link.exists():
-        return True
+    """A link this setup may retarget: still ours, dead, or an older Spindle render.
+
+    "Ours" means the link still points where a prior setup left it. A link
+    someone has since retargeted is theirs, whatever the record says.
+    """
     target = os.readlink(link)
+    if owned.get(str(link)) == target or not link.exists():
+        return True
     return target.startswith(str(paths.spindle_home() / "rendered"))
 
 
@@ -400,7 +404,7 @@ def setup_machine(
         wanted = {str(skill_dir / name): source for name, source in sources.items()}
         for link_text in sorted(set(owned) - set(wanted)):
             link = Path(link_text)
-            if link.is_symlink():
+            if link.is_symlink() and os.readlink(link) == owned[link_text]:
                 if not dry_run:
                     link.unlink()
                 row(harness, "skill", link.name, "unlinked", "left the kernel")
@@ -436,6 +440,35 @@ def setup_machine(
     if not dry_run:
         record["house_version"] = house.version
         record["house_dir"] = str(house.root)
+        _save_record(record)
+    return rows
+
+
+def remove_machine(
+    harnesses: tuple[str, ...], *, dry_run: bool = False
+) -> list[dict[str, str]]:
+    """Undo ``setup_machine``: drop the rules block and the links it still owns."""
+    record = _load_record()
+    rows: list[dict[str, str]] = []
+    for harness in harnesses:
+        state = record["harnesses"].get(harness)
+        if state is None:
+            continue
+        target = rules_target(harness)
+        has_block = target.is_file() and read_block(target.read_text("utf-8"))
+        if has_block and (dry_run or remove_block(target)):
+            rows.append({"harness": harness, "kind": "rules", "name": str(target),
+                         "action": "removed", "detail": ""})
+        for link_text, source in sorted(state.get("links", {}).items()):
+            link = Path(link_text)
+            if link.is_symlink() and os.readlink(link) == source:
+                if not dry_run:
+                    link.unlink()
+                rows.append({"harness": harness, "kind": "skill", "name": link.name,
+                             "action": "unlinked", "detail": ""})
+        if not dry_run:
+            del record["harnesses"][harness]
+    if not dry_run:
         _save_record(record)
     return rows
 
@@ -543,6 +576,11 @@ def setup_repo(
         pattern_names = tuple(lock.get("patterns") or ())
     if lock and not with_house_rules:
         with_house_rules = bool(lock.get("with_house_rules"))
+    if not pattern_names and not with_house_rules:
+        raise HouseError(
+            "name a --pattern (see `spindle house patterns`) or pass "
+            "--with-house-rules; this repository has not been set up before"
+        )
     patterns = [house.pattern(name) for name in pattern_names]
     wanted: dict[str, Path] = {}
     for pattern in patterns:
