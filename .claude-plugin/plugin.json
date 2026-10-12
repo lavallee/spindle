@@ -1,0 +1,20 @@
+{
+  "name": "spindle",
+  "displayName": "Spindle",
+  "version": "0.2.0",
+  "description": "Inspect, try, compose, verify, and maintain agent skills with exact custody and evidence.",
+  "author": {
+    "name": "Marc Lavallee",
+    "email": "mlavallee@gmail.com",
+    "url": "https://github.com/lavallee"
+  },
+  "homepage": "https://lavallee.github.io/spindle/",
+  "repository": "https://github.com/lavallee/spindle",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "claude-code",
+    "lifecycle",
+    "provenance"
+  ]
+}

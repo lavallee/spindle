@@ -1,0 +1,56 @@
+{
+  "adapter_build": "spindle-core/v1",
+  "applied_actions": [
+    {
+      "action_id": "sha256:aeb882426e0fd949d827026c054f4e15506d9c3a5246bf8ebcfeeab07771e9a3",
+      "kind": "link",
+      "ownership_id": null,
+      "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "projection_path": "/media/ubuntussd/home/lavallee/Projects/spindle/.claude/skills/spindle-lease-canary",
+      "reason": "desired projection is absent",
+      "schema": "spindle.startup-action/v1",
+      "skill": "spindle-lease-canary",
+      "source_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary"
+    }
+  ],
+  "decision": "warn",
+  "event_source": "lease-activate",
+  "expected_inventory_id": "sha256:cce5d12f0fb39af2bdda5487f4b78bb208aacbf7fb927f08a9305add6e99e528",
+  "foreign_conflicts": [],
+  "harness": "claude",
+  "lease_status": {
+    "active": [
+      "sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1"
+    ],
+    "expired": []
+  },
+  "lock_id": "sha256:84d3f9f9dd3d14549a5e74bde1ef16b2909268b08e06171691d7c903b7672f73",
+  "observed_inventory_id": "sha256:846514be0e616de94968c7b9dc8daecc99ea0aea7666cd4978af578081254d78",
+  "plan_id": "sha256:9ce85496cf471167a1b9c3dac844ea4e7ad57f1872add63ea5a07920913a158f",
+  "prior_startup_match": null,
+  "prior_startup_receipt_id": null,
+  "receipt_id": "sha256:b9754b4aa5a36ce93765194b2c861347370c67f40617b63d0c5b1f3c1555dc26",
+  "repo_path": "/media/ubuntussd/home/lavallee/Projects/spindle",
+  "restart_required": false,
+  "runtime_facts": {},
+  "schema": "spindle.startup-receipt/v1",
+  "surface_id": "sha256:91c57a162797fd5ca2f04c269f73db4017a27bbce9b2c7cac030d463b527df81",
+  "surface_name": "spindle",
+  "warnings": [
+    {
+      "path": null,
+      "reason": "Claude plugin skills are namespaced and harness-managed",
+      "scope": "plugins",
+      "skill": "__plugins__",
+      "state": "opaque"
+    },
+    {
+      "path": null,
+      "reason": "Claude managed and bundled skills require harness-reported inventory",
+      "scope": "managed",
+      "skill": "__managed__",
+      "state": "opaque"
+    }
+  ]
+}

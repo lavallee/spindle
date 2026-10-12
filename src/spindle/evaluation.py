@@ -17,6 +17,9 @@ from typing import Any, Iterable
 
 
 SCHEMA_VERSION = 1
+EVALUATION_RECEIPT_SCHEMA = "spindle.evaluation-receipt/v2"
+PROMOTION_RECEIPT_SCHEMA = "spindle.procedure-promotion/v1"
+PROCEDURE_ORIGIN_SCHEMA = "spindle.procedure-origin/v1"
 VALID_SPLITS = {"development", "held_out"}
 VALID_ARMS = ("baseline", "variant")
 VALID_MANIFEST_KEYS = {
@@ -33,7 +36,25 @@ VALID_MANIFEST_KEYS = {
     "receipt_dir",
     "dimensions",
     "acceptance",
+    "origin",
 }
+_ORIGIN_FIELDS = (
+    "milton_finding_id",
+    "milton_revision_id",
+    "chip_candidate_id",
+    "chip_receipt_id",
+)
+_TUPLE_DIMENSIONS = ("profile", "model", "harness", "baseline_implementation")
+_DESIGN_PROFILE_DIMENSIONS = (
+    "des_profile",
+    "surface_mode",
+    "harness",
+    "model_tier",
+    "requested_model",
+    "served_model",
+    "capabilities",
+)
+_DESIGN_SURFACE_MODES = {"operator", "public-data", "editorial", "marketing"}
 
 
 class EvaluationError(ValueError):
@@ -63,6 +84,7 @@ class EvalManifest:
     receipt_dir: Path | None = None
     dimensions: dict[str, str] = field(default_factory=dict)
     required_variant_gates: tuple[str, ...] = ()
+    origin: dict[str, str] = field(default_factory=dict)
 
 
 def _resolve(root: Path, value: str) -> Path:
@@ -150,6 +172,34 @@ def load_manifest(path: str | Path) -> EvalManifest:
         isinstance(key, str) and isinstance(value, str) for key, value in dimensions.items()
     ):
         raise EvaluationError("[dimensions] values must be strings")
+    if "des_profile" in dimensions or "surface_mode" in dimensions:
+        missing_design = [key for key in _DESIGN_PROFILE_DIMENSIONS if not dimensions.get(key)]
+        if missing_design:
+            raise EvaluationError(
+                "design evaluation [dimensions] missing " + ", ".join(missing_design)
+            )
+        if dimensions["surface_mode"] not in _DESIGN_SURFACE_MODES:
+            raise EvaluationError(
+                "design evaluation surface_mode must be operator, public-data, "
+                "editorial, or marketing"
+            )
+
+    origin = raw.get("origin", {})
+    if not isinstance(origin, dict) or not all(
+        isinstance(key, str) and isinstance(value, str) for key, value in origin.items()
+    ):
+        raise EvaluationError("[origin] values must be strings")
+    if origin:
+        if origin.get("schema") != PROCEDURE_ORIGIN_SCHEMA:
+            raise EvaluationError(f"origin.schema must be {PROCEDURE_ORIGIN_SCHEMA}")
+        missing_origin = [key for key in _ORIGIN_FIELDS if not origin.get(key)]
+        if missing_origin:
+            raise EvaluationError(f"[origin] missing {', '.join(missing_origin)}")
+        missing_dimensions = [key for key in _TUPLE_DIMENSIONS if not dimensions.get(key)]
+        if missing_dimensions:
+            raise EvaluationError(
+                "procedure evaluation [dimensions] missing " + ", ".join(missing_dimensions)
+            )
 
     required_variant_gates: tuple[str, ...] = ()
     acceptance = raw.get("acceptance")
@@ -202,6 +252,7 @@ def load_manifest(path: str | Path) -> EvalManifest:
         receipt_dir=_resolve(root, receipt_value),
         dimensions=dict(dimensions),
         required_variant_gates=required_variant_gates,
+        origin=dict(origin),
     )
 
 
@@ -484,7 +535,10 @@ def run_evaluation(
         schedule.extend((case, arm) for arm in arms)
 
     runs = [_run_one(manifest, case, arm, run_id) for case, arm in schedule]
+    skill_sha256 = _sha256(manifest.skill_path)
+    evaluation_tuple, baseline_tuple = _evaluation_tuples(manifest, skill_sha256)
     receipt = {
+        "schema": EVALUATION_RECEIPT_SCHEMA,
         "schema_version": SCHEMA_VERSION,
         "evaluation_id": manifest.id,
         "run_id": run_id,
@@ -493,9 +547,12 @@ def run_evaluation(
         "manifest_sha256": _sha256(manifest.path),
         "skill": manifest.skill,
         "skill_path": str(manifest.skill_path),
-        "skill_sha256": _sha256(manifest.skill_path),
+        "skill_sha256": skill_sha256,
         "dimensions": manifest.dimensions,
         "required_variant_gates": list(manifest.required_variant_gates),
+        "origin": manifest.origin or None,
+        "evaluation_tuple": evaluation_tuple,
+        "baseline_tuple": baseline_tuple,
         "seed": manifest.seed,
         "split_requested": split,
         "runs": runs,
@@ -504,6 +561,7 @@ def run_evaluation(
         },
         "promotion": _promotion(manifest, runs),
     }
+    receipt["receipt_id"] = _content_id("spr-eval", receipt)
     output = Path(receipt_path).resolve() if receipt_path else _default_receipt_path(manifest, run_id)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -520,7 +578,64 @@ def load_receipt(path: str | Path) -> dict[str, Any]:
         raise EvaluationError(f"invalid receipt JSON: {exc}") from exc
     if not isinstance(receipt, dict) or receipt.get("schema_version") != SCHEMA_VERSION:
         raise EvaluationError(f"receipt schema_version must be {SCHEMA_VERSION}")
+    if receipt.get("schema") == EVALUATION_RECEIPT_SCHEMA:
+        _validate_procedure_receipt_fields(receipt)
     return receipt
+
+
+def record_promotion(
+    evaluation_receipt: dict[str, Any],
+    binding_record: Any,
+    path: str | Path,
+) -> dict[str, Any]:
+    """Write one idempotent promotion receipt after an eligible evaluated bind."""
+
+    _validate_procedure_receipt_fields(evaluation_receipt)
+    promotion = evaluation_receipt.get("promotion")
+    if not isinstance(promotion, dict) or promotion.get("eligible") is not True:
+        raise EvaluationError("only an eligible evaluation can be promoted")
+    evaluation_receipt_id = str(evaluation_receipt["receipt_id"])
+    for name in ("coordinate", "surface", "bound_at"):
+        if not isinstance(getattr(binding_record, name, None), str):
+            raise EvaluationError(f"binding record is missing {name}")
+    if getattr(binding_record, "evaluation_receipt_id", None) != evaluation_receipt_id:
+        raise EvaluationError("binding record does not name this evaluation receipt")
+    for field_name in ("origin", "evaluation_tuple", "baseline_tuple"):
+        if getattr(binding_record, field_name, None) != evaluation_receipt.get(field_name):
+            raise EvaluationError(f"binding record {field_name} does not match evaluation")
+
+    document: dict[str, Any] = {
+        "schema": PROMOTION_RECEIPT_SCHEMA,
+        "recorded_at": binding_record.bound_at,
+        "evaluation_receipt_id": evaluation_receipt_id,
+        "evaluation_id": evaluation_receipt["evaluation_id"],
+        "origin": evaluation_receipt["origin"],
+        "evaluation_tuple": evaluation_receipt["evaluation_tuple"],
+        "baseline_tuple": evaluation_receipt["baseline_tuple"],
+        "binding": {
+            "surface": binding_record.surface,
+            "coordinate": binding_record.coordinate,
+            "doctrine_coordinate": binding_record.doctrine_coordinate,
+            "skills": binding_record.skills,
+            "channel_versions": binding_record.channel_versions,
+        },
+        "decision": {
+            "eligible": True,
+            "observed_delta": promotion.get("observed_delta"),
+            "required_improvement": promotion.get("required_improvement"),
+        },
+    }
+    document["receipt_id"] = _content_id("spr-promote", document)
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    encoded = json.dumps(document, indent=2, sort_keys=True) + "\n"
+    if output.is_file():
+        existing = output.read_text(encoding="utf-8")
+        if existing != encoded:
+            raise EvaluationError("promotion receipt path already contains other content")
+        return document
+    output.write_text(encoded, encoding="utf-8")
+    return document
 
 
 def manifest_as_dict(manifest: EvalManifest) -> dict[str, Any]:
@@ -535,3 +650,44 @@ def manifest_as_dict(manifest: EvalManifest) -> dict[str, Any]:
         for case in manifest.cases
     ]
     return raw
+
+
+def _evaluation_tuples(
+    manifest: EvalManifest, skill_sha256: str
+) -> tuple[dict[str, str] | None, dict[str, str] | None]:
+    if not manifest.origin:
+        return None, None
+    common = {
+        "profile": manifest.dimensions["profile"],
+        "model": manifest.dimensions["model"],
+        "harness": manifest.dimensions["harness"],
+    }
+    return (
+        {"implementation": f"sha256:{skill_sha256}", **common},
+        {"implementation": manifest.dimensions["baseline_implementation"], **common},
+    )
+
+
+def _validate_procedure_receipt_fields(receipt: dict[str, Any]) -> None:
+    origin = receipt.get("origin")
+    if origin is None:
+        return
+    if not isinstance(origin, dict) or origin.get("schema") != PROCEDURE_ORIGIN_SCHEMA:
+        raise EvaluationError("evaluation receipt has invalid procedure origin")
+    if any(not isinstance(origin.get(key), str) or not origin[key] for key in _ORIGIN_FIELDS):
+        raise EvaluationError("evaluation receipt has incomplete procedure origin")
+    for name in ("evaluation_tuple", "baseline_tuple"):
+        value = receipt.get(name)
+        if not isinstance(value, dict) or any(
+            not isinstance(value.get(key), str) or not value[key]
+            for key in ("implementation", "profile", "model", "harness")
+        ):
+            raise EvaluationError(f"evaluation receipt has invalid {name}")
+    receipt_id = receipt.get("receipt_id")
+    if not isinstance(receipt_id, str) or not receipt_id:
+        raise EvaluationError("evaluation receipt has no receipt_id")
+
+
+def _content_id(prefix: str, document: dict[str, Any]) -> str:
+    body = json.dumps(document, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return f"{prefix}-{hashlib.sha256(body.encode()).hexdigest()[:24]}"

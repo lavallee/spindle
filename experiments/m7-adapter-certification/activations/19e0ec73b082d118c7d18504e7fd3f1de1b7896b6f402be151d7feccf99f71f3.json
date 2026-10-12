@@ -1,0 +1,77 @@
+{
+  "activation_evidence": {
+    "effective": {
+      "policy": {
+        "authority": "observed",
+        "source": "evidence/claude-runtime.json#agents.parent",
+        "value": "permission-mode:plan"
+      },
+      "tools": {
+        "authority": "observed",
+        "source": "evidence/claude-runtime.json#agents.parent",
+        "value": [
+          "Task",
+          "Skill"
+        ]
+      }
+    },
+    "harness": {
+      "build": {
+        "authority": "observed",
+        "source": "evidence/claude-runtime.json#agents.parent",
+        "value": "2.1.220"
+      }
+    },
+    "model": {
+      "served_canonical": {
+        "authority": "derived",
+        "source": "evidence/claude-runtime.json#agents.parent",
+        "value": "claude-opus-5"
+      },
+      "served_raw": {
+        "authority": "observed",
+        "source": "evidence/claude-runtime.json#agents.parent",
+        "value": "claude-opus-5"
+      }
+    },
+    "permission_denials": [],
+    "projection_loaded": {
+      "authority": "observed",
+      "source": "evidence/claude-runtime.json#agents.parent",
+      "value": true
+    }
+  },
+  "created_at": "2026-07-31T17:09:43Z",
+  "projection_plan": {
+    "adapter_id": "claude-code-reference/v1",
+    "agent_id": "c6b99d55-47b2-46ef-a6e4-c39ff77a94a3",
+    "configured": {
+      "effort": null,
+      "harness_build": null,
+      "policy": null,
+      "role": null,
+      "tools": null
+    },
+    "harness": "claude",
+    "model": {
+      "configured": null,
+      "requested": null
+    },
+    "parent_agent_id": null,
+    "plan_id": "536170db1c41f14eb31d7a30f4fa6a134e54993eacdafe987e34f96086be46ee",
+    "projection": {
+      "mode": "skill-path",
+      "target": ".claude/skills/m7-adapter-proof"
+    },
+    "realization": {
+      "package_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+      "path": "canary",
+      "realization_digest": "sha256:f240e43d42b60249b578cc78056ec2868fef9d8a126fa2f81bce723da2bcfaa1",
+      "realization_receipt_id": "sha256:25d7448afd991ebcd9bbc3557c95f7ab74d97ba724208cc71b895009aeaf8bd9",
+      "skill": "m7-adapter-proof"
+    },
+    "session_id": "c6b99d55-47b2-46ef-a6e4-c39ff77a94a3"
+  },
+  "receipt_id": "19e0ec73b082d118c7d18504e7fd3f1de1b7896b6f402be151d7feccf99f71f3",
+  "schema": "spindle.activation-receipt/v1"
+}

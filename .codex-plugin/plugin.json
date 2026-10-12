@@ -1,0 +1,36 @@
+{
+  "name": "spindle",
+  "version": "0.2.0",
+  "description": "Inspect, try, compose, verify, and maintain agent skills with exact custody and evidence.",
+  "author": {
+    "name": "Marc Lavallee",
+    "email": "mlavallee@gmail.com",
+    "url": "https://github.com/lavallee"
+  },
+  "homepage": "https://lavallee.github.io/spindle/",
+  "repository": "https://github.com/lavallee/spindle",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "codex",
+    "lifecycle",
+    "provenance"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Spindle",
+    "shortDescription": "Evidence-bearing agent-skill lifecycle",
+    "longDescription": "Inspect and try exact skill bytes, verify the active harness state, and adopt, update, distill, or retire only with explicit custody and evidence.",
+    "developerName": "Marc Lavallee",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://lavallee.github.io/spindle/",
+    "defaultPrompt": [
+      "Use Spindle to inspect this repository's active skill state.",
+      "Use Spindle to try a skill without adopting it.",
+      "Use Spindle to diagnose skill startup or version drift."
+    ]
+  }
+}

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Why Spindle exists — the case against the skill pile</title>
-<meta name="description" content="Skills multiply, and an unvetted pile is expensive: context budget, silent conflicts, one-size-fits-all bloat, wrong-surface phrasing, and eroded guardrails. The argument for composing skills per surface — and why the extra step pays for itself.">
+<title>Why Spindle exists — beyond install and hope</title>
+<meta name="description" content="Installing an agent skill leaves intent, conflicts, authority, runtime activation, effectiveness, updates, and retirement unresolved. Spindle supplies the missing lifecycle and composition control plane.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="lib/artoo-kit/tokens.css">
 <link rel="stylesheet" href="lib/artoo-kit/base.css">
@@ -19,6 +19,7 @@
   <div class="nav-links">
     <a href="index.html">Overview</a>
     <a href="rationale.html">Rationale</a>
+    <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
     <a href="evaluation.html">Evaluation</a>
     <a href="guide.html">Guide</a>
@@ -30,10 +31,11 @@
 <main class="article">
   <header class="article-header">
     <div class="article-kicker">rationale</div>
-    <h1 class="article-title">Why compose skills at all?</h1>
-    <p class="article-dek">Skills are easy to add and quietly expensive to carry.
-    The default — a global pile that every repo inherits — has five hidden costs.
-    Composition is what turns a pile into a <em>tight, vetted set</em>.</p>
+    <h1 class="article-title">Why manage a skill lifecycle at all?</h1>
+    <p class="article-dek">Skills are easy to install and quietly expensive to
+    understand, combine, keep current, and remove. Composition turns a pile into a
+    coherent set; lifecycle custody makes that set temporary, exact, evidenced,
+    and reversible.</p>
   </header>
 
   <p class="lead">Agent skills are one of the best ideas to arrive in coding
@@ -41,6 +43,36 @@
   at a task. The trouble starts not with any one skill but with the twentieth.
   Skills accumulate the way dependencies do — and, like dependencies, an
   unmanaged pile carries costs that don't show up until they compound.</p>
+
+  <h2>Cost 0 — install and hope</h2>
+  <p>The usual workflow compresses several different decisions into one action:
+  copy a skill into a discovery directory and hope the model notices it, the
+  harness loads the intended version, its permissions are acceptable, it does not
+  conflict with ambient state, and somebody will retest it after the next model
+  upgrade. Installation answers none of those questions.</p>
+
+  <div class="ledger">
+    <div>
+      <span class="tag">install and hope</span>
+      <h4>Ambient dependency</h4>
+      <ul>
+        <li>Presence stands in for intent and authority.</li>
+        <li>The installed name stands in for exact bytes.</li>
+        <li>Configuration stands in for activation.</li>
+        <li>Old anecdotes stand in for current evidence.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">with spindle</span>
+      <h4>Evidence-bearing custody</h4>
+      <ul>
+        <li>Inspect before granting authority.</li>
+        <li>Try or borrow before adopting.</li>
+        <li>Verify exact startup and per-agent activation.</li>
+        <li>Rebaseline, update, roll back, and retire explicitly.</li>
+      </ul>
+    </div>
+  </div>
 
   <p>The instinct is to install every useful skill globally so it's always
   available. It's the right instinct and the wrong result. A global pile is never
@@ -180,17 +212,18 @@
     </aside>
   </div>
 
-  <h2>"But it adds a step"</h2>
-  <p>It does — one command, <code>spindle bind</code>, between installing skills
-  and using them. That's a fair objection, so here's the honest accounting of why
-  the step earns its place.</p>
+  <h2>"But it adds a control plane"</h2>
+  <p>It does. The payoff is that the decisions already being made implicitly—what
+  to load, which version, for how long, under which authority, and whether it
+  helped—become inspectable and reversible. The correct-state path stays small:
+  cached bootstrap and stable native hooks verify desired state without network
+  access or evaluation in the startup callback.</p>
 
   <div class="article-mrow">
-    <p>First, it's cheap and it's amortized. A bind is deterministic and cached;
-    re-binding an unchanged surface is nearly free. The <b>advance team</b> can
-    precompute the blend for every known surface ahead of time, so a repo is
-    already composed before anyone opens it — the step disappears into a warm
-    cache.</p>
+    <p>Composition is deterministic and cached; re-binding an unchanged surface is
+    nearly free. Startup uses local metadata and content identities. The
+    <b>advance team</b> can precompute managed blends, while lease and adoption
+    changes remain mutable state behind stable hook definitions.</p>
     <aside class="article-marginnote article-marginnote--def">
       <span class="term">advance team</span>
       <code>spindle advance run</code> binds every configured surface up front, so
@@ -217,8 +250,8 @@
   Spindle separates those questions on purpose and answers the second one with
   real evidence.</p>
 
-  <p class="article-pullquote">Rendering proves a skill is available. Only a
-  held-out evaluation proves it helped.</p>
+  <p class="article-pullquote">Availability is not activation, and activation is
+  not improvement. Each deserves its own evidence.</p>
 
   <p>That's the payoff a pile can never give you: a skill set that is not just
   present but sized, coherent, surface-fit, guardrail-safe, and — where it
@@ -229,14 +262,14 @@
       <span class="dir">← Back</span>
       <span class="ttl">Overview</span>
     </a>
-    <a class="next" href="how-it-works.html">
+    <a class="next" href="lifecycle.html">
       <span class="dir">Next →</span>
-      <span class="ttl">How it works</span>
+      <span class="ttl">The skill lifecycle</span>
     </a>
   </nav>
 
   <footer class="colophon">
-    An open toolchain for composing agent skills · built with
+    An open lifecycle and control plane for agent skills · built with
     <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
     MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
   </footer>

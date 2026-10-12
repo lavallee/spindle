@@ -1,0 +1,9 @@
+{
+  "scores": {
+    "no-skill": 0.72,
+    "invariant-core": 0.79,
+    "empty-overlay": 0.79,
+    "incumbent": 0.80,
+    "without-example": 0.79
+  }
+}

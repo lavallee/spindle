@@ -1,0 +1,25 @@
+{
+  "activation_receipt_id": "a9f1e54a7a4f9174665393773320cf353171c08928da84696e4134edb1fa5006",
+  "cleanup_event_id": "sha256:d7188a5b7052239ffbbecef026e23459bc0f84417f9bd847623ee0d3f1d0ed21",
+  "command_shape": [
+    "codex",
+    "-a",
+    "never",
+    "-s",
+    "read-only",
+    "-m",
+    "gpt-5.6-sol",
+    "exec",
+    "--ephemeral",
+    "<task>"
+  ],
+  "exit_code": 0,
+  "harness": "codex",
+  "lease_id": "sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa",
+  "receipt_id": "sha256:816aef70cfb6a1286c44594ca181e9f6ef1e28178f83fc9bf7f8e8e4da309f64",
+  "schema": "spindle.trial-run-receipt/v1",
+  "startup_receipt_id": "sha256:667a2b61f90a45322dd22a01121e8aec68a1cc7f50ed87b7f2123a1bd0e03096",
+  "stderr_digest": "sha256:05107ebb61959f22006f1875e22f919085696ed7592f45877449d3e47387a04b",
+  "stdout_digest": "sha256:2f5c63dc5be09ad2557824a555277f784f9a11d4fbe4b8006bb8e2716fcae03d",
+  "task_digest": "sha256:eee76947bcee951709c60714b8bc2fcb68f841f69b5961b64bcd3308356ebde4"
+}

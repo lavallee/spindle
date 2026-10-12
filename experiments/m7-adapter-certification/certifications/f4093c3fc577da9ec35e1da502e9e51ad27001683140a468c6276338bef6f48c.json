@@ -1,0 +1,187 @@
+{
+  "adapter_id": "codex-reference/v1",
+  "agents": [
+    {
+      "activation_receipt": "activations/ebf17edd877681b167677d018c000b390ffa6ad1d87372d6d06c1f7b064d2c77.json",
+      "activation_receipt_id": "ebf17edd877681b167677d018c000b390ffa6ad1d87372d6d06c1f7b064d2c77",
+      "adapter_id": "codex-reference/v1",
+      "agent_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+      "effective_policy": "sha256:258ef89aac8cee495fa6c7d0c58b857e6f9b0628a4644750624aa0f00b5ce3b0;approval=never;sandbox=read-only;network=restricted",
+      "effective_tools": [
+        "composition:3000",
+        "observed:exec",
+        "observed:spawn_agent",
+        "observed:wait_agent"
+      ],
+      "harness": "codex",
+      "harness_build": "0.146.0",
+      "parent_agent_id": null,
+      "served_model": "gpt-5.6-sol"
+    },
+    {
+      "activation_receipt": "activations/f91b9c06fe8c4472fd6f576e2f8d5e5975e66e009b3c65008286459642f49699.json",
+      "activation_receipt_id": "f91b9c06fe8c4472fd6f576e2f8d5e5975e66e009b3c65008286459642f49699",
+      "adapter_id": "codex-reference/v1",
+      "agent_id": "019fb921-573c-7602-b611-0bccd7dd7d41",
+      "effective_policy": "sha256:258ef89aac8cee495fa6c7d0c58b857e6f9b0628a4644750624aa0f00b5ce3b0;approval=never;sandbox=read-only;network=restricted",
+      "effective_tools": [
+        "composition:3000",
+        "observed:exec"
+      ],
+      "harness": "codex",
+      "harness_build": "0.146.0",
+      "parent_agent_id": "019fb921-0a59-7a50-a02c-fd6cb2644646",
+      "served_model": "gpt-5.6-terra"
+    }
+  ],
+  "capability_gaps": [],
+  "certification_id": "sha256:f4093c3fc577da9ec35e1da502e9e51ad27001683140a468c6276338bef6f48c",
+  "harness": "codex",
+  "harness_build": "0.146.0",
+  "matrix": {
+    "adapter_id": "codex-reference/v1",
+    "capabilities": {
+      "bootstrap": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "effective-policy": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "effective-tools": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "inventory": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "model-identity": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "projection": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "receipt-integrity": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "restart": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "resume-reload": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      },
+      "subagent-independence": {
+        "evidence": [
+          {
+            "path": "evidence/codex-runtime.json",
+            "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+          },
+          {
+            "path": "evidence/conformance-suite.json",
+            "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+          }
+        ],
+        "status": "pass"
+      }
+    },
+    "harness": "codex",
+    "harness_build": "0.146.0",
+    "matrix_id": "sha256:a9b3cb042c0219889579bf903ba9012e710d23214f4adcb286096fe7d05080b2",
+    "projection_modes": [
+      "skill-path",
+      "agent-instructions"
+    ],
+    "schema": "spindle.adapter-capability-matrix/v1"
+  },
+  "observation_digest": "sha256:f7287136fef7dbf68b7cc00920af08b2338408f8b622dd870d6acf869483825e",
+  "schema": "spindle.adapter-certification/v1",
+  "status": "certified"
+}

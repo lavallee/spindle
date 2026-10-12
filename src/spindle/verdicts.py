@@ -90,7 +90,16 @@ def get(slug: str) -> tuple[dict, str] | None:
 
 
 def write(slug: str, *, source: str, url: str = "", verdict: str = "tracking",
-          status: str = "candidate", body: str = "") -> Path:
+          status: str = "candidate", body: str = "",
+          chippable: str = "", chip_alias: str = "") -> Path:
+    """Write a verdict.
+
+    ``chippable`` and ``chip_alias`` are optional touchpoint-B keys: they record
+    a chippability judgment ("yes" / "no" / "candidate" / a note) and an
+    associated chip alias alongside the borrow/graft/try verdict, without
+    overloading it. Open-dict, no enum enforcement (matches the existing
+    frontmatter style); omitted when empty. ``list_verdicts`` surfaces whatever
+    keys are present, so these travel out with no further plumbing."""
     today = date.today().isoformat()
     fm = {
         "slug": slug,
@@ -100,6 +109,8 @@ def write(slug: str, *, source: str, url: str = "", verdict: str = "tracking",
         "verdict": verdict,
         "status": status,
         "last_reviewed": today,
+        "chippable": chippable,
+        "chip_alias": chip_alias,
     }
     lines = ["---"]
     for k, v in fm.items():

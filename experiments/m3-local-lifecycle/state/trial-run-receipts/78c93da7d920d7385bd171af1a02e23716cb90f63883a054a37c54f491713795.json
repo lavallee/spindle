@@ -1,0 +1,25 @@
+{
+  "activation_receipt_id": "c3dc3bb9d00220aad9436e2a96c1fe4d16231cc8777aaf4a6ffeca90add386cc",
+  "cleanup_event_id": "sha256:cba42784c9726b966ab00abcc413300e2e83b7b2978cec77dce32ebcdac249aa",
+  "command_shape": [
+    "claude",
+    "-p",
+    "--no-session-persistence",
+    "--permission-mode",
+    "plan",
+    "--allowedTools",
+    "Read,Glob,Grep",
+    "--model",
+    "sonnet",
+    "<task>"
+  ],
+  "exit_code": 0,
+  "harness": "claude",
+  "lease_id": "sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1",
+  "receipt_id": "sha256:78c93da7d920d7385bd171af1a02e23716cb90f63883a054a37c54f491713795",
+  "schema": "spindle.trial-run-receipt/v1",
+  "startup_receipt_id": "sha256:b9754b4aa5a36ce93765194b2c861347370c67f40617b63d0c5b1f3c1555dc26",
+  "stderr_digest": "sha256:ea6e7c4ddf5015b87583c1c1ce6837643df4490b26dcf9b2a265456ce97e37bd",
+  "stdout_digest": "sha256:2f5c63dc5be09ad2557824a555277f784f9a11d4fbe4b8006bb8e2716fcae03d",
+  "task_digest": "sha256:eee76947bcee951709c60714b8bc2fcb68f841f69b5961b64bcd3308356ebde4"
+}

@@ -7,18 +7,13 @@ flows through ingest correctly, including topo ordering and edge resolution.
 from __future__ import annotations
 
 import json
-import sys
-import threading
-import time
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 
 from spindle import ingest as ingest_mod
 from spindle.ingest import (
-    IngestResult,
     IngestRow,
     _resolve_edges,
     parse_jsonl,

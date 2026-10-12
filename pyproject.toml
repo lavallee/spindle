@@ -1,7 +1,7 @@
 [project]
 name = "spindle"
-version = "0.1.0"
-description = "Spindle composes source skills into surface-specific blends"
+version = "0.2.0"
+description = "Evidence-bearing lifecycle and control plane for agent skills"
 authors = [
     { name = "Marc Lavallee", email = "mlavallee@gmail.com" }
 ]
@@ -26,7 +26,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/lavallee/spindle"
 Repository = "https://github.com/lavallee/spindle.git"
-Documentation = "https://github.com/lavallee/spindle#readme"
+Documentation = "https://lavallee.github.io/spindle/"
 Issues = "https://github.com/lavallee/spindle/issues"
 
 [project.optional-dependencies]
@@ -49,3 +49,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/spindle"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"skills/spindle" = "spindle/builtin/skills/spindle"

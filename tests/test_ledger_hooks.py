@@ -52,9 +52,9 @@ def _read_events() -> list[dict]:
 
 
 class TestInstallSkillsLedger:
-
     def test_install_logs_skill_link(self, skills_dir, src):
         from spindle.skills import install_skills
+
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
             with mock.patch("spindle.active.source_dir", return_value=src):
@@ -67,6 +67,7 @@ class TestInstallSkillsLedger:
 
     def test_install_includes_distribution(self, skills_dir, src):
         from spindle.skills import install_skills
+
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
             with mock.patch("spindle.active.source_dir", return_value=src):
@@ -76,6 +77,7 @@ class TestInstallSkillsLedger:
 
     def test_install_dry_run_does_not_log(self, skills_dir, src):
         from spindle.skills import install_skills
+
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
             with mock.patch("spindle.active.source_dir", return_value=src):
@@ -84,6 +86,7 @@ class TestInstallSkillsLedger:
 
     def test_install_skipped_does_not_log(self, skills_dir, src):
         from spindle.skills import install_skills
+
         spec = _make_skill(src, "sample-grill")
         (skills_dir / "sample-grill").symlink_to(spec.skill_dir)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
@@ -93,16 +96,19 @@ class TestInstallSkillsLedger:
 
     def test_update_also_logs(self, skills_dir, src):
         from spindle.skills import install_skills
+
+        old_base = src / "old-source"
+        old_base.mkdir()
+        old_spec = _make_skill(old_base, "sample-grill")
         spec = _make_skill(src, "sample-grill")
-        old_target = src / "old"
-        old_target.mkdir()
-        (skills_dir / "sample-grill").symlink_to(old_target)
-        with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
-            with mock.patch("spindle.active.source_dir", return_value=src):
+        with mock.patch("spindle.active.source_dir", return_value=src):
+            with mock.patch("spindle.skills.discover_skills", return_value=[old_spec]):
+                install_skills()
+            with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
                 install_skills()
         events = _read_events()
-        assert events[0]["kind"] == "skill_link"
-        assert "sample-grill" in events[0]["skills_linked"]
+        assert events[-1]["kind"] == "skill_link"
+        assert "sample-grill" in events[-1]["skills_linked"]
 
 
 # ---------------------------------------------------------------------------
@@ -111,21 +117,21 @@ class TestInstallSkillsLedger:
 
 
 class TestUninstallSkillsLedger:
-
     def test_uninstall_logs_skill_unlink(self, skills_dir, src):
-        from spindle.skills import uninstall_skills
+        from spindle.skills import install_skills, uninstall_skills
+
         spec = _make_skill(src, "sample-grill")
-        (skills_dir / "sample-grill").symlink_to(spec.skill_dir)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
+            install_skills()
             uninstall_skills()
         events = _read_events()
-        assert len(events) == 1
-        ev = events[0]
+        ev = events[-1]
         assert ev["kind"] == "skill_unlink"
         assert "sample-grill" in ev["skills_removed"]
 
     def test_uninstall_dry_run_does_not_log(self, skills_dir, src):
         from spindle.skills import uninstall_skills
+
         spec = _make_skill(src, "sample-grill")
         (skills_dir / "sample-grill").symlink_to(spec.skill_dir)
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
@@ -134,6 +140,7 @@ class TestUninstallSkillsLedger:
 
     def test_uninstall_not_installed_does_not_log(self, skills_dir, src):
         from spindle.skills import uninstall_skills
+
         spec = _make_skill(src, "sample-grill")
         with mock.patch("spindle.skills.discover_skills", return_value=[spec]):
             uninstall_skills()  # skill not installed → skipped
@@ -145,11 +152,12 @@ class TestUninstallSkillsLedger:
 # ---------------------------------------------------------------------------
 
 
-_TEST_SNIPPET = "<!-- spindle:preempt:begin -->\ntest body\n<!-- spindle:preempt:end -->\n"
+_TEST_SNIPPET = (
+    "<!-- spindle:preempt:begin -->\ntest body\n<!-- spindle:preempt:end -->\n"
+)
 
 
 class TestPreemptLedger:
-
     @pytest.fixture
     def claude_md(self, tmp_path, monkeypatch):
         md = tmp_path / "CLAUDE.md"
@@ -159,6 +167,7 @@ class TestPreemptLedger:
 
     def test_preempt_logs_add(self, claude_md):
         from spindle.preempt import preempt
+
         preempt()
         events = _read_events()
         assert len(events) == 1
@@ -167,6 +176,7 @@ class TestPreemptLedger:
 
     def test_preempt_already_present_does_not_log(self, claude_md):
         from spindle.preempt import preempt
+
         preempt()
         preempt()  # second call → already-present
         events = _read_events()
@@ -174,6 +184,7 @@ class TestPreemptLedger:
 
     def test_unpreempt_logs_remove(self, claude_md):
         from spindle.preempt import preempt, unpreempt
+
         preempt()
         unpreempt()
         events = _read_events()
@@ -182,5 +193,6 @@ class TestPreemptLedger:
 
     def test_unpreempt_not_present_does_not_log(self, claude_md):
         from spindle.preempt import unpreempt
+
         unpreempt()  # → not-present
         assert _read_events() == []

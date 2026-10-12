@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import patch
 
-import pytest
 
 from spindle.cli import main
 from spindle.models import DistributionMetadata

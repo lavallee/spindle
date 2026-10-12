@@ -1,0 +1,62 @@
+{
+  "blockers": [],
+  "current_lock_id": "sha256:84d3f9f9dd3d14549a5e74bde1ef16b2909268b08e06171691d7c903b7672f73",
+  "inventory_id": "sha256:0d920fb7a8d67d14a58b15a3ae830c61f5fbb8069bbb8ecc5573529cce4a41b8",
+  "lease": {
+    "agents": [
+      "parent"
+    ],
+    "cleanup_policy": "remove-owned-projection",
+    "expires_at": "2026-08-01T15:33:03Z",
+    "harness": "claude",
+    "kind": "session",
+    "lease_id": "sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1",
+    "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "posture": "read-only",
+    "renewal_policy": "none",
+    "schema": "spindle.lease/v1",
+    "scope": "session",
+    "skill": "spindle-lease-canary",
+    "skill_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "source": {
+      "content_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "locator": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/candidate/spindle-lease-canary",
+      "provider": "local",
+      "revision": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "schema": "spindle.skill-ref/v1",
+      "subpath": "."
+    },
+    "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary",
+    "starts_at": "2026-07-31T15:33:03Z",
+    "surface_id": "sha256:91c57a162797fd5ca2f04c269f73db4017a27bbce9b2c7cac030d463b527df81",
+    "task_digest": "sha256:eee76947bcee951709c60714b8bc2fcb68f841f69b5961b64bcd3308356ebde4"
+  },
+  "operation": "release",
+  "plan_id": "sha256:9fd2cc4fd261f63511799935769cae3b4728c9702518158bae0c564abdd4789d",
+  "projection": {
+    "authority": "lease:sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1",
+    "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "projection_path": "/media/ubuntussd/home/lavallee/Projects/spindle/.claude/skills/spindle-lease-canary",
+    "skill": "spindle-lease-canary",
+    "source_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+    "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary"
+  },
+  "proposed_lock": {
+    "adoption_ids": [],
+    "binding_coordinate": "lease-only/v1",
+    "conflict_decisions": [],
+    "harness": "claude",
+    "lease_ids": [],
+    "lock_id": "sha256:e0f75bd105c2382892c815d3b3586fb0e3e85db77376dfe25a81d6abefd3104b",
+    "projections": [],
+    "repo_path": "/media/ubuntussd/home/lavallee/Projects/spindle",
+    "schema": "spindle.surface-lock/v1",
+    "surface_id": "sha256:91c57a162797fd5ca2f04c269f73db4017a27bbce9b2c7cac030d463b527df81",
+    "surface_name": "spindle"
+  },
+  "schema": "spindle.lease-plan/v1",
+  "warnings": [
+    "__managed__ [managed] Claude managed and bundled skills require harness-reported inventory",
+    "__plugins__ [plugins] Claude plugin skills are namespaced and harness-managed"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-07-30T00:07:10Z",
+  "realization": {
+    "digest": "5454414203b77cf31b86413322c2d79a2ca8e2ea332943061eaf0030587aa2a7",
+    "path": "experiments/spindle-minimalist-skill/.state/realizations/5454414203b77cf31b86/eno-vault-pilot"
+  },
+  "receipt_id": "b37f43bf38119b47a133",
+  "resolution": {
+    "overlay": null,
+    "overlay_digest": null,
+    "priority": 0,
+    "profile_id": "codex-terra-explorer-candidate",
+    "reason": "matched",
+    "specificity": 6,
+    "status": "matched",
+    "tuned": true
+  },
+  "schema_version": 1,
+  "session": {
+    "effort": "medium",
+    "harness": "codex",
+    "harness_build": "0.146.0",
+    "memory_policy": null,
+    "policy_digest": null,
+    "requested_model": "gpt-5.6-terra",
+    "role": "explorer",
+    "served_model": "gpt-5.6-terra",
+    "session_id": "pinned-probe",
+    "toolset_digest": "sha256:040f23cbde0b3981075ea9cf328c0011e93fd4ed60718d0754ac3d6110a70783"
+  },
+  "skill": {
+    "name": "eno-vault-pilot",
+    "package_digest": "4e538ff5573de5a8fa24fbfebd6816976d75ee17cf0ff783273e119a67021783",
+    "source": "/media/ubuntussd/home/lavallee/Projects/eno/experiments/spindle-minimalist-skill/skills/candidate/eno-vault-pilot"
+  }
+}

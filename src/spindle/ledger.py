@@ -11,7 +11,6 @@ from __future__ import annotations
 import json
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from .models import InstalledDistributionState, LedgerEvent, MaterializedState

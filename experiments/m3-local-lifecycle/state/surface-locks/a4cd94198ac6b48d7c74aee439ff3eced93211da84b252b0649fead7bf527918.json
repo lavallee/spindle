@@ -1,0 +1,13 @@
+{
+  "adoption_ids": [],
+  "binding_coordinate": "lease-only/v1",
+  "conflict_decisions": [],
+  "harness": "codex",
+  "lease_ids": [],
+  "lock_id": "sha256:db9c34de064f3699cf25da5b879e48a2d1a9cafce439f63bf951f419f1f8ccda",
+  "projections": [],
+  "repo_path": "/media/ubuntussd/home/lavallee/Projects/spindle",
+  "schema": "spindle.surface-lock/v1",
+  "surface_id": "sha256:a4cd94198ac6b48d7c74aee439ff3eced93211da84b252b0649fead7bf527918",
+  "surface_name": "spindle"
+}

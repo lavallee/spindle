@@ -1,0 +1,66 @@
+{
+  "activation_evidence": {
+    "effective": {
+      "policy": null,
+      "tools": null
+    },
+    "harness": {
+      "build": null
+    },
+    "model": {
+      "served_canonical": null,
+      "served_raw": null
+    },
+    "permission_denials": [],
+    "projection_loaded": {
+      "authority": "observed",
+      "source": "startup receipt sha256:b9754b4aa5a36ce93765194b2c861347370c67f40617b63d0c5b1f3c1555dc26",
+      "value": true
+    }
+  },
+  "created_at": "2026-07-31T15:33:03Z",
+  "projection_plan": {
+    "adapter_id": "claude-code-reference/v1",
+    "agent_id": "parent",
+    "configured": {
+      "effort": null,
+      "harness_build": null,
+      "policy": {
+        "authority": "configured",
+        "source": "lease sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1",
+        "value": "read-only"
+      },
+      "role": null,
+      "tools": null
+    },
+    "harness": "claude",
+    "model": {
+      "configured": {
+        "authority": "configured",
+        "source": "trial launch command",
+        "value": "sonnet"
+      },
+      "requested": {
+        "authority": "requested",
+        "source": "trial CLI --model",
+        "value": "sonnet"
+      }
+    },
+    "parent_agent_id": null,
+    "plan_id": "79ac0abdde33c96350f4443ccc74b08d9142a9d85a03a1df769fdfcb90694fdf",
+    "projection": {
+      "mode": "skill-path",
+      "target": "/media/ubuntussd/home/lavallee/Projects/spindle/.claude/skills/spindle-lease-canary"
+    },
+    "realization": {
+      "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary",
+      "realization_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "realization_receipt_id": "sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1",
+      "skill": "spindle-lease-canary"
+    },
+    "session_id": "lease:sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1"
+  },
+  "receipt_id": "c3dc3bb9d00220aad9436e2a96c1fe4d16231cc8777aaf4a6ffeca90add386cc",
+  "schema": "spindle.activation-receipt/v1"
+}

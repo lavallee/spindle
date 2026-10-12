@@ -26,25 +26,47 @@ else:  # pragma: no cover
 
 from . import active as active_mod
 from .composition import ChannelLayer, ComposedSkill
+from .lifecycle import PackageRevision
 
 # A provider loads one channel into a layer, or None if the surface's harness has
 # no channel at that (scope, name). Signature: (scope, name, harness) -> layer?.
 ChannelProvider = Callable[[str, str, str], Optional[ChannelLayer]]
 
 
+def _frontmatter_chip(src: str | Path) -> str:
+    """Read the optional ``chip:`` alias from a skill dir's SKILL.md frontmatter.
+
+    Advisory-only; missing file or key returns "". Kept string-level here so the
+    channel layer never imports chip tooling."""
+    md = Path(src) / "SKILL.md"
+    try:
+        text = md.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    if not text.startswith("---"):
+        return ""
+    end = text.find("\n---", 3)
+    if end < 0:
+        return ""
+    for line in text[3:end].splitlines():
+        if line.startswith("chip:"):
+            return line.split(":", 1)[1].strip().strip('"').strip("'")
+    return ""
+
+
 @dataclass(frozen=True)
 class Surface:
     """A skill consumer. ``clusters`` are app-class keys from spindle.appclass."""
 
-    name: str                       # repo / agent id, e.g. "barn-owl"
-    harness: str                    # claude | codex | pi | …
-    autonomy_mode: str              # self_evolving | deterministic
+    name: str  # repo / agent id, e.g. "barn-owl"
+    harness: str  # claude | codex | pi | …
+    autonomy_mode: str  # self_evolving | deterministic
     clusters: tuple[str, ...] = ()  # app-class keys this surface belongs to
-    model: str | None = None        # model/tier key the skills are tuned to render for
-                                    # (frontier | opus-4.8 | …); None = no model tuning.
-                                    # Selection is per (scope × harness); model is a
-                                    # *rendering* axis (density), applied at the render
-                                    # stage like harness dialect — not a channel key.
+    model: str | None = None  # model/tier key the skills are tuned to render for
+    # (frontier | opus-4.8 | …); None = no model tuning.
+    # Selection is per (scope × harness); model is a
+    # *rendering* axis (density), applied at the render
+    # stage like harness dialect — not a channel key.
 
 
 def subscribed_channels(surface: Surface) -> list[tuple[str, str]]:
@@ -77,26 +99,39 @@ def select_layers(surface: Surface, provider: ChannelProvider) -> list[ChannelLa
 
 # ---- filesystem provider ------------------------------------------------
 
-def channel_manifest_path(source_dir: Path, scope: str, name: str, harness: str) -> Path:
+
+def channel_manifest_path(
+    source_dir: Path, scope: str, name: str, harness: str
+) -> Path:
     """Where a channel's manifest lives:
     ``<source_dir>/channels/<scope>/<name>/<harness>/channel.toml``."""
     return Path(source_dir) / "channels" / scope / name / harness / "channel.toml"
 
 
-def fs_provider(skill_index: dict[str, str | Path], *,
-                source_dir: Path | None = None) -> ChannelProvider:
+def fs_provider(
+    skill_index: dict[str, str | Path],
+    *,
+    source_dir: Path | None = None,
+    package_revisions: dict[str, PackageRevision] | None = None,
+) -> ChannelProvider:
     """A ChannelProvider backed by on-disk channel manifests.
 
     A ``channel.toml`` declares ``version``, ``absolutes`` (ids in force at that
-    scope), ``skills`` (skill names), and an optional ``tiers`` map (skill name →
-    P10 routing hint, ``judgment`` | ``execution``). ``skill_index`` maps a skill
-    name to its canonical source dir (built once from installed skills via
+    scope), ``skills`` (skill names), an optional ``tiers`` map (skill name → P10
+    routing hint, ``judgment`` | ``execution``), and an optional ``chips`` map
+    (skill name → chip alias, touchpoint A). ``skill_index`` maps a skill name to
+    its canonical source dir (built once from installed skills via
     ``skills.discover_skills``); names absent from the index are skipped. The
     command is conventionally ``/<name>``.
+
+    The chip alias falls back to the skill's own ``chip:`` frontmatter key when
+    the manifest does not name one — either source is purely advisory and inert
+    without a chip host.
 
     ``source_dir`` defaults to the active distribution's source dir.
     """
     base = Path(source_dir) if source_dir is not None else None
+    revisions = package_revisions or {}
 
     def provider(scope: str, name: str, harness: str) -> Optional[ChannelLayer]:
         root = base if base is not None else active_mod.source_dir()
@@ -105,15 +140,29 @@ def fs_provider(skill_index: dict[str, str | Path], *,
             return None
         data = tomllib.loads(manifest.read_text(encoding="utf-8"))
         tiers = data.get("tiers", {}) or {}
+        chips = data.get("chips", {}) or {}
         skills: list[ComposedSkill] = []
         for sname in data.get("skills", []):
             src = skill_index.get(sname)
             if src is None:
                 continue
-            skills.append(ComposedSkill(
-                name=sname, command=f"/{sname}", scope=scope, source_dir=str(src),
-                tier=str(tiers.get(sname, "")),
-            ))
+            chip = str(chips.get(sname, "")) or _frontmatter_chip(src)
+            revision = revisions.get(sname)
+            skills.append(
+                ComposedSkill(
+                    name=sname,
+                    command=f"/{sname}",
+                    scope=scope,
+                    source_dir=str(src),
+                    tier=str(tiers.get(sname, "")),
+                    chip=chip,
+                    package_name=revision.name if revision is not None else "",
+                    package_version=revision.version if revision is not None else "",
+                    package_digest=revision.content_digest
+                    if revision is not None
+                    else "",
+                )
+            )
         return ChannelLayer(
             scope=scope,
             name=f"{scope}:{name}",

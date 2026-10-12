@@ -1,0 +1,7 @@
+{
+  "cache_id": "sha256:921e025cd407562339282fe2c8f92e5930656bee8519abcd8f99f6223ea6f39a",
+  "content_digest": "sha256:56b3fd9f809e6a9cc31c36a4a4a778bb95caa240badd41df24dfd40d38164c81",
+  "metadata_digest": "sha256:625ff7af10e4351f9a4340e2c0f2bc396b22ca996c0615888523bf0e3ec68e02",
+  "schema": "spindle.inventory-digest-cache-entry/v1",
+  "source_path": "/home/marc/.agents/skills/find-skills"
+}

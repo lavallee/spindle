@@ -1,0 +1,14 @@
+{
+  "event": "trial-cleanup",
+  "event_id": "sha256:cba42784c9726b966ab00abcc413300e2e83b7b2978cec77dce32ebcdac249aa",
+  "lease_id": "sha256:06eaaf2e77b765cb816e1e788354a232ccfdb9cec745d832b96ba75cb4df6ea1",
+  "next_lock_id": "sha256:e0f75bd105c2382892c815d3b3586fb0e3e85db77376dfe25a81d6abefd3104b",
+  "observed_at": "2026-07-31T15:34:25Z",
+  "previous_lock_id": "sha256:84d3f9f9dd3d14549a5e74bde1ef16b2909268b08e06171691d7c903b7672f73",
+  "removed_projections": [
+    "/media/ubuntussd/home/lavallee/Projects/spindle/.claude/skills/spindle-lease-canary"
+  ],
+  "schema": "spindle.lease-event/v1",
+  "startup_receipt_id": "sha256:149115b442432f19d93e5f4590498edc6a64021e204710eb0d8cdc2376829df0",
+  "surface_id": "sha256:91c57a162797fd5ca2f04c269f73db4017a27bbce9b2c7cac030d463b527df81"
+}

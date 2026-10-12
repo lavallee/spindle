@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spindle"
+  short_description: "Drive the agent-skill lifecycle safely"
+  default_prompt: "Use $spindle to inspect this repository's skill state and recommend the next safe lifecycle action."

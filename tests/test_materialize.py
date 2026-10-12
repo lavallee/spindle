@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import pytest
+
 import spindle.materialize as mz
 from spindle.composition import ComposedSkill, Composition
 
 
+@pytest.fixture(autouse=True)
+def _isolated_spindle_home(tmp_path, monkeypatch):
+    monkeypatch.setattr(mz.paths_mod, "spindle_home", lambda: tmp_path / "state")
+
+
 def _skill(name, src):
-    return ComposedSkill(name=name, command=f"/{name}", scope="repo", source_dir=str(src))
+    return ComposedSkill(
+        name=name, command=f"/{name}", scope="repo", source_dir=str(src)
+    )
 
 
 def _make_source_skills(tmp_path, *names):
@@ -48,8 +57,11 @@ def test_materialize_links_subset(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill", "plan")
-    comp = Composition(surface="r", autonomy_mode="deterministic",
-                       skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])],
+    )
     results = mz.materialize(comp, repo, "claude")
     assert sorted(results) == [("grill", "linked"), ("plan", "linked")]
     tdir = repo / ".claude" / "skills"
@@ -61,7 +73,11 @@ def test_materialize_is_idempotent(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill")
-    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     mz.materialize(comp, repo, "claude")
     results = mz.materialize(comp, repo, "claude")
     assert results == [("grill", "kept")]
@@ -71,11 +87,18 @@ def test_materialize_reconciles_removed_skill(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill", "plan")
-    comp1 = Composition(surface="r", autonomy_mode="deterministic",
-                        skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])])
+    comp1 = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])],
+    )
     mz.materialize(comp1, repo, "claude")
     # next bind drops "plan"; previous tells materialize what it owned
-    comp2 = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp2 = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     results = mz.materialize(comp2, repo, "claude", previous={"grill", "plan"})
     assert ("plan", "removed") in results
     assert not (repo / ".claude" / "skills" / "plan").exists()
@@ -90,18 +113,74 @@ def test_materialize_leaves_foreign_files_untouched(tmp_path):
     (tdir / "handmade").mkdir()  # a real dir someone added — not ours
     (tdir / "handmade" / "SKILL.md").write_text("# mine\n")
     srcs = _make_source_skills(tmp_path, "grill")
-    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     # even if told "handmade" was previous, it's not a symlink → never deleted
     results = mz.materialize(comp, repo, "claude", previous={"handmade"})
     assert (tdir / "handmade").is_dir()
     assert ("handmade", "removed") not in results
 
 
+def test_materialize_never_takes_over_an_unowned_symlink(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    source = _make_source_skills(tmp_path, "grill")["grill"]
+    foreign = _make_source_skills(tmp_path, "foreign")["foreign"]
+    link = repo / ".claude" / "skills" / "grill"
+    link.parent.mkdir(parents=True)
+    link.symlink_to(foreign)
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", source)],
+    )
+
+    results = mz.materialize(comp, repo, "claude")
+
+    assert results == [("grill", "skipped:foreign-symlink")]
+    assert link.resolve() == foreign.resolve()
+
+
+def test_materialize_fails_preflight_before_partial_update_on_ownership_mismatch(
+    tmp_path,
+):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    srcs = _make_source_skills(tmp_path, "old", "new", "foreign")
+    first = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("old", srcs["old"])],
+    )
+    mz.materialize(first, repo, "claude")
+    old_link = repo / ".claude" / "skills" / "old"
+    old_link.unlink()
+    old_link.symlink_to(srcs["foreign"])
+    second = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("new", srcs["new"])],
+    )
+
+    results = mz.materialize(second, repo, "claude", previous={"old"})
+
+    assert ("old", "skipped:ownership-mismatch") in results
+    assert ("new", "linked") in results
+    assert not (repo / ".claude" / "skills" / "new").exists()
+    assert old_link.resolve() == srcs["foreign"].resolve()
+
+
 def test_materialize_skips_skill_with_no_source(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
-    comp = Composition(surface="r", autonomy_mode="deterministic",
-                       skills=[ComposedSkill("nosrc", "/nosrc", "repo")])  # no source_dir
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[ComposedSkill("nosrc", "/nosrc", "repo")],
+    )  # no source_dir
     results = mz.materialize(comp, repo, "claude")
     assert results == [("nosrc", "skipped:no-source")]
 
@@ -110,7 +189,11 @@ def test_materialize_dry_run_writes_nothing(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill")
-    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     results = mz.materialize(comp, repo, "claude", dry_run=True)
     assert results == [("grill", "linked")]
     assert not (repo / ".claude" / "skills" / "grill").exists()
@@ -147,8 +230,11 @@ def test_materialize_hermes_links_into_dedicated_category(tmp_path, monkeypatch)
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill", "plan")
-    comp = Composition(surface="r", autonomy_mode="deterministic",
-                       skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"]), _skill("plan", srcs["plan"])],
+    )
     results = mz.materialize(comp, repo, "hermes")
     assert sorted(results) == [("grill", "linked"), ("plan", "linked")]
     assert (hdir / "grill").is_symlink()
@@ -162,7 +248,11 @@ def test_materialize_hermes_rebind_keeps(tmp_path, monkeypatch):
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill")
-    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     mz.materialize(comp, repo, "hermes")
     results = mz.materialize(comp, repo, "hermes")
     assert results == [("grill", "kept")]
@@ -177,7 +267,11 @@ def test_materialize_hermes_unbind_removes_only_owned_links(tmp_path, monkeypatc
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill")
-    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     mz.materialize(comp, repo, "hermes")
     # unbind = empty composition reconciled against what we owned
     empty = Composition(surface="r", autonomy_mode="deterministic")
@@ -193,7 +287,11 @@ def test_materialize_hermes_dry_run_writes_nothing(tmp_path, monkeypatch):
     repo = tmp_path / "repo"
     repo.mkdir()
     srcs = _make_source_skills(tmp_path, "grill")
-    comp = Composition(surface="r", autonomy_mode="deterministic", skills=[_skill("grill", srcs["grill"])])
+    comp = Composition(
+        surface="r",
+        autonomy_mode="deterministic",
+        skills=[_skill("grill", srcs["grill"])],
+    )
     results = mz.materialize(comp, repo, "hermes", dry_run=True)
     assert results == [("grill", "linked")]
     assert not hdir.exists()

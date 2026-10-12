@@ -1,0 +1,14 @@
+{
+  "creation_receipt_id": "startup:sha256:8deecdded346adc85192500d3440a519bc96982631b82cf9be5dbf298fa03dc6",
+  "harness": "codex",
+  "owner": "spindle",
+  "ownership_id": "sha256:b94af33e28621358ef5037465dc05078fdfd7765f5974bb4adaad0d2235d9b3a",
+  "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+  "projection_path": "/media/ubuntussd/home/lavallee/Projects/spindle/.agents/skills/spindle-lease-canary",
+  "schema": "spindle.ownership-receipt/v1",
+  "skill": "spindle-lease-canary",
+  "source_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+  "source_path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary",
+  "surface_id": "sha256:a4cd94198ac6b48d7c74aee439ff3eced93211da84b252b0649fead7bf527918",
+  "surface_name": "spindle"
+}

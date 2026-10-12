@@ -1,0 +1,66 @@
+{
+  "activation_evidence": {
+    "effective": {
+      "policy": null,
+      "tools": null
+    },
+    "harness": {
+      "build": null
+    },
+    "model": {
+      "served_canonical": null,
+      "served_raw": null
+    },
+    "permission_denials": [],
+    "projection_loaded": {
+      "authority": "observed",
+      "source": "startup receipt sha256:667a2b61f90a45322dd22a01121e8aec68a1cc7f50ed87b7f2123a1bd0e03096",
+      "value": true
+    }
+  },
+  "created_at": "2026-07-31T15:32:32Z",
+  "projection_plan": {
+    "adapter_id": "codex-reference/v1",
+    "agent_id": "parent",
+    "configured": {
+      "effort": null,
+      "harness_build": null,
+      "policy": {
+        "authority": "configured",
+        "source": "lease sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa",
+        "value": "read-only"
+      },
+      "role": null,
+      "tools": null
+    },
+    "harness": "codex",
+    "model": {
+      "configured": {
+        "authority": "configured",
+        "source": "trial launch command",
+        "value": "gpt-5.6-sol"
+      },
+      "requested": {
+        "authority": "requested",
+        "source": "trial CLI --model",
+        "value": "gpt-5.6-sol"
+      }
+    },
+    "parent_agent_id": null,
+    "plan_id": "2133c0336910408d58931ff0148cd3cbb3f192773d33212f4182321da6d0e6bb",
+    "projection": {
+      "mode": "skill-path",
+      "target": "/media/ubuntussd/home/lavallee/Projects/spindle/.agents/skills/spindle-lease-canary"
+    },
+    "realization": {
+      "package_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "path": "/media/ubuntussd/home/lavallee/Projects/spindle/experiments/m3-local-lifecycle/state/cache/packages/48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1/spindle-lease-canary",
+      "realization_digest": "sha256:48a95637a0464a912611e1193b10e6d987e31b135d24307a3ed989c980462af1",
+      "realization_receipt_id": "sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa",
+      "skill": "spindle-lease-canary"
+    },
+    "session_id": "lease:sha256:874c2e8a18b4a965a0c1d9c53e4fd893ac42c3278f17a48debc0c48fa938fcaa"
+  },
+  "receipt_id": "a9f1e54a7a4f9174665393773320cf353171c08928da84696e4134edb1fa5006",
+  "schema": "spindle.activation-receipt/v1"
+}

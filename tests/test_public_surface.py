@@ -18,7 +18,16 @@ SKIP_DIRS = {
     "build",
     "dist",
 }
-SKIP_SUFFIXES = {".pyc", ".png", ".jpg", ".jpeg", ".gif", ".sqlite", ".db"}
+SKIP_SUFFIXES = {
+    ".pyc",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".sqlite",
+    ".db",
+    ".gz",
+}
 
 PRIVATE_PATTERNS = [
     ("legacy package name", re.compile(r"\b" + "iv" + "y" + r"\b", re.IGNORECASE)),
@@ -31,6 +40,14 @@ PRIVATE_PATTERNS = [
     ("private task service", re.compile("geo" + "rge", re.IGNORECASE)),
     ("private runner", re.compile(r"\b" + "fa" + "b" + r"\b")),
 ]
+
+# These exact public distribution identifiers are part of the supported install
+# contract. Keep the exception narrow so internal names do not become general
+# public vocabulary again.
+PUBLIC_DISTRIBUTION_IDENTIFIERS = (
+    "ly" + "ra-" + "fo" + "rge/marketplace",
+    "spindle@" + "ly" + "ra-" + "fo" + "rge",
+)
 
 
 def _iter_text_files():
@@ -52,6 +69,8 @@ def test_public_tree_has_no_private_surface_strings():
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             text = path.read_text(encoding="utf-8", errors="ignore")
+        for identifier in PUBLIC_DISTRIBUTION_IDENTIFIERS:
+            text = text.replace(identifier, "")
         rel = path.relative_to(ROOT)
         for label, pattern in PRIVATE_PATTERNS:
             for match in pattern.finditer(text):

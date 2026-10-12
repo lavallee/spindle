@@ -1,0 +1,148 @@
+{
+  "agents": [
+    {
+      "activation_receipt": "activations/ebf17edd877681b167677d018c000b390ffa6ad1d87372d6d06c1f7b064d2c77.json",
+      "agent_id": "019fb921-0a59-7a50-a02c-fd6cb2644646"
+    },
+    {
+      "activation_receipt": "activations/f91b9c06fe8c4472fd6f576e2f8d5e5975e66e009b3c65008286459642f49699.json",
+      "agent_id": "019fb921-573c-7602-b611-0bccd7dd7d41"
+    }
+  ],
+  "cases": {
+    "bootstrap": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "effective-policy": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "effective-tools": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "inventory": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "model-identity": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "projection": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "receipt-integrity": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "restart": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "resume-reload": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    },
+    "subagent-independence": {
+      "evidence": [
+        {
+          "path": "evidence/codex-runtime.json",
+          "sha256": "sha256:582e53515e81f00176dd5fee319ff7dd9f58110d6489fc293247a3c466f7bfdc"
+        },
+        {
+          "path": "evidence/conformance-suite.json",
+          "sha256": "sha256:61b233d4a69e2cc5516df915b0ddca858d1775f94d46d443321e13c360f695d9"
+        }
+      ],
+      "status": "pass"
+    }
+  },
+  "harness": "codex",
+  "harness_build": "0.146.0",
+  "notes": "Sanitized live evidence; raw harness transcripts are intentionally excluded.",
+  "schema": "spindle.adapter-conformance-observation/v1"
+}

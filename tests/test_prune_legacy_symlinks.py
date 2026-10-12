@@ -1,22 +1,58 @@
 """Tests for prune_legacy_symlinks."""
 
-import os
 from pathlib import Path
 from unittest import mock
 
-from spindle.skills import prune_legacy_symlinks, install_skills
+import pytest
+
 from spindle.models import SkillSpec
+from spindle.skills import install_skills, prune_legacy_symlinks
+
+
+@pytest.fixture(autouse=True)
+def isolated_spindle_home(tmp_path, monkeypatch):
+    monkeypatch.setenv("SPINDLE_HOME", str(tmp_path / "spindle-state"))
+
+
+def _owned_dead_link(skills_dir: Path, dist_root: Path, name: str) -> Path:
+    skill_dir = dist_root / "skills" / name
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(f"---\nname: {name}\n---\n")
+    spec = SkillSpec(name=name, package="test", skill_dir=skill_dir)
+    with (
+        mock.patch("spindle.skills.claude_skills_dir", return_value=skills_dir),
+        mock.patch("spindle.active.source_dir", return_value=dist_root),
+        mock.patch("spindle.skills.discover_skills", return_value=[spec]),
+    ):
+        install_skills()
+    (skill_dir / "SKILL.md").unlink()
+    skill_dir.rmdir()
+    return skills_dir / name
 
 
 class TestPruneLegacySymlinks:
-
-    def test_prunes_dead_legacy_link(self, tmp_path):
+    def test_preserves_unowned_dead_legacy_link(self, tmp_path):
         skills_dir = tmp_path / "claude" / "skills"
         skills_dir.mkdir(parents=True)
         dist_root = tmp_path / "repo"
         # Dead link points to the old skills layout: dist_root/skills/spindle-*
         link = skills_dir / "spindle-grill"
         link.symlink_to(dist_root / "skills" / "spindle-grill")
+
+        with (
+            mock.patch("spindle.skills.claude_skills_dir", return_value=skills_dir),
+            mock.patch("spindle.active.source_dir", return_value=dist_root),
+        ):
+            results = prune_legacy_symlinks()
+
+        assert link.is_symlink()
+        assert ("spindle-grill", "skipped:unverified-ownership") in results
+
+    def test_prunes_dead_owned_legacy_link(self, tmp_path):
+        skills_dir = tmp_path / "claude" / "skills"
+        skills_dir.mkdir(parents=True)
+        dist_root = tmp_path / "repo"
+        link = _owned_dead_link(skills_dir, dist_root, "spindle-grill")
 
         with (
             mock.patch("spindle.skills.claude_skills_dir", return_value=skills_dir),
@@ -66,8 +102,7 @@ class TestPruneLegacySymlinks:
         skills_dir = tmp_path / "claude" / "skills"
         skills_dir.mkdir(parents=True)
         dist_root = tmp_path / "repo"
-        link = skills_dir / "spindle-plan"
-        link.symlink_to(dist_root / "skills" / "spindle-plan")
+        link = _owned_dead_link(skills_dir, dist_root, "spindle-plan")
 
         with (
             mock.patch("spindle.skills.claude_skills_dir", return_value=skills_dir),
@@ -119,17 +154,19 @@ class TestPruneLegacySymlinks:
         ):
             results = prune_legacy_symlinks()
 
-        pruned = [name for name, action in results if action == "pruned"]
-        assert set(pruned) == set(names)
+        preserved = [
+            name for name, action in results if action == "skipped:unverified-ownership"
+        ]
+        assert set(preserved) == set(names)
         for name in names:
-            assert not (skills_dir / name).is_symlink()
+            assert (skills_dir / name).is_symlink()
 
 
 class TestInstallCallsPrune:
     """install_skills should automatically call prune_legacy_symlinks."""
 
     @mock.patch("spindle.skills.discover_skills")
-    def test_install_prunes_dead_links(self, mock_discover, tmp_path):
+    def test_install_preserves_unowned_dead_links(self, mock_discover, tmp_path):
         skills_dir = tmp_path / "claude" / "skills"
         skills_dir.mkdir(parents=True)
         dist_root = tmp_path / "repo"
@@ -145,8 +182,8 @@ class TestInstallCallsPrune:
         ):
             results = install_skills()
 
-        assert not dead_link.is_symlink()
-        assert ("spindle-old", "pruned") in results
+        assert dead_link.is_symlink()
+        assert ("spindle-old", "skipped:unverified-ownership") in results
 
     @mock.patch("spindle.skills.discover_skills")
     def test_install_dry_run_does_not_prune(self, mock_discover, tmp_path):
@@ -166,4 +203,4 @@ class TestInstallCallsPrune:
             results = install_skills(dry_run=True)
 
         assert dead_link.is_symlink()
-        assert ("spindle-old", "pruned") in results
+        assert ("spindle-old", "skipped:unverified-ownership") in results

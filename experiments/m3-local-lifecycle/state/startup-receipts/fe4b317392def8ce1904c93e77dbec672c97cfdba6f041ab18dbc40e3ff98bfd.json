@@ -1,0 +1,68 @@
+{
+  "adapter_build": "spindle-core/v1",
+  "applied_actions": [
+    {
+      "action_id": "sha256:ba520cedb1d4730ab7d980ade4d6d8bb961e011c3f3ad754b8c8ca23870db62f",
+      "kind": "remove",
+      "ownership_id": "sha256:b94af33e28621358ef5037465dc05078fdfd7765f5974bb4adaad0d2235d9b3a",
+      "package_digest": null,
+      "projection_path": "/media/ubuntussd/home/lavallee/Projects/spindle/.agents/skills/spindle-lease-canary",
+      "reason": "owned projection is absent from or differs from desired state",
+      "schema": "spindle.startup-action/v1",
+      "skill": "spindle-lease-canary",
+      "source_digest": null,
+      "source_path": null
+    }
+  ],
+  "decision": "warn",
+  "event_source": "lease-release",
+  "expected_inventory_id": "sha256:0410faabec746a46963047f7490f57efe090b772701cdde9e0ffec72ac600041",
+  "foreign_conflicts": [],
+  "harness": "codex",
+  "lease_status": {
+    "active": [],
+    "expired": []
+  },
+  "lock_id": "sha256:db9c34de064f3699cf25da5b879e48a2d1a9cafce439f63bf951f419f1f8ccda",
+  "observed_inventory_id": "sha256:84f1d779e20e88ff4682b47a22fa037cf68ae4850c6bc206265ffdfe9396ead1",
+  "plan_id": "sha256:9f1fe88b26f87fcd44018fa85d00e9845d8f321781a65173ce982ae5986e6f31",
+  "prior_startup_match": null,
+  "prior_startup_receipt_id": null,
+  "receipt_id": "sha256:fe4b317392def8ce1904c93e77dbec672c97cfdba6f041ab18dbc40e3ff98bfd",
+  "repo_path": "/media/ubuntussd/home/lavallee/Projects/spindle",
+  "restart_required": false,
+  "runtime_facts": {},
+  "schema": "spindle.startup-receipt/v1",
+  "surface_id": "sha256:a4cd94198ac6b48d7c74aee439ff3eced93211da84b252b0649fead7bf527918",
+  "surface_name": "spindle",
+  "warnings": [
+    {
+      "path": null,
+      "reason": "Codex built-in skills are harness-managed",
+      "scope": "system",
+      "skill": "__system__",
+      "state": "opaque"
+    },
+    {
+      "path": "/home/marc/.agents/skills/find-skills",
+      "reason": "entry is outside Spindle ownership",
+      "scope": "user",
+      "skill": "find-skills",
+      "state": "foreign"
+    },
+    {
+      "path": null,
+      "reason": "enabled Codex plugin skills require harness-reported inventory",
+      "scope": "plugins",
+      "skill": "__plugins__",
+      "state": "opaque"
+    },
+    {
+      "path": "/home/marc/.agents/skills/omarchy",
+      "reason": "entry is outside Spindle ownership",
+      "scope": "user",
+      "skill": "omarchy",
+      "state": "foreign"
+    }
+  ]
+}
