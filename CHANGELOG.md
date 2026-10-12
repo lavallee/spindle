@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-12
+
 - Added conjunctive outcome gates for paired evaluations: an optional
   `[acceptance].required_variant_gates` list requires every held-out variant
   result to report each named gate as `{passed, evidence}`, and one missing,

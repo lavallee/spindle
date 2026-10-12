@@ -17,7 +17,7 @@ def test_dual_harness_manifests_share_identity_and_package_version():
     codex = json.loads((ROOT / ".codex-plugin" / "plugin.json").read_text())
 
     assert claude["name"] == codex["name"] == "spindle"
-    assert claude["version"] == codex["version"] == __version__ == "0.2.0"
+    assert claude["version"] == codex["version"] == __version__ == "0.3.0"
     assert codex["skills"] == "./skills/"
 
 

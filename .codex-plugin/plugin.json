@@ -1,6 +1,6 @@
 {
   "name": "spindle",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Inspect, try, compose, verify, and maintain agent skills with exact custody and evidence.",
   "author": {
     "name": "Marc Lavallee",
