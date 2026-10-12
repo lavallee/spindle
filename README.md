@@ -146,6 +146,9 @@ records exact ownership for the harness-native projection.
   control loop.
 - [Candidate inspection and leases](docs/local-lifecycle.md) — local and pinned
   sources, trust preflight, try, borrow, expiry, and quarantine.
+- [The house, the catalog, and sourcing on demand](docs/house-and-sourcing.md)
+  — a small always-installed kernel and house rules per machine and project,
+  plus `find`, `use`, and `report` over a pinned catalog.
 - [Startup integrity](docs/startup-integrity.md) — desired versus effective
   state, stable native hooks, conflicts, repair, and restart semantics.
 - [Runtime realization](docs/runtime-realization.md) — independent parent/child
