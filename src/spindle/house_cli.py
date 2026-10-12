@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from . import catalog as catalog_mod
+from . import expand as expand_mod
 from . import house as house_mod
 from . import sourcing as sourcing_mod
 from .lifecycle import LifecycleError
@@ -251,8 +252,18 @@ def cmd_catalog_update(args) -> int:
 def _select(args):
     index = catalog_mod.load_index()
     repo = Path(args.repo) if args.repo else None
+    task = _task(args)
+    phrases: list[str] = []
+    note = ""
+    if args.expand == "auto":
+        try:
+            command = house_mod.load().expand_command
+        except house_mod.HouseError:
+            command = None
+        phrases, note = expand_mod.expand(task, command)
     return sourcing_mod.select(
-        index, _task(args), k=args.k, repo=repo, job=args.job, use_judge=args.judge
+        index, task, k=args.k, repo=repo, job=args.job, use_judge=args.judge,
+        phrases=phrases, expand_note=note,
     )
 
 
@@ -270,6 +281,10 @@ def cmd_find(args) -> int:
         return 0
     if selection["judge_note"]:
         print(f"({selection['judge_note']}; ranked by text match only)")
+    if selection["expanded_queries"]:
+        print("also searched: " + "; ".join(selection["expanded_queries"]))
+    elif selection["expand_note"]:
+        print(f"({selection['expand_note']})")
     for candidate in candidates[:8]:
         mark = "*" if candidate["selected"] else " "
         judged = (f"{candidate['judged']:.2f}" if candidate["judged"] is not None
@@ -390,6 +405,9 @@ def _task_arguments(parser) -> None:
                              "(default: $SPINDLE_JOB)")
     parser.add_argument("-k", type=int, default=3, help="most skills to select")
     parser.add_argument("--judge", choices=["auto", "jev", "none"], default="auto")
+    parser.add_argument("--expand", choices=["auto", "none"], default="auto",
+                        help="rewrite the task into search phrases with the "
+                             "house's expander, when it names one")
     parser.add_argument("--json", action="store_true")
 
 

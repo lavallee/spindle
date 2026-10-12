@@ -29,6 +29,7 @@ from .house import HouseError, read_repo_lock, skill_body
 
 SELECTION_SCHEMA = "spindle.selection/v1"
 RECALL_LIMIT = 12
+RRF_K = 10
 JUDGE_THRESHOLD = 0.6
 LEXICAL_FLOOR = 0.5
 OUTCOMES = ("accepted", "rejected", "mixed", "unknown")
@@ -156,14 +157,20 @@ def search(
     limit: int = RECALL_LIMIT,
     include_kernel: bool = False,
     stats: dict[str, dict[str, int]] | None = None,
+    phrases: list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Lexical recall over the catalog index, best first."""
-    words = tokens(task)
+    """Lexical recall over the catalog index, best first.
+
+    ``phrases`` are extra queries (see ``spindle.expand``). Each query ranks the
+    catalog on its own and the rankings are fused by reciprocal rank, so a skill
+    that one focused phrase puts first is not buried by a long task text.
+    """
+    queries = [words for words in map(tokens, [task, *(phrases or [])]) if words]
     entries = [
         entry for entry in index.get("skills", [])
         if include_kernel or not entry.get("kernel")
     ]
-    if not words or not entries:
+    if not queries or not entries:
         return []
     stats = usage_summary() if stats is None else stats
     db = sqlite3.connect(":memory:")
@@ -180,12 +187,17 @@ def search(
                 for e in entries
             ],
         )
-        query = " OR ".join('"' + word.replace('"', "") + '"' for word in words)
-        rows = db.execute(
-            "SELECT ref, -bm25(skills, 0.0, 8.0, 4.0, 0.3) AS score FROM skills "
-            "WHERE skills MATCH ? ORDER BY score DESC LIMIT ?",
-            (query, limit * 3),
-        ).fetchall()
+        fused: dict[str, float] = {}
+        for words in queries:
+            query = " OR ".join('"' + word.replace('"', "") + '"' for word in words)
+            ranked_refs = db.execute(
+                "SELECT ref FROM skills WHERE skills MATCH ? "
+                "ORDER BY bm25(skills, 0.0, 8.0, 4.0, 0.3) LIMIT ?",
+                (query, limit * 3),
+            ).fetchall()
+            for rank, (ref,) in enumerate(ranked_refs):
+                fused[ref] = fused.get(ref, 0.0) + 1.0 / (RRF_K + rank)
+        rows = sorted(fused.items(), key=lambda item: (-item[1], item[0]))
     finally:
         db.close()
     if not rows:
@@ -235,6 +247,8 @@ def select(
     repo: Path | None = None,
     job: str | None = None,
     use_judge: str = "auto",
+    phrases: list[str] | None = None,
+    expand_note: str = "",
     provider: judge_mod.Provider | None = None,
     key: str | None = None,
     save: bool = True,
@@ -248,7 +262,7 @@ def select(
     match finds the right neighbourhood but cannot tell "relevant" from "shares
     words", so whoever receives the shortlist has to do the judging.
     """
-    candidates = search(index, task)
+    candidates = search(index, task, phrases=phrases)
     facts = project_facts(repo)
     scores: dict[str, float] | None = None
     judged_by = "none"
@@ -289,6 +303,8 @@ def select(
         "judge": judged_by,
         "judge_policy": judge_mod.JUDGE_POLICY if judged_by == "jev" else None,
         "judge_note": note,
+        "expanded_queries": list(phrases or []),
+        "expand_note": expand_note,
         "confidence": "judged" if judged_by == "jev" else "lexical",
         "house_version": index.get("house_version"),
         "candidates": candidates,

@@ -73,6 +73,7 @@ class House:
     kernel: tuple[str, ...]
     skill_roots: tuple[Path, ...]
     patterns: dict[str, Pattern] = field(default_factory=dict)
+    expand_command: Path | None = None
 
     def rules_text(self) -> str:
         return self.rules_file.read_text(encoding="utf-8").strip() + "\n"
@@ -149,8 +150,10 @@ def load(root: Path | None = None) -> House:
             rules=rules,
             skills=tuple(body.get("skills") or ()),
         )
+    expand = (raw.get("sourcing") or {}).get("expand")
     return House(
         root=root,
+        expand_command=(root / str(expand)).resolve() if expand else None,
         version=version,
         rules_file=rules_file,
         kernel=tuple((raw.get("kernel") or {}).get("skills") or ()),
