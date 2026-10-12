@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "read-reviewed-answer", "name": "Read an answer with bounded review evidence", "entry_route": "/reviewed-answer/", "completion_signal": "reviewed-answer-visible",
+    "delivery_budget": {"max_transferred_bytes": 600000, "max_rendered_bytes": 1200000},
+    "source_semantics": {"fixture://reviewed-answer": {"sealed": true, "supports": ["verified_value"]}}
+  },
+  "baseline": {
+    "task_id": "read-reviewed-answer", "surface_id": "reviewed-answer-v1", "producer_id": "baseline-author",
+    "states": [{"id": "answer", "route": "/reviewed-answer/", "visible": ["Answer: 62", "Source"], "signals": ["reviewed-answer-visible"], "foreground": ["reviewed-answer"], "material_claims": ["Answer: 62"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "reviewed-answer"},
+    "interactions": [], "claims": [{"artifact_id": "answer", "text": "Answer: 62", "source": "fixture://reviewed-answer", "kind": "verified_value"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 190000, "rendered_bytes": 350000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "read-reviewed-answer", "surface_id": "reviewed-answer-v2", "replacement_for": "reviewed-answer-v1", "producer_id": "generator-a",
+    "states": [{"id": "answer", "route": "/reviewed-answer/", "visible": ["Verified answer: 62", "View source"], "signals": ["reviewed-answer-visible"], "foreground": ["reviewed-answer"], "material_claims": ["Verified answer: 62"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "reviewed-answer"},
+    "interactions": [], "claims": [{"artifact_id": "answer", "text": "Verified answer: 62", "source": "fixture://reviewed-answer", "kind": "verified_value"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 195000, "rendered_bytes": 360000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {
+      "critic": {"rounds": 1, "actor_id": "critic-b", "role": "approval-judge", "behavior_basis": "observed-users", "input_capture_hashes": ["c28e46f04c4c170d61f78b36b6651b147ecff2b017fffe161ad75ce195914e80"], "parent_reaction": "parents will love it", "findings": [{"id": "approve", "artifact_id": "answer", "locator": "Verified answer: 62", "risk": "none", "evidence": "the screen looks clean", "postcondition": {"type": "visible_text_absent", "value": "Verified answer: 62"}, "verdict": "approve"}]},
+      "repair_passes": 0
+    }
+  }
+}

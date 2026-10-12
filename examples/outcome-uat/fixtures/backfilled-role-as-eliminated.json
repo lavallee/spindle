@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "explain-backfilled-role",
+    "name": "Explain the status of a role after a RIF notice",
+    "entry_route": "/district/changes/",
+    "completion_signal": "backfill-answer-visible",
+    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 900000},
+    "source_semantics": {"fixture://staffing/backfill-notice": {"sealed": true, "supports": ["person_rif_action", "backfill_announced"]}}
+  },
+  "baseline": {
+    "task_id": "explain-backfilled-role", "surface_id": "blank-backfill-answer-v1", "producer_id": "baseline-author",
+    "states": [{"id": "blank", "route": "/district/changes/", "visible": ["Role status", "No explanation available"], "signals": [], "foreground": ["backfill-answer"], "material_claims": []}],
+    "journey": {"executor": "scripted-browser", "entry_state": "blank", "events": [], "terminal_state": "blank", "foreground_target": "backfill-answer"},
+    "interactions": [], "claims": [],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 170000, "rendered_bytes": 300000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "explain-backfilled-role", "surface_id": "eliminated-backfill-answer-v2", "replacement_for": "blank-backfill-answer-v1", "producer_id": "generator-a",
+    "states": [{"id": "answer", "route": "/district/changes/", "visible": ["Role status", "The middle-school media role was eliminated"], "signals": ["backfill-answer-visible"], "foreground": ["backfill-answer"], "material_claims": ["The middle-school media role was eliminated"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "backfill-answer"},
+    "interactions": [],
+    "claims": [{"artifact_id": "answer", "text": "The middle-school media role was eliminated", "source": "fixture://staffing/backfill-notice", "kind": "eliminated_position"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 175000, "rendered_bytes": 310000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["5c54f1c13430774353a694f4ce3b063ef87b32c84139a9e6a54b9fea89989d62"], "findings": []}, "repair_passes": 0}
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "report-latest-total",
+    "name": "Find the latest reported total",
+    "entry_route": "/latest-total/",
+    "completion_signal": "latest-total-visible",
+    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 900000},
+    "source_semantics": {"fixture://reported-total": {"sealed": true, "supports": ["reported_value", "reporting_period"]}}
+  },
+  "baseline": {
+    "task_id": "report-latest-total", "surface_id": "blank-total-v1", "producer_id": "baseline-author",
+    "states": [{"id": "blank", "route": "/latest-total/", "visible": ["Latest total", "—"], "signals": [], "foreground": ["latest-total"], "material_claims": []}],
+    "journey": {"executor": "scripted-browser", "entry_state": "blank", "events": [], "terminal_state": "blank", "foreground_target": "latest-total"},
+    "interactions": [], "claims": [],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 170000, "rendered_bytes": 300000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "report-latest-total", "surface_id": "reported-zero-total-v2", "replacement_for": "blank-total-v1", "producer_id": "generator-a",
+    "states": [{"id": "reported", "route": "/latest-total/", "visible": ["Latest total", "Reported total: 0", "Latest period: 2026"], "signals": ["latest-total-visible"], "foreground": ["latest-total"], "material_claims": ["Reported total: 0", "Latest period: 2026"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "reported", "events": [], "terminal_state": "reported", "foreground_target": "latest-total"},
+    "interactions": [],
+    "claims": [
+      {"artifact_id": "reported", "text": "Reported total: 0", "source": "fixture://reported-total", "kind": "reported_value"},
+      {"artifact_id": "reported", "text": "Latest period: 2026", "source": "fixture://reported-total", "kind": "reporting_period"}
+    ],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 175000, "rendered_bytes": 310000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["145783f76d7ef044b59a32b4b02427a7296800bf5257fb898b08ee4afb6d525e"], "findings": []}, "repair_passes": 0}
+  }
+}

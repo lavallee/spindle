@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "task": {
+    "id": "explain-rif-notices",
+    "name": "Explain what reduction-in-force notices establish",
+    "entry_route": "/district/changes/",
+    "completion_signal": "rif-answer-visible",
+    "delivery_budget": {"max_transferred_bytes": 500000, "max_rendered_bytes": 900000},
+    "source_semantics": {"fixture://staffing/may-7-rif-notice": {"sealed": true, "supports": ["person_rif_action"]}}
+  },
+  "baseline": {
+    "task_id": "explain-rif-notices", "surface_id": "blank-rif-answer-v1", "producer_id": "baseline-author",
+    "states": [{"id": "blank", "route": "/district/changes/", "visible": ["RIF notices", "No explanation available"], "signals": [], "foreground": ["rif-answer"], "material_claims": []}],
+    "journey": {"executor": "scripted-browser", "entry_state": "blank", "events": [], "terminal_state": "blank", "foreground_target": "rif-answer"},
+    "interactions": [], "claims": [],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 170000, "rendered_bytes": 300000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": false},
+    "loop": {"critic": {"rounds": 0, "actor_id": "not-run", "role": "risk-finder-only", "behavior_basis": "not-run", "input_capture_hashes": [], "findings": []}, "repair_passes": 0}
+  },
+  "variant": {
+    "task_id": "explain-rif-notices", "surface_id": "conflated-rif-answer-v2", "replacement_for": "blank-rif-answer-v1", "producer_id": "generator-a",
+    "states": [{"id": "answer", "route": "/district/changes/", "visible": ["RIF notices", "Eight RIF notices mean eight positions and their student services were eliminated"], "signals": ["rif-answer-visible"], "foreground": ["rif-answer"], "material_claims": ["Eight RIF notices mean eight positions and their student services were eliminated"]}],
+    "journey": {"executor": "scripted-browser", "entry_state": "answer", "events": [], "terminal_state": "answer", "foreground_target": "rif-answer"},
+    "interactions": [],
+    "claims": [{"artifact_id": "answer", "text": "Eight RIF notices mean eight positions and their student services were eliminated", "source": "fixture://staffing/may-7-rif-notice", "kind": "position_and_service_elimination"}],
+    "accessibility": {"keyboard_path_complete": true, "serious_violations": []}, "harm": {"misleading_claims": [], "invalid_visual_encodings": []},
+    "responsive_layout": {"desktop": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "mobile": {"contained": true, "horizontal_overflow_px": 0, "required_fields_visible_without_undisclosed_action": true}, "reflow_observed": true, "task_order_preserved": true},
+    "delivery": {"transferred_bytes": 175000, "rendered_bytes": 310000},
+    "superficial_checks": {"route_resolves": true, "controls_labeled": true, "mobile_layout_fits": true, "copy_present": true},
+    "loop": {"critic": {"rounds": 1, "actor_id": "critic-b", "role": "risk-finder-only", "behavior_basis": "simulated-not-observed", "input_capture_hashes": ["e7f0fb9c1fb040de9d1a1ce610f9b27cecccba37ea2717a7df0121b4046b563c"], "findings": []}, "repair_passes": 0}
+  }
+}

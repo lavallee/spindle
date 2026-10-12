@@ -7,6 +7,16 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- Added conjunctive outcome gates for paired evaluations: an optional
+  `[acceptance].required_variant_gates` list requires every held-out variant
+  result to report each named gate as `{passed, evidence}`, and one missing,
+  malformed, or false gate blocks promotion regardless of mean score. The CLI
+  and receipt report the exact failed case/gate coordinates.
+- Evaluation manifests now reject unknown top-level and `[acceptance]` keys
+  instead of ignoring them.
+- Added the `examples/outcome-uat` skill and frozen-receipt calibration: 16
+  held-out cases across nine deterministic gates, including missing-data,
+  wrong-grain, hidden-mobile-field, and evidence-state controls.
 - Added job-scoped leases for external dispatchers: `spindle job
   grant|release|status --for-job <id>` leases an explicit skill set to one
   dispatched job over the standing surface binding, records the job id on each
