@@ -432,3 +432,28 @@ def test_expanded_phrases_recover_a_skill_the_task_text_misses(estate, capsys):
     assert selection["candidates"][0]["ref"] == "home/bughunt"
     assert main(["find", "--judge", "none", "--expand", "none", "--json", task]) == 0
     assert json.loads(capsys.readouterr().out)["expanded_queries"] == []
+
+
+def test_inline_brief_embeds_at_most_two_skills_and_records_only_those(
+    estate, capsys, monkeypatch
+):
+    packages = estate / "depot" / "packages"
+    for name in ("flaky-one", "flaky-two"):
+        _skill(packages, f"more/skills/{name}", name,
+               "Diagnose a flaky failing test.", "Body of " + name)
+    index = catalog.sync(house.load())
+    selection = sourcing.select(
+        index, "diagnose a flaky failing test", key="k",
+        provider=lambda body, key: {"answers": {n: {"noul": 0.9} for n in body["questions"]}},
+    )
+    assert sum(c["selected"] for c in selection["candidates"]) == 3
+
+    import spindle.house_cli as cli
+    from types import SimpleNamespace
+    monkeypatch.setattr(cli, "_select", lambda args: selection)
+    args = SimpleNamespace(inline=True, unjudged="pointer", job=None, rules=False, json=True)
+    capsys.readouterr()
+    assert cli.cmd_brief(args) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["prompt_block"].count("### Skill: ") == 2
+    assert len(payload["skills"]["offered"]) == 2
