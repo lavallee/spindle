@@ -308,6 +308,14 @@ def cmd_brief(args) -> int:
     try:
         selection = _select(args)
         delivery = "inline" if args.inline else "path"
+        if args.inline:
+            # Inline text is paid for whether or not it is used, so embed fewer
+            # skills than a path listing would name.
+            kept = 0
+            for candidate in selection["candidates"]:
+                if candidate["selected"]:
+                    kept += 1
+                    candidate["selected"] = kept <= sourcing_mod.INLINE_MAX_SKILLS
         if selection["confidence"] == "lexical" and args.unjudged != "shortlist":
             # Unjudged text matches are not offered; see sourcing.pointer_block.
             for candidate in selection["candidates"]:
