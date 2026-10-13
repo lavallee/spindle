@@ -95,6 +95,34 @@ def cmd_house_remove(args) -> int:
     return 0
 
 
+def cmd_house_update(args) -> int:
+    """Pull the house, reinstall what this machine has, and refresh the catalog."""
+    try:
+        pulled = house_mod.pull(house_mod.house_dir())
+        house = house_mod.load()
+        harnesses = house_mod.installed_harnesses()
+        rows = house_mod.setup_machine(house, harnesses) if harnesses else []
+        index = None if args.no_catalog else catalog_mod.sync(house)
+    except (house_mod.HouseError, LifecycleError, OSError) as exc:
+        return _fail(exc)
+    failed = pulled["state"] == "failed"
+    conflicts = [row for row in rows if row["action"] == "conflict"]
+    errors = [s for s in (index or {}).get("sources", []) if s.get("error")]
+    if args.json:
+        print(json.dumps({"pull": pulled, "house_version": house.version,
+                          "setup": rows, "catalog": (index or {}).get("sources")},
+                         indent=2, sort_keys=True))
+    else:
+        detail = f": {pulled['detail']}" if pulled.get("detail") else ""
+        print(f"house {pulled['state']}{detail}; v{house.version}")
+        print(_rows_text(rows))
+        if index is not None:
+            print(f"catalog: {len(index['skills'])} skills from "
+                  f"{len(index['sources'])} sources"
+                  + (f", {len(errors)} with errors" if errors else ""))
+    return 1 if failed or conflicts or errors else 0
+
+
 def cmd_house_status(args) -> int:
     try:
         house = house_mod.load()
@@ -310,12 +338,17 @@ def cmd_brief(args) -> int:
         delivery = "inline" if args.inline else "path"
         if args.inline:
             # Inline text is paid for whether or not it is used, so embed fewer
-            # skills than a path listing would name.
+            # skills than a path listing would name, and only ones the judge is
+            # clearly confident about.
             kept = 0
             for candidate in selection["candidates"]:
                 if candidate["selected"]:
-                    kept += 1
-                    candidate["selected"] = kept <= sourcing_mod.INLINE_MAX_SKILLS
+                    sure = (candidate["judged"] is None
+                            or candidate["judged"] >= sourcing_mod.INLINE_THRESHOLD)
+                    kept += sure
+                    candidate["selected"] = (
+                        sure and kept <= sourcing_mod.INLINE_MAX_SKILLS
+                    )
         if selection["confidence"] == "lexical" and args.unjudged != "shortlist":
             # Unjudged text matches are not offered; see sourcing.pointer_block.
             for candidate in selection["candidates"]:
@@ -439,6 +472,12 @@ def register(sub) -> None:
     h.add_argument("--dry-run", action="store_true")
     h.add_argument("--json", action="store_true")
     h.set_defaults(func=cmd_house_setup)
+    h = hs.add_parser(
+        "update", help="pull the house, reinstall, and refresh the catalog"
+    )
+    h.add_argument("--no-catalog", action="store_true")
+    h.add_argument("--json", action="store_true")
+    h.set_defaults(func=cmd_house_update)
     h = hs.add_parser("remove", help="undo the machine setup for a harness")
     h.add_argument("--harness", action="append", choices=house_mod.HARNESSES)
     h.add_argument("--dry-run", action="store_true")

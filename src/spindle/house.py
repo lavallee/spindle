@@ -21,6 +21,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -474,6 +475,39 @@ def remove_machine(
     if not dry_run:
         _save_record(record)
     return rows
+
+
+def installed_harnesses() -> tuple[str, ...]:
+    """Harnesses an earlier ``setup_machine`` installed on this machine."""
+    recorded = _load_record()["harnesses"]
+    return tuple(h for h in HARNESSES if h in recorded)
+
+
+def pull(root: Path) -> dict[str, str]:
+    """Fast-forward the Git checkout holding the house, when it is one.
+
+    Only a fast-forward is attempted: a checkout with local commits or edits
+    that conflict is reported and left exactly as it was.
+    """
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["git", "-C", str(root), *args], capture_output=True, text=True, timeout=120
+        )
+
+    try:
+        if git("rev-parse", "--is-inside-work-tree").returncode != 0:
+            return {"state": "not a git checkout"}
+        before = git("rev-parse", "HEAD").stdout.strip()
+        pulled = git("pull", "--ff-only", "--quiet")
+        after = git("rev-parse", "HEAD").stdout.strip()
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {"state": "failed", "detail": str(exc)}
+    if pulled.returncode != 0:
+        detail = (pulled.stderr or pulled.stdout).strip().splitlines()
+        return {"state": "failed", "detail": detail[-1] if detail else "git pull failed"}
+    if before == after:
+        return {"state": "current", "commit": after}
+    return {"state": "updated", "from": before, "commit": after}
 
 
 def machine_status(house: House, harnesses: tuple[str, ...]) -> dict[str, Any]:

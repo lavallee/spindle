@@ -33,6 +33,7 @@ RRF_K = 10
 JUDGE_THRESHOLD = 0.6
 LEXICAL_FLOOR = 0.5
 INLINE_MAX_SKILLS = 2
+INLINE_THRESHOLD = 0.7
 OUTCOMES = ("accepted", "rejected", "mixed", "unknown")
 _WORD = re.compile(r"[a-z0-9][a-z0-9_-]{2,}")
 _STOP = frozenset(

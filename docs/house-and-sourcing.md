@@ -62,6 +62,16 @@ older Spindle render; anything else is reported as a conflict and left alone.
 harness. After editing the house, bump `version` and run
 `setup` again; `status` reports rules that are stale or were edited by hand.
 
+Keep a machine current with one command, suitable for a timer:
+
+```bash
+spindle house update
+```
+
+It fast-forwards the Git checkout that holds the house (and leaves it alone if
+that is not a clean fast-forward), reinstalls rules and kernel for the harnesses
+this machine already has set up, and rebuilds the catalog index.
+
 ### Projects
 
 A repository opts into a pattern, and the pattern travels with it:
@@ -192,6 +202,9 @@ that tells the agent how to run `find` itself once it knows what it is about to
 do (`--unjudged shortlist` or `--unjudged none` change that). Set `SPINDLE_JOB`
 in the agent's environment and every `find` and `use` it runs is attributed to
 the job, so the later `report --job` joins them without the agent passing ids.
+
+`--inline` embeds at most two skills, and only ones the judge scored 0.7 or
+higher: embedded text is paid for whether or not the agent uses it.
 
 Add `--rules` to get the house rules in the same answer for runtimes that do not
 load a harness instruction file. An empty `prompt_block` means nothing was

@@ -27,6 +27,11 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
   house-named command (`[sourcing] expand`) rewrites the task into short search
   phrases, and the per-phrase rankings are fused by reciprocal rank.
 
+- Added `spindle house update`: fast-forward the house checkout, reinstall for
+  the harnesses already set up, and rebuild the catalog index.
+- `spindle brief --inline` embeds at most two skills and only those the judge
+  scored 0.7 or higher.
+
 ## [0.3.0] - 2026-10-12
 
 - Added conjunctive outcome gates for paired evaluations: an optional
