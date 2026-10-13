@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-12
+
 - `spindle brief --json` returns `read_roots`, the directories holding every
   catalog skill, for runtimes that restrict what an agent may read.
 
