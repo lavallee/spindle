@@ -448,6 +448,12 @@ def test_inline_brief_embeds_at_most_two_skills_and_records_only_those(
     )
     assert sum(c["selected"] for c in selection["candidates"]) == 3
 
+    lukewarm = sourcing.select(
+        index, "diagnose a flaky failing test", key="k", save=False,
+        provider=lambda body, key: {"answers": {n: {"noul": 0.62} for n in body["questions"]}},
+    )
+    assert any(c["selected"] for c in lukewarm["candidates"])  # fine as a path offer
+
     import spindle.house_cli as cli
     from types import SimpleNamespace
     monkeypatch.setattr(cli, "_select", lambda args: selection)
@@ -457,3 +463,45 @@ def test_inline_brief_embeds_at_most_two_skills_and_records_only_those(
     payload = json.loads(capsys.readouterr().out)
     assert payload["prompt_block"].count("### Skill: ") == 2
     assert len(payload["skills"]["offered"]) == 2
+
+    # A skill the judge only narrowly favours is not worth embedding.
+    monkeypatch.setattr(cli, "_select", lambda args: lukewarm)
+    assert cli.cmd_brief(args) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["prompt_block"] == "" and payload["skills"]["offered"] == []
+
+
+def test_house_update_pulls_a_git_house_reinstalls_and_reindexes(estate, capsys):
+    depot = estate / "depot"
+    upstream = estate / "upstream.git"
+    _git(depot, "init", "-b", "main")
+    _git(depot, "config", "user.email", "t@example.test")
+    _git(depot, "config", "user.name", "T")
+    _git(depot, "add", ".")
+    _git(depot, "commit", "-m", "house")
+    subprocess.run(["git", "clone", "--bare", str(depot), str(upstream)],
+                   check=True, capture_output=True)
+    _git(depot, "remote", "add", "origin", str(upstream))
+    _git(depot, "fetch", "origin")
+    _git(depot, "branch", "--set-upstream-to=origin/main", "main")
+
+    assert main(["house", "setup", "--harness", "claude"]) == 0
+    capsys.readouterr()
+    assert main(["house", "update"]) == 0
+    assert "house current" in capsys.readouterr().out
+
+    other = estate / "other"
+    subprocess.run(["git", "clone", str(upstream), str(other)],
+                   check=True, capture_output=True)
+    _git(other, "config", "user.email", "t@example.test")
+    _git(other, "config", "user.name", "T")
+    (other / "house" / "RULES.md").write_text("# House rules\n\n- Fresh rule.\n", "utf-8")
+    _git(other, "commit", "-am", "new rule")
+    _git(other, "push", "origin", "main")
+
+    assert main(["house", "update"]) == 0
+    out = capsys.readouterr().out
+    assert "house updated" in out and "catalog: 4 skills" in out
+    assert "Fresh rule." in (estate / "home/.claude/CLAUDE.md").read_text("utf-8")
+    # Only harnesses that were set up are touched.
+    assert not (estate / "home/.codex/AGENTS.md").exists()
