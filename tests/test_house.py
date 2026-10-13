@@ -505,3 +505,16 @@ def test_house_update_pulls_a_git_house_reinstalls_and_reindexes(estate, capsys)
     assert "Fresh rule." in (estate / "home/.claude/CLAUDE.md").read_text("utf-8")
     # Only harnesses that were set up are touched.
     assert not (estate / "home/.codex/AGENTS.md").exists()
+
+
+def test_repo_setup_reports_vendored_skills_that_git_ignores(estate, capsys):
+    repo = estate / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-b", "main")
+    (repo / ".gitignore").write_text(".agents/\n.claude/\n", "utf-8")
+    assert main(["house", "setup", "--repo", str(repo), "--pattern", "data"]) == 1
+    assert "ignored" in capsys.readouterr().out
+
+    (repo / ".gitignore").write_text(
+        ".agents/*\n!.agents/skills/\n.claude/*\n!.claude/skills/\n", "utf-8")
+    assert main(["house", "setup", "--repo", str(repo)]) == 0

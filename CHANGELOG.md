@@ -7,6 +7,9 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- `spindle house setup --here` reports vendored skills that the repository's
+  ignore rules exclude, and exits non-zero.
+
 ## [0.4.0] - 2026-10-12
 
 - Added the house: one versioned directory holding the rules every harness

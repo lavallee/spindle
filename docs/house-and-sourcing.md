@@ -89,7 +89,8 @@ The copies are meant to be committed, so they work in worktrees, on other
 machines, and in dispatched jobs. `.spindle/house.json` records the pattern and
 each skill's digest; a later `setup --here` updates from the house and refuses
 to overwrite a copy that was edited in the repository unless `--force` is given.
-Add `--with-house-rules` to embed the full house rules in the repository for
+`setup` reports any vendored skill that the repository's ignore rules exclude and
+exits non-zero, since an ignored copy stays on one machine. Add `--with-house-rules` to embed the full house rules in the repository for
 environments that never run the machine-level setup.
 
 ## The catalog
