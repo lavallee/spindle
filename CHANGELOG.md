@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-12
+
 - Added the house: one versioned directory holding the rules every harness
   loads, a small kernel of always-installed skills, and named project patterns.
   `spindle house init|setup|status|rules|patterns` installs it per machine for

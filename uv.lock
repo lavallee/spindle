@@ -70,7 +70,7 @@ source = { editable = "examples/spindle-sample/packages/sample-planning" }
 
 [[package]]
 name = "spindle"
-version = "0.3.0"
+version = "0.4.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
