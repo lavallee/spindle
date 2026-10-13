@@ -376,6 +376,7 @@ def test_unjudged_brief_points_at_find_instead_of_offering_text_matches(
     assert main(["brief", "--judge", "none", "--json", "diagnose a flaky test"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["prompt_block"].startswith("## Skills on demand")
+    assert payload["read_roots"] == [str(estate / "depot" / "packages")]
     assert "spindle find" in payload["prompt_block"]
     assert payload["skills"]["offered"] == [] and payload["skills"]["delivery"] == "pointer"
 

@@ -196,6 +196,9 @@ spindle report --selection "$SELECTION" --job "$JOB_ID" \
   beside the job's own receipt so a reviewer or evaluator can see what guidance
   the producer was given, and pin exactly which skill bytes were in play.
 - `selection`: the id to pass to `report`.
+- `read_roots`: the directories that hold every catalog skill. A runtime whose
+  agent may only read named directories adds these to its allow-list, so the
+  agent can open an offered skill, or one it finds for itself, by path.
 
 Without a judge, `brief` does not offer its text matches: a shortlist built from
 a whole commission is mostly noise. It returns a short "skills on demand" section
