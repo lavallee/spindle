@@ -681,6 +681,11 @@ def setup_repo(
         new_lock[name] = source_digest
         row("skill", name, "updated" if name in locked else "vendored")
         _link_claude(claude_dir, name, rows, dry_run)
+    for name in sorted(new_lock):
+        if _git_ignored(repo, agents_dir / name) or _git_ignored(repo, claude_dir / name):
+            row("skill", name, "ignored",
+                "git ignores this path, so the skill will not travel with the "
+                "repository; un-ignore .agents/skills and .claude/skills")
     if not dry_run:
         path = repo / REPO_LOCK
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -700,6 +705,18 @@ def setup_repo(
             encoding="utf-8",
         )
     return rows
+
+
+def _git_ignored(repo: Path, path: Path) -> bool:
+    """True when *repo* is a Git checkout whose ignore rules cover *path*."""
+    try:
+        done = subprocess.run(
+            ["git", "-C", str(repo), "check-ignore", "-q", str(path)],
+            capture_output=True, timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return done.returncode == 0
 
 
 def _link_claude(

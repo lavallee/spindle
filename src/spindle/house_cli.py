@@ -80,7 +80,7 @@ def cmd_house_setup(args) -> int:
         return _fail(exc)
     prefix = "dry run; nothing changed\n" if args.dry_run else ""
     _emit(rows, args.json, prefix + _rows_text(rows))
-    return 1 if any(row["action"] == "conflict" for row in rows) else 0
+    return 1 if any(row["action"] in {"conflict", "ignored"} for row in rows) else 0
 
 
 def cmd_house_remove(args) -> int:
