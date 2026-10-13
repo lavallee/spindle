@@ -231,6 +231,27 @@ def load_index(*, missing_ok: bool = False) -> dict[str, Any]:
         raise HouseError(f"cannot read {path}: {exc}") from exc
 
 
+def read_roots(index: dict[str, Any]) -> list[str]:
+    """The directories that hold every indexed skill, for sandbox allow-lists.
+
+    A runtime whose agent may only read named directories needs these to let
+    it open a skill by path, including one it finds for itself mid-task.
+    """
+    roots: set[str] = set()
+    snapshots = str(paths.source_snapshots_dir())
+    for entry in index.get("skills", []):
+        path = entry["path"]
+        if path.startswith(snapshots + os.sep):
+            roots.add(snapshots)
+        else:
+            rel = entry.get("rel") or "."
+            root = Path(path)
+            for _ in Path(rel).parts if rel != "." else ():
+                root = root.parent
+            roots.add(str(root))
+    return sorted(roots)
+
+
 def find_entry(index: dict[str, Any], ref: str) -> dict[str, Any]:
     """Look a skill up by ``source/name``, or by bare name when it is unambiguous."""
     matches = [

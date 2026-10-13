@@ -364,6 +364,7 @@ def cmd_brief(args) -> int:
             "selection": selection["id"],
             "skills": sourcing_mod.skills_record(selection, delivery),
             "prompt_block": block,
+            "read_roots": catalog_mod.read_roots(catalog_mod.load_index()),
         }
         if args.inline and delivery == "inline":
             for candidate in selection["candidates"]:
