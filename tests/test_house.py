@@ -64,6 +64,13 @@ def test_frontmatter_joins_block_scalars():
     assert meta == {"name": "a", "description": "First line second."}
 
 
+
+def test_frontmatter_unquotes_yaml_scalars():
+    meta = house.frontmatter(
+        "---\nname: 'it''s'\ndescription: \"Use for \\\"x\\\" work\"\n---\nx"
+    )
+    assert meta == {"name": "it's", "description": 'Use for "x" work'}
+
 def test_machine_setup_installs_rules_and_kernel_for_each_harness(estate, capsys):
     home = estate / "home"
     home.joinpath(".codex/AGENTS.md").write_text("# Mine\n\nKeep this.\n", "utf-8")
@@ -201,6 +208,17 @@ def test_catalog_sync_indexes_local_source_and_flags_kernel_and_install(estate):
     with pytest.raises(house.HouseError):
         catalog.find_entry(index, "missing")
 
+
+
+def test_catalog_refs_use_the_directory_when_the_name_is_a_display_name(estate):
+    skill = estate / "depot" / "packages" / "style" / "skills" / "poteto-mode"
+    skill.mkdir(parents=True)
+    skill.joinpath("SKILL.md").write_text(
+        "---\nname: Poteto Mode\ndescription: An agent style.\n---\nBody.\n", "utf-8"
+    )
+    refs = {entry["ref"] for entry in catalog.sync(house.load())["skills"]}
+    assert "home/poteto-mode" in refs
+    assert not any(" " in ref for ref in refs)
 
 def _git(repo: Path, *args: str) -> str:
     return subprocess.run(["git", "-C", str(repo), *args], check=True,
