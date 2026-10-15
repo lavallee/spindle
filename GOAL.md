@@ -1,7 +1,8 @@
 # Spindle completion goal
 
-Status: completed for the current Spindle 0.x baseline on 2026-07-31; future harness or
-model coordinates require recertification under the same contract.
+Status: active for the sourcing phase (roadmap milestones 8 to 13), set
+2026-10-15. The lifecycle goal (milestones 1 to 7) was completed on 2026-07-31;
+see [the previous goal](#previous-goal).
 
 This is paste-ready language for running [VISION.md](VISION.md) and
 [ROADMAP.md](ROADMAP.md) to completion as one persistent implementation goal.
@@ -9,94 +10,76 @@ This is paste-ready language for running [VISION.md](VISION.md) and
 ## Objective
 
 ```text
-Implement the Spindle VISION.md and ROADMAP.md end to end, delivering an
-evidence-bearing skill lifecycle for Claude Code and Codex: desired-state and
-ownership records; effective cross-scope inventory; ownership-safe startup
-bootstrap and stable native hooks; intent cards; local and pinned-remote try and
-borrow leases; exact per-agent realization and activation evidence; explicit
-adoption; update-as-trial, health, rollback, disable, quarantine, and retirement;
-and tuple-aware evaluation and distillation.
+Implement the sourcing phase of Spindle's VISION.md and ROADMAP.md end to end:
+close the loop from task to guidance to outcome for every agent an estate runs.
 
-Make that lifecycle directly operable from the harness: ship a minimal
-project-local Spindle operator for Codex and Claude Code that queries live CLI
-state and action contracts, routes correctly in nested mixed-harness sessions,
-previews every mutation, and never treats operator installation or hook
-configuration as proof of skill activation or runtime observation.
+Every agent, in an interactive harness or a dispatched job, should load the
+current house rules and kernel, be offered only the catalog skills (and later
+tools) a judge expects to materially help, receive them as files to read, and
+leave a per-skill record of whether they helped that reviewers and critic agents
+contribute to. That record must be good enough to measure selection quality,
+calibrate thresholds, and decide promotion and demotion across the house.
 
-Work milestone by milestone in ROADMAP.md dependency order, completing the
-highest unblocked vertical slice before expanding scope. Preserve foreign and
-user-managed harness state. Never delete or overwrite an artifact without an
-exact Spindle ownership record. Keep harness mechanics deterministic and outside
-portable skill prose. Bind all effectiveness claims to exact artifact and runtime
-coordinates. Treat live Claude/Codex validation and durable receipts as required
-evidence wherever a roadmap gate names them.
+Work milestone by milestone in ROADMAP.md dependency order (outcomes before
+measurement, measurement before promotion), completing the highest unblocked
+vertical slice before expanding scope. Keep sourcing fail-soft: it never gates a
+job. Never execute third-party code to index or hand over a skill. Keep house
+rules above skills. Record every offer with exact digests. Say what task text
+leaves the machine, and keep a local path.
 
-The goal is complete only when every roadmap milestone gate passes, the full
-test and lint suites pass, schema migrations and user documentation are current,
-and the end-to-end acceptance journey succeeds from fresh and intentionally
-polluted environments on certified Claude Code and Codex builds. Do not mark the
-goal complete because one milestone ships, the remaining work is difficult, or
-the context window is ending. Record incomplete work and continue with the next
-highest-priority acceptance gap.
+The goal is complete only when every milestone gate from 8 to 13 passes in real
+use on at least one estate (a set of machines, harnesses, projects, and a job
+runtime), the full test and lint suites pass, schemas and documentation are
+current, and the acceptance journey below succeeds. Do not mark the goal
+complete because one milestone ships, the remaining work is difficult, or a gate
+needs more real use than has happened yet. Record incomplete work and continue
+with the next highest-priority gap.
 ```
 
 ## Definition of done
 
-All of the following must be true:
-
-1. A user can inspect a local or pinned remote skill without activating it or
-   executing bundled code.
-2. A user can try it for one disposable session or borrow it with a TTL over the
-   actual current blend, without creating durable adoption state.
-3. A surface lock resolves adopted and leased skills to immutable content
-   identity, not only names or version strings.
-4. Startup bootstrap inventories all supported discovery scopes, verifies exact
-   expected revisions, repairs only stale Spindle-owned projections, preserves
-   foreign state, and blocks or explains collisions.
-5. Stable Claude and Codex hooks attest startup, resume/compaction, and subagent
-   state without embedding mutable pins in hook definitions or flooding context.
-6. Parent and child agents independently resolve and prove their actual model,
-   realization, effective tools, permissions, and activation state.
-7. A successful lease can be explicitly adopted; adoption is the only trial
-   path that changes durable desired state.
-8. Updates run beside incumbents as candidate trials. Rollback, disable,
-   quarantine, release, and retirement preserve history and remove only owned
-   runtime state.
-9. Evaluation separates availability, activation, routing, authorization, and
-   behavior; supports named arms and ablations; and can prove that a smaller or
-   empty steering residue is non-inferior for a bounded runtime coordinate.
-10. Claude Code and Codex adapters pass the published conformance suite on named
-    builds, including clean, stale-owned, foreign-conflict, resume, expired-lease,
-    mixed-model delegation, and crash-recovery cases.
-11. All durable schemas are versioned and migrated; all mutating commands expose
-    a plan or dry-run; all receipts are content-addressed and reproducible except
-    for explicitly non-addressed observation metadata.
-12. The public documentation, CLI help, examples, and migration guide describe
-    the implemented behavior accurately.
-13. A user can invoke `$spindle` in Codex or `/spindle` in Claude Code to inspect
-    current lifecycle state and drive exact dry-run/apply commands; mixed-harness
-    nesting routes to the active child, and status separates operator custody,
-    hook configuration, and observed startup evidence.
+1. One versioned house installs rules and kernel into every supported harness on
+   every machine, and a merged house change reaches all of them through a timer
+   without manual steps.
+2. A project's vendored pattern stays current with the house, and a container or
+   hosted agent with no setup can still load the rules and reach the catalog.
+3. A new third-party source can be admitted, filtered, tested on queries it
+   should win and lose, and later updated, entirely through reviewed commands.
+4. `find` and `brief` separate recall from judgment, label unjudged shortlists,
+   offer zero to two skills for a typical task, and degrade to "no offer" on any
+   failure.
+5. Every selection has a receipt with digests and reasons, and every graded job
+   that was offered a skill carries per-skill verdicts from its reviewer.
+6. Selection precision and recall are measured on held-out real tasks, for the
+   remote and the local judge, and the thresholds in use cite that evidence.
+7. Promotion and demotion between catalog, pattern, and kernel are decided from
+   recorded evidence and a paired evaluation, and the kernel does not grow
+   without one.
+8. Tools are indexed, judged, and handed over beside skills, with outcomes in the
+   same record.
+9. The `brief`/`report` contract is versioned with a conformance test, and a
+   second runtime has integrated from the documentation alone.
+10. The lifecycle's guarantees (ownership, startup integrity, leases, adoption,
+    updates as trials) still pass their conformance suite.
+11. The public documentation, CLI help, and examples describe the implemented
+    behavior accurately.
 
 ## Operating contract
 
-Use these rules while the goal is active:
-
-- Begin each continuation by reading the current roadmap, repository state,
-  latest receipts, and failing acceptance gates. Do not restart completed work.
-- Keep at most one milestone's main vertical slice in progress. Parallelize only
-  bounded research, adapter, or validation tasks whose file ownership is clear.
-- Prefer executable acceptance tests and raw receipts over architectural claims.
-- Run focused tests during implementation and the full suite before closing a
-  slice.
-- Validate harness-specific claims through the actual harness version under test
-  and record the build. Do not generalize from undocumented behavior.
-- When an API or harness limitation blocks one adapter, preserve the portable
-  contract, report the capability gap, and continue other meaningful work.
-- Treat a changed model, harness build, toolset, policy, package digest, or active
-  blend as evidence drift that may reopen a previously passing claim.
-- Keep startup fast: no network fetch, deep scan, or behavioral evaluation in the
-  normal session-start hook path.
+- Begin each continuation by reading the roadmap, the repository, the latest
+  usage and selection records, and failing gates. Do not restart completed work.
+- Prefer evidence from real use over synthetic cases, and say which one a claim
+  rests on.
+- Keep at most one milestone's main slice in progress. Parallelize only bounded
+  research, adapter, or validation work with clear file ownership.
+- Run focused tests while building and the full suite before closing a slice.
+- When a gate needs more real use than exists, keep the instrumentation running,
+  report the count, and move to the next unblocked milestone instead of
+  weakening the gate.
+- Treat a changed model, harness build, judge, threshold, or catalog pin as
+  evidence drift that may reopen a passing claim.
+- Never let sourcing slow startup or block a job. Never add a skill to the kernel
+  to make a metric move.
 - Keep the worktree safe. Preserve unrelated user changes and never clean foreign
   skill directories as a convenience.
 - Update ROADMAP.md when evidence changes sequencing or a gate, but do not weaken
@@ -104,51 +87,56 @@ Use these rules while the goal is active:
 
 ## Acceptance journey
 
-The final system must demonstrate this scenario on both reference harnesses:
-
 ```text
-1. Begin with a fresh repo plus one unrelated user-managed skill.
-2. Inspect a pinned candidate without installing or executing it.
-3. Try it read-only over the current blend and retain startup, activation, and
-   run receipts.
-4. Borrow it for a bounded TTL and verify a new session loads the exact digest.
-5. Delegate to a differently modeled child and prove independent realization.
-6. Introduce a stale Spindle-owned link and a same-name foreign skill.
-7. Bootstrap repairs the owned link, preserves the foreign skill, and blocks or
-   requires an explicit conflict decision.
-8. Adopt the useful lease and restart with the adopted lock.
-9. Present an upstream update, test it beside the incumbent, reject one failing
-   revision, and promote one passing revision.
-10. Change the harness/model coordinate and observe the evidence become stale.
-11. Rebaseline, distill redundant steering when non-inferior, and retain the
-    richer references progressively disclosed.
-12. Roll back, disable, and retire the skill while preserving historical
-    receipts and the unrelated user-managed skill.
+1. Start from a fresh machine and a house repository; install the house into
+   every supported harness and confirm a new session in each loaded the rules.
+2. Vendor a pattern into a project, then move the house version and watch the
+   project report itself behind and update.
+3. Admit a public skill collection with a filter and a query test; confirm
+   `find` offers its skills for tasks they fit and not for tasks they do not.
+4. Run a week of real work through a job runtime with `brief` before dispatch,
+   reviewer verdicts after, and `report` on every graded job.
+5. Show each frequently offered skill's history, and the selection evaluation's
+   precision for remote, local, and unjudged selection.
+6. Recalibrate a threshold from that evidence and show the change in offers.
+7. Promote one catalog skill and demote one kernel skill from the evidence, each
+   with a paired evaluation receipt and a reviewed house change.
+8. Update the pinned collection through a reviewed diff that lists per-skill
+   changes and new indicators.
+9. Find and hand over an estate tool for a task where a generic one would
+   otherwise be used.
+10. Run a container with no setup that loads the house bundle and sources a
+    skill.
+11. Run the lifecycle conformance suite and confirm nothing regressed.
 ```
 
 ## Checkpoint language
 
-Use this for subsequent continuation turns:
-
 ```text
 Continue the active Spindle completion goal. Read VISION.md, ROADMAP.md, and
-GOAL.md; inspect the current repository, plan, receipts, and tests; then implement
-the highest unblocked acceptance gap in the current roadmap milestone. Validate
-the vertical slice with focused tests and any required live harness evidence,
-update the roadmap truthfully, and continue while safe meaningful work remains.
-Do not repeat completed work, broaden into a later milestone prematurely, mutate
-foreign skill state, or mark the goal complete until every definition-of-done
-item and final acceptance journey passes.
+GOAL.md; inspect the repository, the usage and selection records, and failing
+gates; then implement the highest unblocked gap in the current milestone. Prove
+the slice with focused tests and, where the gate names it, real use. Update the
+roadmap truthfully and continue while safe, meaningful work remains. Do not
+repeat completed work, broaden into a later milestone prematurely, weaken a gate,
+or mark the goal complete until every definition-of-done item and the acceptance
+journey pass.
 ```
 
 ## Completion report
 
-The final report should name:
+The final report should name the release and schema versions, the harnesses and
+builds verified, the estate and runtime the gates were proven on, test and lint
+results, the selection-evaluation numbers and thresholds with their evidence,
+the promotions and demotions made, known limitations, and the migration and
+rollback paths.
 
-- the release and schema versions;
-- the certified harness builds and capability matrix;
-- the full automated test/lint results;
-- the acceptance-journey receipt IDs;
-- known limitations and explicitly unsupported harness behavior;
-- migration and rollback paths; and
-- evidence that foreign state remained intact.
+## Previous goal
+
+The lifecycle goal ran from July to 2026-07-31 and delivered an evidence-bearing
+skill lifecycle for Claude Code and Codex: desired-state and ownership records,
+effective inventory, startup bootstrap and stable hooks, intent cards, local and
+pinned-remote leases, per-agent realization and activation evidence, adoption,
+updates as trials, retirement, tuple-aware evaluation and distillation, and a
+harness operator. Its full text, definition of done, and acceptance journey are
+in [GOAL.md at d290d66](https://github.com/lavallee/spindle/blob/d290d66/GOAL.md).
