@@ -1,7 +1,7 @@
 [project]
 name = "spindle"
 version = "0.4.2"
-description = "Evidence-bearing lifecycle and control plane for agent skills"
+description = "Choose, hand over, and track the skills coding agents use: a small house, a pinned catalog, and an evidence-bearing lifecycle and control plane"
 authors = [
     { name = "Marc Lavallee", email = "mlavallee@gmail.com" }
 ]

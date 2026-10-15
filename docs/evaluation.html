@@ -13,20 +13,24 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- nav:begin -->
 <nav class="site-nav">
   <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
   <button class="nav-toggle" aria-label="Menu">menu</button>
   <div class="nav-links">
     <a href="index.html">Overview</a>
-    <a href="rationale.html">Rationale</a>
+    <a href="rationale.html">Why</a>
+    <a href="house.html">House</a>
+    <a href="catalog.html">Catalog</a>
     <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
-    <a href="evaluation.html">Evaluation</a>
+    <a href="evaluation.html" aria-current="page">Evaluation</a>
     <a href="guide.html">Guide</a>
     <a href="https://github.com/lavallee/spindle">GitHub</a>
   </div>
   <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
 </nav>
+<!-- nav:end -->
 
 <main class="article">
   <header class="article-header">
@@ -69,6 +73,22 @@
   <p class="article-pullquote">Availability is not activation. Activation is not
   authorization. None of them is improvement.<cite>The boundaries the evaluation
   contracts enforce.</cite></p>
+
+  <h2>Two kinds of evidence</h2>
+  <div class="article-mrow">
+    <p>Everyday use produces cheap evidence. Each <a href="catalog.html#feedback">report</a>
+    records whether work that was offered a skill was accepted, and whether the
+    skill helped or hurt. That ledger tunes the catalog's ranking, but it is
+    observational: the work was not run without the skill, so it cannot say the
+    skill caused the result. Promotion needs the stronger evidence described
+    below, a paired experiment on held-out cases. Use the ledger to decide what to
+    evaluate, and the evaluation to decide what to keep.</p>
+    <aside class="article-marginnote">
+      <span class="term">ledger vs. experiment</span>
+      <code>spindle usage</code> answers "how has this fared?".
+      <code>spindle eval run</code> answers "does it help, against a baseline?".
+    </aside>
+  </div>
 
   <h2>The paired experiment</h2>
   <div class="article-mrow">
@@ -311,7 +331,7 @@ fixture = "fixtures/unseen-regression.json"</code></pre>
 
   <nav class="pagenav">
     <a class="prev" href="how-it-works.html">
-      <span class="dir">← Back</span>
+      <span class="dir">← Previous</span>
       <span class="ttl">How it works</span>
     </a>
     <a class="next" href="guide.html">

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The catalog — Spindle</title>
+  <meta name="description" content="Spindle's catalog indexes skills from commit-pinned sources without running them. find ranks and judges them per task, use hands one over by path, brief serves job runtimes, and report records whether a skill helped.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+  <link rel="stylesheet" href="lib/artoo-kit/base.css">
+  <link rel="stylesheet" href="lib/artoo-kit/article.css">
+  <link rel="stylesheet" href="lib/artoo-kit/components.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- nav:begin -->
+<nav class="site-nav">
+  <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
+  <button class="nav-toggle" aria-label="Menu">menu</button>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="rationale.html">Why</a>
+    <a href="house.html">House</a>
+    <a href="catalog.html" aria-current="page">Catalog</a>
+    <a href="lifecycle.html">Lifecycle</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="evaluation.html">Evaluation</a>
+    <a href="guide.html">Guide</a>
+    <a href="https://github.com/lavallee/spindle">GitHub</a>
+  </div>
+  <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
+</nav>
+<!-- nav:end -->
+
+<main class="article">
+  <header class="article-header">
+    <div class="article-kicker">the catalog</div>
+    <h1 class="article-title">Hundreds of skills available. None of them in the way.</h1>
+    <p class="article-dek">The catalog lists skill sources pinned to exact
+    commits. Nothing in it is installed. An agent or a job runner asks for help
+    with a task and gets back the few skills a judge thinks would matter, as
+    files to read.</p>
+  </header>
+
+  <div class="toc">
+    <b>On this page</b>
+    <ol>
+      <li><a href="#sources">Sources and pins</a></li>
+      <li><a href="#find">Find, use, report</a></li>
+      <li><a href="#selection">How a choice is made</a></li>
+      <li><a href="#feedback">Feedback</a></li>
+      <li><a href="#runtimes">For job runtimes</a></li>
+      <li><a href="#trust">What Spindle will not do</a></li>
+    </ol>
+  </div>
+
+  <h2 id="sources">Sources and pins</h2>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">catalog.toml</span></div>
+<pre><code>[[source]]
+slug = "ours"
+path = "../packages"                 <span class="c"># a local directory, read in place</span>
+
+[[source]]
+slug = "upstream"
+ref = "github:owner/skills@&lt;40-character commit&gt;"
+track = "main"
+include = ["plugins/upstream/skills/*"]   <span class="c"># optional: index only these</span>
+exclude = ["plugins/upstream/skills/setup-*"]
+notes = "Shown to agents beside each skill from this source."</code></pre>
+  </div>
+
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle catalog sync               <span class="c"># export pinned sources, rebuild the index</span>
+<span class="p">$</span> spindle catalog sync upstream      <span class="c"># or one source</span>
+<span class="p">$</span> spindle catalog list
+<span class="p">$</span> spindle catalog update             <span class="c"># what would a newer upstream commit change?</span>
+<span class="p">$</span> spindle catalog update upstream --apply</code></pre>
+  </div>
+
+  <div class="article-mrow">
+    <p>A Git source must pin a full commit. <code>update</code> compares the pin
+    with the tracked branch and lists the skills added, changed, and removed,
+    with any new static indicators. <code>--apply</code> rewrites the pin, and you
+    review it as an ordinary diff to the house. <code>include</code> and
+    <code>exclude</code> take globs over each skill's directory, relative to the
+    source root, so one plugin can be taken from a repository of many and its
+    harness-specific setup skills left out.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">refs</span>
+      Each skill is <code>source/name</code>. The name is the skill's
+      frontmatter <code>name</code>, or its directory name when that is a
+      display name such as "Review Mode".
+    </aside>
+  </div>
+
+  <p>For every skill the index records its digest, the commit it came from,
+  whether it hard-codes its own install location (and so cannot be used from a
+  snapshot), and static indicators of network, credential, or shell use.</p>
+
+  <h2 id="find">Find, use, report</h2>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle find "agents keep making the same mistake in this repo"
+<span class="o">* 0.80 1.00  upstream/correct    Find the mistakes agents keep repeating and make each impossible
+  0.45 0.92  other/retro         Conduct a retrospective on a coding session</span>
+<span class="p">$</span> spindle use upstream/correct              <span class="c"># the SKILL.md path; --print for the text</span>
+<span class="p">$</span> spindle report --outcome accepted --helped upstream/correct
+<span class="p">$</span> spindle usage                             <span class="c"># counts and the prior per skill</span></code></pre>
+  </div>
+
+  <p>The two numbers are the judge's probability and the text-match score
+  relative to the best match. <code>use</code> hands over a path, which works in
+  any harness that can read files and needs no install, lease, or reload. Use a
+  lease (<a href="lifecycle.html">try or borrow</a>) only when a skill has to
+  appear in a harness's native skill list.</p>
+
+  <h2 id="selection">How a choice is made</h2>
+  <div class="article-breakout">
+  <div class="pipeline">
+    <div class="stage"><span class="n">01</span><h4>Expand</h4>
+      <p>An optional command rewrites the task as phrases a skill
+      description would use.</p>
+      <span class="mod">[sourcing] expand</span></div>
+    <div class="stage"><span class="n">02</span><h4>Recall</h4>
+      <p>Full-text search ranks the catalog per phrase and for the task, then
+      fuses the rankings.</p>
+      <span class="mod">BM25 + RRF</span></div>
+    <div class="stage"><span class="n">03</span><h4>Weigh</h4>
+      <p>Ranks are weighted by each skill's record. Kernel skills are left
+      out.</p>
+      <span class="mod">usage prior</span></div>
+    <div class="stage"><span class="n">04</span><h4>Judge</h4>
+      <p>Would this skill materially help? At or above 0.6 is selected. None
+      is a fine answer.</p>
+      <span class="mod">--judge auto|jev|none</span></div>
+    <div class="stage"><span class="n">05</span><h4>Receipt</h4>
+      <p>The selection is saved with its candidates, scores, and skill
+      digests.</p>
+      <span class="mod">~/.spindle/selections</span></div>
+  </div>
+  </div>
+
+  <div class="article-mrow">
+    <p><strong>The expander</strong> is any executable named in
+    <code>house.toml</code> that reads the task on stdin and prints short search
+    phrases, one per line. It is usually a small model call. A missing command,
+    a non-zero exit, a timeout, or empty output means no expansion.
+    <code>--expand none</code> skips it.</p>
+    <aside class="article-marginnote article-marginnote--callout">
+      <span class="term">task text leaves the machine</span>
+      The expander and the judge both see the task. Use <code>--expand none</code>
+      and <code>--judge none</code> when that is not acceptable.
+    </aside>
+  </div>
+
+  <div class="article-mrow">
+    <p><strong>The judge</strong> is the Jev decision model: one call, a
+    calibrated probability per candidate. Enable it with
+    <code>TYPESAFE_API_KEY</code>, or name a key file with
+    <code>SPINDLE_JEV_KEY_FILE</code> or <code>jev_key_file</code> in
+    <code>~/.spindle/house.toml</code>. It is advisory and fail-soft: a missing
+    key, a timeout, or a malformed answer falls back to the text-match shortlist,
+    marked <code>lexical</code>, and says so.</p>
+    <aside class="article-marginnote">
+      <span class="term">why a judge</span>
+      Text match finds the neighbourhood. It cannot tell a skill that would help
+      from one that only shares vocabulary with the task.
+    </aside>
+  </div>
+
+  <h2 id="feedback">Feedback</h2>
+  <p>Every step appends to <code>~/.spindle/usage.jsonl</code>: what was offered
+  and selected, what was read, and how the work was judged.
+  <code>report --helped</code> and <code>--hurt</code> are direct verdicts. An
+  outcome on a run that merely had a skill loaded counts as weak evidence. The
+  resulting prior lifts skills that keep helping and lowers skills that keep
+  being rejected, and <code>spindle usage</code> shows both.</p>
+
+  <h2 id="runtimes">For job runtimes</h2>
+  <p>A runner that dispatches agent jobs needs one call before dispatch and one
+  after grading:</p>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle brief --json --task-file - --repo "$WORKTREE" &lt; commission.md
+<span class="p">$</span> spindle report --selection "$SELECTION" --job "$JOB_ID" \
+    --outcome accepted --loaded upstream/systematic-debugging</code></pre>
+  </div>
+
+  <table>
+    <thead><tr><th><code>brief --json</code> field</th><th>What the runtime does with it</th></tr></thead>
+    <tbody>
+      <tr><td><code>prompt_block</code></td><td>Append to the agent's prompt. It lists each offered skill with the path to read, so the agent pays for a skill only if it uses it. Empty means nothing was offered.</td></tr>
+      <tr><td><code>skills</code></td><td>Store beside the job's own receipt: selection id, how it was chosen, delivery mode, and each skill's ref, digest, and judged probability. A reviewer then sees what guidance the producer had.</td></tr>
+      <tr><td><code>selection</code></td><td>Pass to <code>report</code> after grading.</td></tr>
+      <tr><td><code>read_roots</code></td><td>Add to the agent's read allow-list in a sandbox, so it can open an offered skill, or one it finds itself, by path.</td></tr>
+    </tbody>
+  </table>
+
+  <ul>
+    <li><strong>No judge, no offer.</strong> A shortlist built from a whole
+      commission is mostly noise, so without a judge <code>brief</code> returns
+      a short "skills on demand" section that tells the agent how to run
+      <code>find</code> once it knows what it is about to do.
+      <code>--unjudged shortlist|none</code> changes that.</li>
+    <li><strong>Inline only when you must.</strong> <code>--inline</code> embeds
+      skill text for sandboxes that cannot read outside their workspace, at most
+      two skills and only ones scored 0.7 or higher. Embedded text is paid for
+      whether or not it is used.</li>
+    <li><strong>Attribution without plumbing.</strong> Set
+      <code>SPINDLE_JOB</code> in the agent's environment and every
+      <code>find</code> and <code>use</code> it runs is attributed to the job, so
+      <code>report --job</code> joins them.</li>
+    <li><strong>Rules for bare runtimes.</strong> <code>--rules</code> returns
+      the house rules in the same answer, for runtimes that load no harness
+      instruction file.</li>
+    <li><strong>Never a gate.</strong> Treat any failure like an empty
+      <code>prompt_block</code>. Skill sourcing should never stop a job.</li>
+  </ul>
+
+  <h2 id="trust">What Spindle will not do</h2>
+  <dl class="defs">
+    <div><dt>Run a source</dt><dd>Sources are exported through the same
+      non-executing snapshot path as <code>spindle inspect</code>: no hooks, no
+      install scripts, no package managers.</dd></div>
+    <div><dt>Float a version</dt><dd>A Git source without a full commit is
+      refused. Upstream work arrives only through <code>catalog update
+      --apply</code>.</dd></div>
+    <div><dt>Let a skill outrank the task</dt><dd>The handover tells the agent a
+      skill is guidance. It never overrides the task, its acceptance criteria,
+      or the house rules.</dd></div>
+    <div><dt>Hide what was offered</dt><dd>Every selection has a receipt, and
+      every offered skill a digest, so an evaluator can pin the exact bytes in
+      play.</dd></div>
+  </dl>
+
+  <nav class="pagenav">
+    <a class="prev" href="house.html">
+      <span class="dir">← Previous</span>
+      <span class="ttl">The house</span>
+    </a>
+    <a class="next" href="lifecycle.html">
+      <span class="dir">Next →</span>
+      <span class="ttl">The vetting lifecycle</span>
+    </a>
+  </nav>
+
+  <footer class="colophon">
+    Spindle chooses, hands over, and tracks agent skills. Full reference:
+    <a href="https://github.com/lavallee/spindle/blob/main/docs/house-and-sourcing.md">house-and-sourcing.md</a>.<br>
+    MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
+  </footer>
+</main>
+<script src="lib/artoo-kit/kit.js"></script>
+</body>
+</html>

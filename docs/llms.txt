@@ -1,155 +1,64 @@
 # Spindle
 
-> Spindle is an evidence-bearing lifecycle and control plane for agent skills. It
-> lets users inspect and try exact package bytes before adoption, lease them
-> temporarily, compose and verify the effective startup environment, realize
-> minimal overlays per agent, evaluate bounded behavioral claims, and update or
-> retire only state under exact custody. Open-core Python toolchain; MIT licensed.
+> Spindle chooses, hands over, and tracks the skills coding agents use. A house
+> keeps a short list of rules and kernel skills always on in every harness; a
+> catalog of commit-pinned skills is searched and judged per task and handed over
+> by path; every outcome is recorded against the skill. For skills that must be
+> installed, an evidence-bearing lifecycle and control plane inspects, tries,
+> verifies, and retires them with custody. Python CLI, MIT licensed. Spindle v0.4.
 
-For the whole documentation in one file, read the bundle:
-[bundle.md](bundle.md).
+For the whole documentation in one file, read [bundle.md](bundle.md).
 
 ## Core idea
 
-- Install from `lyra-forge/marketplace` with `codex plugin marketplace add
-  lyra-forge/marketplace` plus `codex plugin add spindle@lyra-forge`, or the
-  corresponding Claude Code `claude plugin marketplace add` and `claude plugin
-  install` commands. The dual-manifest plugin carries an exact-source launcher;
-  its initial namespaced skill is `$spindle:spindle` or `/spindle:spindle`.
-- The primary UX is harness-native: `spindle harness setup --harness <codex|claude>
-  --here` projects a minimal operator invoked as `$spindle` in Codex or
-  `/spindle` in Claude Code. It reads current facts and command contracts from
-  `spindle harness context`, rather than duplicating a CLI manual in skill prose.
-- Installation does not prove intent, authority, activation, compatibility,
-  usefulness, or maintenance ownership. Spindle keeps those decisions separate.
-- The lifecycle is **inspect → try/borrow → compose → bootstrap → realize →
-  activate → evaluate → adopt/update/distill/release/retire**.
-- Temporary use comes first: `try` creates one disposable read-only session;
-  `borrow` creates an exact expiring lease. Only `adopt` creates durable custody.
-- Desired state lives in a content-addressed surface lock. Startup inventories the
-  effective harness environment, repairs only receipt-owned drift, preserves
-  foreign state, and writes a receipt before task execution.
-- Composition still matters: `bind` resolves a tight surface-specific set,
-  renders it for the harness/model, verifies guardrails, and records ownership.
-- Parent and child agents independently realize and prove their served model,
-  tools, policy, and projection. Shared package state is never rewritten to route
-  one session.
-- Effectiveness is tuple-bound. Named-arm evaluations rebaseline no-skill
-  behavior and permit smaller or empty overlays only through held-out
-  non-inferiority, hard-floor, runtime, and efficiency gates.
+- The model picks worse from a longer skill list, so keep the always-on list
+  short (the house kernel) and search the rest (the catalog) per task.
+- `spindle house init <dir>` then `spindle house setup` installs house rules into
+  `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and `~/.hermes/SOUL.md` (managed
+  blocks) and links kernel skills. `spindle house update` keeps a machine current.
+  `spindle house setup --here --pattern <name>` vendors a project pattern.
+- `catalog.toml` lists sources pinned to full commits, with optional `include`
+  and `exclude` globs. `spindle catalog sync` indexes them without executing
+  anything; `spindle catalog update <slug>` shows what a newer commit changes.
+- `spindle find "<task>"` ranks catalog skills (full-text search, optional search
+  expander, usage prior) and, with a judge (Jev, via `TYPESAFE_API_KEY`), selects
+  those likely to materially help. `spindle use <source>/<name>` prints the
+  SKILL.md path. `spindle report --outcome accepted|rejected --helped <ref>`
+  records the result; `spindle usage` shows the record.
+- Job runtimes call `spindle brief --json` before dispatch (`prompt_block`,
+  `skills`, `selection`, `read_roots`) and `spindle report --selection --job`
+  after grading. `SPINDLE_JOB` attributes the agent's own lookups. Sourcing never
+  gates a job.
+- For installed skills: inspect → try/borrow → compose → bootstrap → realize →
+  activate → evaluate → adopt/update/distill/release/retire. `try` is one
+  disposable session, `borrow` an expiring lease, and only `adopt` creates
+  custody. `spindle harness setup --harness <codex|claude> --here` projects a
+  small operator; it reads live state from `spindle harness context`.
+- Install: `uv tool install "git+https://github.com/lavallee/spindle@v0.4.2"`, or
+  the plugin from `lyra-forge/marketplace` (`claude plugin install
+  spindle@lyra-forge`, `codex plugin add spindle@lyra-forge`).
 
 ## Pages
 
-- [Product vision](https://github.com/lavallee/spindle/blob/main/VISION.md): the
-  evidence-bearing lifecycle, startup integrity model, and product boundaries.
-- [Execution roadmap](https://github.com/lavallee/spindle/blob/main/ROADMAP.md):
-  milestone order, delivery gates, release slices, and adapter certification.
-- [Completion goal](https://github.com/lavallee/spindle/blob/main/GOAL.md):
-  paste-ready objective, definition of done, operating contract, and acceptance
-  journey.
-- [Overview](index.html): what Spindle is, the two-minute quickstart, and the
-  concept map.
-- [Rationale](rationale.html): the five hidden costs of the skill pile (context
-  budget, incoherent blends, one-size-fits-all skills, wrong-surface phrasing,
-  guardrail erosion), plus the install-and-hope lifecycle gap.
-- [Lifecycle](lifecycle.html): intent cards, disposable trials, expiring leases,
-  desired-state startup, per-agent activation, adoption, updates, recovery, and
-  build-specific adapter certification.
-- [How it works](how-it-works.html): the vocabulary (skill, package, distribution,
-  channel, surface, profile, blend, doctrine), lifecycle record chain, startup
-  control loop, six-stage bind pipeline, safety floor, and caching.
-- [Evaluation](evaluation.html): separate runtime gates, legacy paired cases,
-  named arms, non-inferiority minimalism, distillation, and durable receipts.
-- [Guide](guide.html): harness-native setup and invocation, inspect/try/borrow,
-  startup hooks, adoption/update/retire, policy/certification/recovery, and the
-  deeper distribution-authoring path.
-- [Runtime realization](runtime-realization.md): package manifest, exact session
-  routing, immutable stores, conservative fallback, receipts, and adapter boundary.
-- [Startup integrity](startup-integrity.md): pre-launch bootstrap, stable native
-  Claude/Codex hooks, trust and heartbeat states, fast verification, and exact
-  foreign-conflict decisions.
-- [Candidate lifecycle](local-lifecycle.md): read-only intent cards, pinned Git
-  sources, static trust preflight, quarantine, exact borrow/try leases, expiry
-  reconciliation, cleanup, and receipt custody.
-- [House and sourcing](house-and-sourcing.md): house rules and kernel skills per
-  machine and repository (`spindle house`), the pinned on-demand catalog
-  (`spindle catalog`), and `spindle find|use|report|brief|usage`.
-- [Job-scoped leases](job-scoped-leases.md): the external dispatcher contract —
-  `spindle job grant|release|status --for-job`, explicit skill lists, composition
-  over the standing binding, and TTL-plus-startup crash cleanup.
-- [Adapter compatibility](adapter-compatibility.md): fail-closed build matrices,
-  Claude/Codex certifications, mixed-model parent/child evidence, and
-  reproduction boundaries.
-- [Migration and recovery](migration-and-recovery.md): legacy audits,
-  deterministic export/import, immutable-receipt recovery, cache GC, and
-  rollback custody.
-- [Organization policy](organization-policy.md): source allowlists, authority
-  ceilings, required hooks/attestations, and certified-build enforcement.
-- [Skill lifecycle UX](skill-lifecycle-ux.md): intent cards, temporary try/borrow
-  leases, effective inventory, adoption and retirement, plus the current ecosystem
-  landscape.
+- [Overview](index.html): the house, the catalog, and judged per-task choice.
+- [Why a small house](rationale.html): selection accuracy, and the costs of an
+  unmanaged pile.
+- [The house](house.html): rules, kernel, patterns, machine and project setup.
+- [The catalog](catalog.html): sources and pins, find/use/report, the selection
+  pipeline, feedback, job runtimes, trust.
+- [The vetting lifecycle](lifecycle.html): inspect, try, borrow, adopt, update,
+  retire.
+- [How it works](how-it-works.html): record chain, composition, startup,
+  rendering, safety floor.
+- [Evaluation](evaluation.html): usage evidence versus paired held-out
+  experiments.
+- [Guide](guide.html): recipes and the CLI reference.
 
-## Vocabulary (quick reference)
+## Reference
 
-- **skill**: a directory with a `SKILL.md` (frontmatter `name`/`description` + body);
-  the canonical authored-once unit, kept small.
-- **package**: pip project shipping skills, declared with `[tool.spindle.package]`.
-- **cache**: immutable package bytes available locally, without runtime or
-  maintenance authority.
-- **lease**: expiring authority to project exact bytes without durable adoption.
-- **activation**: per-agent evidence for the loaded realization, served model,
-  tools, and policy.
-- **adoption**: durable maintenance custody promoted from a successful trial.
-- **distribution**: pip bundle grouping packages + carrying doctrine, channels,
-  profiles; declared with `[tool.spindle.distribution]`.
-- **channel**: versioned `(scope × harness)` manifest listing which skills a surface
-  gets at that scope, plus the absolutes in force.
-- **surface**: a repo or agent consuming a blend (name, harness, autonomy, clusters,
-  model).
-- **profile**: a versioned renderer; a *harness* profile sets dialect, a *model*
-  profile sets density. Transforms: `identity`, `terse`, `trim`, `llm`.
-- **realization**: one immutable skill package containing the invariant core plus
-  at most one overlay selected from an explicit agent-session coordinate.
-- **surface lock**: exact desired package/projection identity plus active leases
-  and conflict decisions for one repository/harness surface.
-- **ownership receipt**: proof that Spindle created one exact projection and may
-  reconcile it only while path and target still match.
-- **blend / composition**: the resolved subset for one surface + absolutes in force
-  + recorded overrides (shadows).
-- **doctrine**: the versioned first-principles set (preferences, absolutes,
-  meta-principles) skills are checked against.
-- **scope**: `system | cluster | repo` — drives selection order and precedence
-  (narrow wins), except absolutes, which accumulate.
-
-## Key invariants
-
-- Guardrails only accumulate: absolutes are unioned across all channel layers and
-  never dropped by precedence.
-- Every `ALWAYS`/`NEVER`/`MUST NOT`/`DO NOT` clause in a skill's source must survive
-  rendering, or the bind fails closed (`render.verify_preserved`).
-- Availability, activation, routing, authorization, behavior, and adapter
-  conformance are distinct. Unknown never becomes success.
-- Rendering and binding prove desired availability; only held-out evaluation can
-  support an improvement or non-inferiority claim. Development cases never make
-  a run promotion-eligible.
-- Runtime model matching uses the actually served model. Unknown, mismatched, or
-  ambiguous coordinates fall back to the invariant core and record an unresolved
-  receipt rather than claiming tuned behavior.
-- Everything is content-addressed: rendered skills and binding coordinates are
-  hashes of their inputs, so re-binding an unchanged surface is nearly free and
-  every past coordinate is a rollback target.
-- Spindle mutates or removes only exact receipt-owned state. Foreign directories,
-  symlinks, plugins, hooks, and same-name collisions are preserved.
-
-## Source
-
-- Repository: https://github.com/lavallee/spindle
-- Reference distribution: `examples/spindle-sample` in the repo.
-- License: MIT. An open toolchain for composing agent skills.
-
-## Provenance
-
-This site is an [artoo](https://github.com/lavallee/artoo) artifact, built with the
-artoo-kit design system and hand-authored from the Spindle source. It describes
-Spindle v0.2; adapter claims remain pinned to the exact builds named in their
-certification receipts.
+- [house-and-sourcing.md](https://github.com/lavallee/spindle/blob/main/docs/house-and-sourcing.md)
+- [local-lifecycle.md](https://github.com/lavallee/spindle/blob/main/docs/local-lifecycle.md)
+- [startup-integrity.md](https://github.com/lavallee/spindle/blob/main/docs/startup-integrity.md)
+- [runtime-realization.md](https://github.com/lavallee/spindle/blob/main/docs/runtime-realization.md)
+- [skill-evaluations.md](https://github.com/lavallee/spindle/blob/main/docs/skill-evaluations.md)
+- Source: https://github.com/lavallee/spindle

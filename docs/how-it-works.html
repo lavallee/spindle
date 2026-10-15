@@ -13,20 +13,24 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- nav:begin -->
 <nav class="site-nav">
   <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
   <button class="nav-toggle" aria-label="Menu">menu</button>
   <div class="nav-links">
     <a href="index.html">Overview</a>
-    <a href="rationale.html">Rationale</a>
+    <a href="rationale.html">Why</a>
+    <a href="house.html">House</a>
+    <a href="catalog.html">Catalog</a>
     <a href="lifecycle.html">Lifecycle</a>
-    <a href="how-it-works.html">How it works</a>
+    <a href="how-it-works.html" aria-current="page">How it works</a>
     <a href="evaluation.html">Evaluation</a>
     <a href="guide.html">Guide</a>
     <a href="https://github.com/lavallee/spindle">GitHub</a>
   </div>
   <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
 </nav>
+<!-- nav:end -->
 
 <main class="article">
   <header class="article-header">
@@ -41,6 +45,7 @@
   <div class="toc">
     <b>On this page</b>
     <ol>
+      <li><a href="#two-paths">Two paths to a skill</a></li>
       <li><a href="#lifecycle-records">The lifecycle record chain</a></li>
       <li><a href="#vocabulary">Composition vocabulary</a></li>
       <li><a href="#pipeline">The <code>bind</code> pipeline</a></li>
@@ -50,6 +55,25 @@
       <li><a href="#safety">The safety floor</a></li>
       <li><a href="#determinism">Determinism &amp; caching</a></li>
     </ol>
+  </div>
+
+  <h2 id="two-paths">Two paths to a skill</h2>
+  <div class="article-mrow">
+    <p>A skill reaches an agent in one of two ways. The light path, used for
+    almost everything, is the <a href="catalog.html">catalog</a>: an index of
+    pinned sources, a judged choice per task, a path to read, and a usage ledger.
+    It writes nothing into the harness and leaves no state behind but receipts.
+    The managed path, described on the rest of this page, installs a skill into a
+    harness's native list with exact custody, startup verification, and
+    per-agent realization. The <a href="house.html">house</a> kernel and
+    project patterns sit between them: a few skills installed everywhere, from
+    one versioned directory.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">state on disk</span>
+      <code>~/.spindle/catalog/index.json</code>, <code>source-snapshots/</code>,
+      <code>selections/</code>, and <code>usage.jsonl</code> for the light path;
+      content-addressed lifecycle records for the managed one.
+    </aside>
   </div>
 
   <h2 id="lifecycle-records">The lifecycle record chain</h2>
@@ -427,8 +451,8 @@ statement = "fabricate missing facts"</code></pre>
 
   <nav class="pagenav">
     <a class="prev" href="lifecycle.html">
-      <span class="dir">← Back</span>
-      <span class="ttl">The skill lifecycle</span>
+      <span class="dir">← Previous</span>
+      <span class="ttl">The vetting lifecycle</span>
     </a>
     <a class="next" href="evaluation.html">
       <span class="dir">Next →</span>

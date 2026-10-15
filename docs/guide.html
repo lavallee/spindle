@@ -13,34 +13,42 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- nav:begin -->
 <nav class="site-nav">
   <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
   <button class="nav-toggle" aria-label="Menu">menu</button>
   <div class="nav-links">
     <a href="index.html">Overview</a>
-    <a href="rationale.html">Rationale</a>
+    <a href="rationale.html">Why</a>
+    <a href="house.html">House</a>
+    <a href="catalog.html">Catalog</a>
     <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
     <a href="evaluation.html">Evaluation</a>
-    <a href="guide.html">Guide</a>
+    <a href="guide.html" aria-current="page">Guide</a>
     <a href="https://github.com/lavallee/spindle">GitHub</a>
   </div>
   <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
 </nav>
+<!-- nav:end -->
 
 <main class="article">
   <header class="article-header">
     <div class="article-kicker">guide</div>
     <h1 class="article-title">Using Spindle.</h1>
-    <p class="article-dek">Start with a read-only intent card, try exact bytes in
-    one disposable session, borrow only when useful, and adopt only after the
-    runtime evidence is sound. Composition and authoring are deeper paths, not
-    prerequisites for trying a skill.</p>
+    <p class="article-dek">Set up a house and a catalog first; that covers most
+    days. When a skill has to be installed, inspect it, try it in one disposable
+    session, and adopt it only after the runtime evidence is sound. Composition
+    and authoring are deeper paths, not prerequisites.</p>
   </header>
 
   <div class="toc">
     <b>On this page</b>
     <ol>
+      <li><a href="#machine">Set up a machine</a></li>
+      <li><a href="#project">Give a project its pattern</a></li>
+      <li><a href="#source">Add a skill source</a></li>
+      <li><a href="#job">Wire a job runner</a></li>
       <li><a href="#harness">Drive it from Codex or Claude Code</a></li>
       <li><a href="#try">Inspect, try, and borrow</a></li>
       <li><a href="#startup">Verify startup</a></li>
@@ -55,6 +63,59 @@
       <li><a href="#cli">CLI reference</a></li>
     </ol>
   </div>
+
+  <h2 id="machine">Set up a machine</h2>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="c"># the CLI, pinned to a release</span>
+<span class="p">$</span> uv tool install "git+https://github.com/lavallee/spindle@v0.4.2"
+<span class="c"># a dedicated clone of the repository that holds your house</span>
+<span class="p">$</span> git clone https://github.com/you/my-skills ~/.local/share/spindle/house
+<span class="p">$</span> spindle house init ~/.local/share/spindle/house/house
+<span class="p">$</span> spindle house setup --dry-run
+<span class="p">$</span> spindle house setup
+<span class="p">$</span> spindle catalog sync
+<span class="c"># optional: a judge for find and brief</span>
+<span class="p">$</span> echo 'jev_key_file = "/path/to/typesafe.env"' &gt;&gt; ~/.spindle/house.toml</code></pre>
+  </div>
+  <p>Run <code>spindle house update</code> from a daily timer to pull merged
+  house changes, reinstall rules and kernel, and rebuild the index. Start a new
+  harness session after setup so it loads the rules. See
+  <a href="house.html">the house</a> for what each step writes.</p>
+
+  <h2 id="project">Give a project its pattern</h2>
+  <div class="terminal">
+    <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
+<pre><code><span class="p">$</span> spindle house patterns
+<span class="p">$</span> spindle house setup --here --pattern data-publication
+<span class="p">$</span> git add AGENTS.md CLAUDE.md .agents .claude .spindle &amp;&amp; git commit -m "Vendor house pattern"</code></pre>
+  </div>
+  <p>Commit the vendored copies so worktrees, other machines, and dispatched jobs
+  see them. When the house version moves, run <code>setup --here</code> again;
+  <code>status --here</code> says when the copy is behind.</p>
+
+  <h2 id="source">Add a skill source</h2>
+  <ol>
+    <li>Add a <code>[[source]]</code> to <code>catalog.toml</code> with a full
+      commit, and <code>include</code>/<code>exclude</code> globs if you want only
+      part of the repository.</li>
+    <li>Test it in a scratch home before it reaches any agent:
+      <code>SPINDLE_HOME=/tmp/s SPINDLE_HOUSE_DIR=./house spindle catalog sync &lt;slug&gt;</code>,
+      then <code>spindle catalog list</code> and a few <code>spindle find</code>
+      queries you expect it to win and to lose.</li>
+    <li>Merge the change to the house, then <code>spindle house update</code>.</li>
+    <li>Later, <code>spindle catalog update &lt;slug&gt;</code> shows what upstream
+      changed; <code>--apply</code> moves the pin as a reviewable diff.</li>
+  </ol>
+
+  <h2 id="job">Wire a job runner</h2>
+  <p>Before dispatch, call <code>spindle brief --json</code> with the commission
+  and append its <code>prompt_block</code> to the agent's prompt. Store its
+  <code>skills</code> record with the job, add its <code>read_roots</code> to any
+  sandbox read allow-list, and set <code>SPINDLE_JOB</code> in the agent's
+  environment. After grading, call <code>spindle report --selection … --job …
+  --outcome …</code>. Treat any failure as "no skills offered". The
+  <a href="catalog.html#runtimes">catalog page</a> lists each field.</p>
 
   <h2 id="harness">Drive it from Codex or Claude Code</h2>
   <p>Install Spindle from the public marketplace, then let its namespaced
@@ -420,6 +481,8 @@ tier = "frontier"</code></pre>
   <table>
     <thead><tr><th>Area</th><th>Commands</th></tr></thead>
     <tbody>
+      <tr><td>House</td><td><code>house init · setup · update · status · rules · patterns · remove</code></td></tr>
+      <tr><td>Catalog / sourcing</td><td><code>catalog sync · list · update</code> · <code>find</code> · <code>use</code> · <code>brief</code> · <code>report</code> · <code>usage</code></td></tr>
       <tr><td>Distributions</td><td><code>dist list · show · install · uninstall · activate · new</code></td></tr>
       <tr><td>Packages / skills</td><td><code>package list · show · new</code> · <code>skill list · show</code> · <code>capability list · show</code></td></tr>
       <tr><td>Inspect / lease</td><td><code>inspect</code> · <code>try</code> · <code>borrow</code> · <code>release</code> · <code>source</code></td></tr>
@@ -439,8 +502,8 @@ tier = "frontier"</code></pre>
 
   <nav class="pagenav">
     <a class="prev" href="evaluation.html">
-      <span class="dir">← Back</span>
-      <span class="ttl">Evaluation</span>
+      <span class="dir">← Previous</span>
+      <span class="ttl">Does the skill help?</span>
     </a>
     <a class="next" href="index.html">
       <span class="dir">Start over →</span>
@@ -449,7 +512,7 @@ tier = "frontier"</code></pre>
   </nav>
 
   <footer class="colophon">
-    An open lifecycle and control plane for agent skills · built with
+    Spindle chooses, hands over, and tracks agent skills · built with
     <a href="https://github.com/lavallee/artoo">artoo</a>.<br>
     MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
   </footer>
