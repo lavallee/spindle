@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-15
+
 - Catalog refs use the skill's directory name when its frontmatter `name` is a
   display name such as `Poteto Mode`, so every ref can be passed to `spindle use`.
 - Quoted frontmatter values are unescaped, so a description reads

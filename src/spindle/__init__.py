@@ -1,3 +1,3 @@
 """Spindle — evidence-bearing lifecycle and control plane for agent skills."""
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
