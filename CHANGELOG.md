@@ -7,6 +7,12 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+- Rewrote the documentation around the house, the catalog, and per-task skill
+  selection: new House and Catalog pages, a reworked overview, rationale,
+  guide recipes, and README. `scripts/build_docs.py` writes the shared nav and
+  page links and generates `docs/bundle.md` from the pages; a test keeps them
+  current. Tables and inline code no longer force sideways scrolling on phones.
+
 ## [0.4.2] - 2026-10-15
 
 - Catalog refs use the skill's directory name when its frontmatter `name` is a

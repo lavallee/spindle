@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Why Spindle exists — beyond install and hope</title>
+<title>Why a small house — Spindle</title>
 <meta name="description" content="Installing an agent skill leaves intent, conflicts, authority, runtime activation, effectiveness, updates, and retirement unresolved. Spindle supplies the missing lifecycle and composition control plane.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="lib/artoo-kit/tokens.css">
@@ -13,12 +13,15 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- nav:begin -->
 <nav class="site-nav">
   <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
   <button class="nav-toggle" aria-label="Menu">menu</button>
   <div class="nav-links">
     <a href="index.html">Overview</a>
-    <a href="rationale.html">Rationale</a>
+    <a href="rationale.html" aria-current="page">Why</a>
+    <a href="house.html">House</a>
+    <a href="catalog.html">Catalog</a>
     <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
     <a href="evaluation.html">Evaluation</a>
@@ -27,15 +30,15 @@
   </div>
   <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
 </nav>
+<!-- nav:end -->
 
 <main class="article">
   <header class="article-header">
     <div class="article-kicker">rationale</div>
-    <h1 class="article-title">Why manage a skill lifecycle at all?</h1>
-    <p class="article-dek">Skills are easy to install and quietly expensive to
-    understand, combine, keep current, and remove. Composition turns a pile into a
-    coherent set; lifecycle custody makes that set temporary, exact, evidenced,
-    and reversible.</p>
+    <h1 class="article-title">Why not just install every good skill?</h1>
+    <p class="article-dek">Because the model chooses from the list you give it,
+    and a longer list gets worse choices. Skills are easy to install and quietly
+    expensive to select among, combine, keep current, and remove.</p>
   </header>
 
   <p class="lead">Agent skills are one of the best ideas to arrive in coding
@@ -43,6 +46,56 @@
   at a task. The trouble starts not with any one skill but with the twentieth.
   Skills accumulate the way dependencies do — and, like dependencies, an
   unmanaged pile carries costs that don't show up until they compound.</p>
+
+  <h2>The list is the bottleneck</h2>
+  <div class="article-mrow">
+    <p>A harness shows the model the name and description of every installed
+    skill and lets it decide which to open. That decision is made from a list,
+    in passing, at the start of a task. With ten good skills the model usually
+    picks well. With two hundred, from five authors who each describe their
+    skills in their own words, it picks the wrong one, or none, far more often.
+    Every addition makes every other skill a little harder to find.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">selection accuracy</span>
+      The reason for Spindle's split is the quality of the choice, not token
+      cost. Descriptions are cheap; a poor choice is not.
+    </aside>
+  </div>
+  <p>Spindle's answer has two halves. A <a href="house.html">house</a> keeps the
+  always-on list short: rules every agent follows and a kernel of skills most
+  sessions use. A <a href="catalog.html">catalog</a> keeps everything else
+  available but out of the list. When a task arrives, search narrows the catalog
+  to a handful of candidates, a judge decides whether any of them would
+  materially help, and the agent gets a path to read. The outcome of the work is
+  recorded against the skill, so the next choice is better informed. Both lists
+  stay useful: the short one because it is short, the long one because it is
+  searched with the task in hand.</p>
+
+  <div class="ledger">
+    <div>
+      <span class="tag">install everything</span>
+      <h4>The pile</h4>
+      <ul>
+        <li>The model picks from hundreds of descriptions.</li>
+        <li>Nobody knows which skill shaped which result.</li>
+        <li>Upstream updates arrive unreviewed, or never.</li>
+        <li>Your own rules compete with everyone else's.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="tag">with spindle</span>
+      <h4>House and catalog</h4>
+      <ul>
+        <li>A short always-on list; the rest is searched per task.</li>
+        <li>Each job's receipt names the exact skills offered.</li>
+        <li>Pins move only through a reviewed diff.</li>
+        <li>House rules load first, in every harness.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>The rest of this page is the older, still-true argument for treating the
+  skills you <em>do</em> install as dependencies with a lifecycle.</p>
 
   <h2>Cost 0 — install and hope</h2>
   <p>The usual workflow compresses several different decisions into one action:
@@ -116,9 +169,9 @@
     context is fullest.</p>
     <aside class="article-marginnote article-marginnote--callout">
       <span class="term">the subset is the product</span>
-      Spindle's materializer installs the <em>resolved subset</em> for a surface —
-      not every skill of a distribution. Fewer, sharper skills beat more, vaguer
-      ones.
+      The house kernel and each project pattern are deliberately small, and a
+      managed blend installs the <em>resolved subset</em> for a surface. Fewer,
+      sharper skills beat more, vaguer ones.
     </aside>
   </div>
 
@@ -259,12 +312,12 @@
 
   <nav class="pagenav">
     <a class="prev" href="index.html">
-      <span class="dir">← Back</span>
+      <span class="dir">← Previous</span>
       <span class="ttl">Overview</span>
     </a>
-    <a class="next" href="lifecycle.html">
+    <a class="next" href="house.html">
       <span class="dir">Next →</span>
-      <span class="ttl">The skill lifecycle</span>
+      <span class="ttl">The house</span>
     </a>
   </nav>
 

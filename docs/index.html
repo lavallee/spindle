@@ -1,24 +1,28 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spindle — try, verify, and maintain agent skills</title>
-<meta name="description" content="Spindle is an evidence-bearing lifecycle for agent skills: inspect and try before adoption, verify exact startup state, realize per agent, evaluate, update, distill, and retire safely.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="lib/artoo-kit/tokens.css">
-<link rel="stylesheet" href="lib/artoo-kit/base.css">
-<link rel="stylesheet" href="lib/artoo-kit/article.css">
-<link rel="stylesheet" href="lib/artoo-kit/components.css">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spindle — the right skills for each agent task</title>
+  <meta name="description" content="Spindle keeps a small set of rules and skills always on, a large pinned catalog searched only when a task calls for it, and a judged choice per task whose outcome feeds the next choice. It also vets, leases, and retires skills with exact evidence.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%237aa2f7' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%237aa2f7'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="lib/artoo-kit/tokens.css">
+  <link rel="stylesheet" href="lib/artoo-kit/base.css">
+  <link rel="stylesheet" href="lib/artoo-kit/article.css">
+  <link rel="stylesheet" href="lib/artoo-kit/components.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<!-- nav:begin -->
 <nav class="site-nav">
   <a class="brand" href="index.html"><span class="spin"></span>spindle</a>
   <button class="nav-toggle" aria-label="Menu">menu</button>
   <div class="nav-links">
-    <a href="index.html">Overview</a>
-    <a href="rationale.html">Rationale</a>
+    <a href="index.html" aria-current="page">Overview</a>
+    <a href="rationale.html">Why</a>
+    <a href="house.html">House</a>
+    <a href="catalog.html">Catalog</a>
     <a href="lifecycle.html">Lifecycle</a>
     <a href="how-it-works.html">How it works</a>
     <a href="evaluation.html">Evaluation</a>
@@ -27,138 +31,150 @@
   </div>
   <button data-theme-toggle class="nav-toggle" style="display:block;margin-left:auto" aria-label="Toggle theme">theme</button>
 </nav>
+<!-- nav:end -->
 
 <main class="article">
   <header class="article-header">
-    <div class="article-kicker">skill lifecycle for coding agents <span class="badge badge--accent">v0.2</span></div>
-    <h1 class="article-title">Try first. Know what loaded. Adopt deliberately.</h1>
-    <p class="article-dek">Spindle makes agent skills understandable, temporary
-    when you want them temporary, exact at runtime, and reversible after adoption.
-    Composition is one part of a complete evidence-bearing lifecycle.</p>
+    <div class="article-kicker">skills for coding agents <span class="badge badge--accent">v0.4</span></div>
+    <h1 class="article-title">Keep a small house. Find the rest when the work calls for it.</h1>
+    <p class="article-dek">Spindle gives every agent you run the same short list
+    of rules and skills, a large catalog of pinned skills it searches only when a
+    task needs one, and a record of whether each skill actually helped.</p>
     <div class="meta-row">
-      <span>Python toolchain</span>
+      <span>Claude Code, Codex, Hermes</span>
+      <span>any runtime that can read a file</span>
+      <span>nothing third-party is executed</span>
       <span>MIT licensed</span>
-      <span>content-addressed custody</span>
-      <span>Claude + Codex adapters</span>
     </div>
   </header>
 
-  <p class="lead">Agent "skills" — the reusable instruction files a coding agent
-  loads to do a job well — multiply fast. Left unmanaged, every repository inherits
-  the same growing pile: skills it will never use, skills that quietly contradict
-  each other, and a context budget spent on instructions instead of work. Spindle
-  treats skills as behavioral dependencies you <em>inspect</em>,
-  <em>try</em>, <em>verify</em>, and only then maintain—not directories you copy
-  into an ambient pile and forget.</p>
+  <p class="lead">Skills are instruction files an agent loads to do a kind of
+  work well. Good ones are everywhere now: your own, your team's, and public
+  collections with hundreds each. Installing all of them makes agents worse. A
+  harness shows the model every installed skill's name and description, and the
+  model picks less accurately as that list grows. Spindle splits the list in two:
+  a few skills that are always on, and everything else, which is searched,
+  judged, and handed over only for the task at hand.</p>
 
-  <div class="article-mrow">
-    <p>The ordinary workflow begins before installation. <code>spindle inspect</code>
-    explains a candidate without executing it. <code>try</code> creates one
-    disposable read-only session; <code>borrow</code> creates an expiring lease.
-    Startup verifies the exact desired set before the harness discovers it, and a
-    useful trial becomes durable only through explicit adoption.</p>
-    <aside class="article-marginnote article-marginnote--def">
-      <span class="term">surface</span>
-      A repo and harness discovery environment with an exact desired blend,
-      active leases, ownership records, and runtime evidence.
-    </aside>
+  <h2>Three parts</h2>
+
+  <div class="pipeline">
+    <div class="stage"><span class="n">01</span><h4>The house</h4>
+      <p>One versioned directory of rules every harness loads and a small kernel
+      of skills linked into every harness. Install it per machine with one
+      command; projects opt into named patterns.</p>
+      <span class="mod">spindle house</span></div>
+    <div class="stage"><span class="n">02</span><h4>The catalog</h4>
+      <p>Skill sources pinned to exact commits, indexed without running anything
+      in them. Hundreds of skills stay available and none of them crowd the
+      model's list.</p>
+      <span class="mod">spindle catalog</span></div>
+    <div class="stage"><span class="n">03</span><h4>Choose and learn</h4>
+      <p>For each task, rank the catalog, let a judge decide whether any skill
+      would materially help, hand it over by path, then record how the work was
+      judged. The next choice uses that record.</p>
+      <span class="mod">find · use · brief · report</span></div>
   </div>
 
-  <h2>Two minutes in—from inside your harness</h2>
+  <h2>Two minutes in</h2>
   <div class="terminal">
     <div class="terminal-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="name">bash</span></div>
-<pre><code><span class="c"># install from the public catalog in Codex</span>
-<span class="p">$</span> codex plugin marketplace add lyra-forge/marketplace
-<span class="p">$</span> codex plugin add spindle@lyra-forge
-<span class="p">›</span> $spindle:spindle set up Spindle for this repository
+<pre><code><span class="c"># install the CLI, then point this machine at your house</span>
+<span class="p">$</span> uv tool install "git+https://github.com/lavallee/spindle@v0.4.2"
+<span class="p">$</span> spindle house init ~/src/my-skills/house
+<span class="p">$</span> spindle house setup                <span class="c"># rules + kernel into every harness found</span>
+<span class="p">$</span> spindle catalog sync               <span class="c"># export pinned sources, build the index</span>
 
-<span class="c"># or install from the same catalog in Claude Code</span>
-<span class="p">$</span> claude plugin marketplace add lyra-forge/marketplace
-<span class="p">$</span> claude plugin install spindle@lyra-forge
-<span class="p">›</span> /spindle:spindle set up Spindle for this repository
-
-<span class="c"># after setup and a new session, use the project-local operator</span>
-<span class="p">›</span> $spindle inspect a review skill for this migration.
-<span class="o">Spindle reads live context · previews mutations · preserves foreign state</span></code></pre>
+<span class="c"># during work: what would help with this task?</span>
+<span class="p">$</span> spindle find "vet a benchmark result before reporting the speedup"
+<span class="o">* 0.88  upstream/benchmark-checklist   Vet a perf measurement before you report it
+  0.46  upstream/verification          Use before claiming work is complete</span>
+<span class="p">$</span> spindle use upstream/benchmark-checklist      <span class="c"># prints the SKILL.md path to read</span>
+<span class="p">$</span> spindle report --outcome accepted --helped upstream/benchmark-checklist</code></pre>
   </div>
-
-  <p>The small operator does not duplicate the product manual. It reads a
-  compact, machine-generated context contract containing current custody,
-  conflicts, hook evidence, authorization boundaries, and exact next commands.
-  The marketplace plugin carries a deterministic launcher for its exact pinned
-  Spindle source, so no separate Python package install is required; Python 3.11
-  or newer is required. Claude and Codex use separate manifests and install
-  commands, while sharing the operator and CLI implementation.
-  Harness discovery and hook execution remain separate gates. The control loop
-  is the product: intent → temporary authority → exact
-  composition → startup verification → per-agent realization and activation →
-  bounded evaluation → adopt, update, distill, release, or retire. See the
-  <a href="lifecycle.html">lifecycle</a> for the complete chain.</p>
-
-  <h2>The shape of the idea</h2>
-  <div class="card-grid">
-    <a class="card" href="rationale.html">
-      <h3>Why it exists →</h3>
-      <p>The case against install-and-hope: ambient conflicts, stale instructions,
-      unclear authority, context cost, and maintenance nobody owns.</p>
-    </a>
-    <a class="card" href="lifecycle.html">
-      <h3>The lifecycle →</h3>
-      <p>Inspect, try, borrow, bootstrap, activate, evaluate, adopt, update,
-      distill, roll back, and retire with exact custody.</p>
-    </a>
-    <a class="card" href="how-it-works.html">
-      <h3>How it works →</h3>
-      <p>The record chain, ownership model, startup control loop, agent-local
-      realizations, and composition pipeline.</p>
-    </a>
-    <a class="card" href="evaluation.html">
-      <h3>Does it actually help? →</h3>
-      <p>Availability, activation, routing, authorization, behavior, and adapter
-      conformance are separate gates. Minimalism is deletion under evidence.</p>
-    </a>
-    <a class="card" href="guide.html">
-      <h3>Use it →</h3>
-      <p>Install the harness operator, try a candidate, manage startup evidence,
-      adopt and update safely, then author distributions when you need them.</p>
-    </a>
-  </div>
-
-  <h2>What it is, precisely</h2>
-  <p>Spindle is a small, dependency-light Python control plane for behavioral
-  dependencies. It keeps source, package, intent, temporary lease, durable
-  adoption, surface binding, agent realization, activation evidence, and
-  evaluation claims distinct. Packages and distributions remain ordinary
-  pip-installable projects, but installation alone grants neither runtime nor
-  maintenance authority.</p>
 
   <div class="article-mrow">
-    <p>The public base ships a minimal reference distribution under
-    <code>examples/spindle-sample</code>. Everything private — an organization's
-    own packages, project registries, task sinks, marketplace providers — lives in
-    separate adapter packages that depend on Spindle, never inside its core.</p>
-    <aside class="article-marginnote article-marginnote--source">
-      <span class="term">open core</span>
-      Core is the lifecycle, composition machinery, and public contracts. Swap
-      organization-specific providers and sinks without changing portable skills.
-      See the <a href="guide.html#extending">Guide</a>.
+    <p>The first column is the judge's probability that the skill would
+    materially improve the work; a star marks a selection. With no judge
+    configured, <code>find</code> returns a ranked shortlist and says so, and
+    whoever receives it does the judging. Selecting nothing is a valid answer:
+    asking for help renaming a variable returns no skill at all.</p>
+    <aside class="article-marginnote article-marginnote--def">
+      <span class="term">by path</span>
+      An offered skill is a file to read, not an install. Any harness or
+      sandbox that can read files can use it, with no reload and no leftover
+      state.
     </aside>
   </div>
 
-  <p class="article-pullquote">A skill should earn ongoing custody in the exact
-  environment that will carry it.<cite>Temporary first; durable only with
-  evidence.</cite></p>
+  <h2>Who it is for</h2>
+  <div class="card-grid">
+    <a class="card" href="house.html">
+      <h3>You run several harnesses →</h3>
+      <p>Keep one set of house rules and kernel skills, and install them into
+      Claude Code, Codex, and Hermes on every machine from the same directory.</p>
+    </a>
+    <a class="card" href="catalog.html">
+      <h3>You want public skill collections →</h3>
+      <p>Pin them by commit, see exactly what a newer commit would change, and
+      reach any skill on demand without installing the collection.</p>
+    </a>
+    <a class="card" href="catalog.html#runtimes">
+      <h3>You dispatch agent jobs →</h3>
+      <p>One call before dispatch picks the skills, one call after grading
+      records the outcome, and the job's receipt says exactly which skill bytes
+      the agent was given.</p>
+    </a>
+    <a class="card" href="lifecycle.html">
+      <h3>You need to vet a skill first →</h3>
+      <p>Inspect it without running it, try it in a disposable session, lease
+      it, and adopt it only with evidence. Every step is reversible.</p>
+    </a>
+  </div>
 
-  <h2>Built for humans and agents</h2>
+  <h2>What makes it different</h2>
+  <dl class="defs">
+    <div><dt>Selection is judged</dt><dd>Text search finds the neighbourhood but
+      cannot tell "relevant" from "shares words with the task". A judge model
+      gives a calibrated yes-or-no per candidate, and an optional expander turns
+      a commission into the phrases a skill description would use.</dd></div>
+    <div><dt>Outcomes close the loop</dt><dd>Every offer, read, and graded
+      outcome lands in a local ledger. Skills that keep helping rise; skills
+      that keep getting rejected sink. Reviewers can see what guidance a
+      producer was given.</dd></div>
+    <div><dt>Pins, not floating installs</dt><dd>A source is a full commit.
+      Moving the pin shows the skills added, changed, and removed, and any new
+      network, credential, or shell indicators, before you accept it as a
+      reviewed diff.</dd></div>
+    <div><dt>Nothing third-party runs</dt><dd>Sources are exported without hooks,
+      install scripts, or package managers. Spindle reads skill text; it never
+      executes a catalog skill's code.</dd></div>
+    <div><dt>Your rules travel</dt><dd>House rules land in a managed block of
+      each harness's always-loaded instruction file. Text outside the block is
+      never touched, and a project can embed the rules for environments that
+      never run setup.</dd></div>
+  </dl>
+
+  <p class="article-pullquote">A skill should earn its place in the context, task
+  by task, with a record of whether it helped.<cite>The always-on list stays
+  short so both it and the long tail stay useful.</cite></p>
+
+  <h2>Deeper: the vetting lifecycle</h2>
   <div class="article-mrow">
-    <p>This site reads as prose for people and ships a machine surface for agents:
-    an <a href="llms.txt">llms.txt</a> index and a single-file
-    <a href="bundle.md">bundle.md</a> you can paste straight into an LLM's context.
-    Point your agent at either when you want it to reason about how Spindle works.</p>
+    <p>Some skills belong in a harness's native list, or need more care than a
+    file read: a skill with scripts, a team-wide default, a skill under
+    evaluation. For those, Spindle keeps the full lifecycle it started with:
+    <code>inspect</code> explains a package without executing it,
+    <code>try</code> opens one disposable session, <code>borrow</code> grants an
+    expiring lease, startup verifies the exact desired set, and only
+    <code>adopt</code> creates lasting custody. Paired evaluations decide
+    whether a skill improves held-out work. See the
+    <a href="lifecycle.html">lifecycle</a> and
+    <a href="evaluation.html">evaluation</a>.</p>
     <aside class="article-marginnote">
       <span class="term">for your agent</span>
-      <code>curl</code> the bundle, or add the llms.txt URL to your agent's
-      reading list — same content, machine-shaped.
+      Agents can read this site as <a href="llms.txt">llms.txt</a> or as one
+      file, <a href="bundle.md">bundle.md</a>, generated from these pages.
     </aside>
   </div>
 
@@ -169,12 +185,12 @@
     </a>
     <a class="next" href="rationale.html">
       <span class="dir">Next →</span>
-      <span class="ttl">Why Spindle exists</span>
+      <span class="ttl">Why a small house</span>
     </a>
   </nav>
 
   <footer class="colophon">
-    Spindle is an open lifecycle and control plane for agent skills. This site is an
+    Spindle chooses, hands over, and tracks agent skills. This site is an
     <a href="https://github.com/lavallee/artoo">artoo</a> artifact built with the
     artoo-kit design system.<br>
     MIT licensed · <a href="https://github.com/lavallee/spindle">github.com/lavallee/spindle</a>
