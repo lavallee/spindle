@@ -191,9 +191,20 @@ def frontmatter(text: str) -> dict[str, str]:
             continue
         key = name.strip()
         value = value.strip()
-        values[key] = "" if value in {"|", ">", "|-", ">-", "|+", ">+"} else value
-        values[key] = values[key].strip('"').strip("'")
+        values[key] = "" if value in {"|", ">", "|-", ">-", "|+", ">+"} else _unquote(value)
     return values
+
+
+def _unquote(value: str) -> str:
+    """Undo YAML scalar quoting, so ``"Use for \\"x\\""`` reads ``Use for "x"``."""
+    if len(value) >= 2 and value[0] == value[-1] == '"':
+        try:
+            return json.loads(value)
+        except ValueError:
+            return value[1:-1]
+    if len(value) >= 2 and value[0] == value[-1] == "'":
+        return value[1:-1].replace("''", "'")
+    return value
 
 
 def skill_body(text: str) -> str:

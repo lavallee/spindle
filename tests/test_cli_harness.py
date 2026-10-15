@@ -13,6 +13,10 @@ def _isolate(monkeypatch, tmp_path: Path) -> Path:
     home.mkdir()
     monkeypatch.setenv("SPINDLE_HOME", str(tmp_path / "state"))
     monkeypatch.setenv("HOME", str(home))
+    # Running the suite inside an agent session must not pick that harness.
+    for key in ("CODEX_THREAD_ID", "CODEX_CI", "CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT",
+                "CLAUDE_PROJECT_DIR"):
+        monkeypatch.delenv(key, raising=False)
     return home
 
 

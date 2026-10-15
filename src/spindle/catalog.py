@@ -38,6 +38,7 @@ _SKIP_DIRS = frozenset(
     {".git", "node_modules", "__pycache__", ".venv", "dist", "build", "test",
      "tests", "fixtures", "__fixtures__", "evals"}
 )
+_REF_NAME = re.compile(r"[a-z0-9][a-z0-9_.-]*")
 # A skill that hard-codes its own install location cannot be read from a snapshot.
 _INSTALL_PATH = re.compile(r"(?:~|\$HOME|\$\{HOME\})/\.(?:claude|agents|codex)/skills/")
 
@@ -129,7 +130,10 @@ def scan(source: Source, root: Path, commit: str | None, kernel: frozenset[str])
         except (OSError, UnicodeDecodeError):
             continue
         meta = frontmatter(text)
-        name = meta.get("name") or (skill_dir.name if relative != "." else source.slug)
+        name = meta.get("name") or ""
+        if not _REF_NAME.fullmatch(name):
+            # A display name such as "Poteto Mode" would make an unusable ref.
+            name = skill_dir.name if relative != "." else source.slug
         description = meta.get("description", "")
         if not description or name in entries:
             continue
