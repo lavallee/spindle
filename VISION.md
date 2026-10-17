@@ -1,386 +1,232 @@
 # Spindle vision
 
-Status: implemented 0.x baseline and continuing product direction, 2026-07-31.
+Status: product direction as of 2026-10-15, after the house, catalog, and
+on-demand sourcing shipped in 0.4. Supersedes the
+[2026-07-31 vision](https://github.com/lavallee/spindle/blob/d290d66/VISION.md),
+whose lifecycle remains part of this one.
 
 ## The promise
 
-Spindle makes agent skills understandable, reversible, current, and measurably
-useful.
+> Any agent, in any harness or runtime, gets the few skills that will help with
+> the task in front of it, follows the same house rules everywhere, and leaves a
+> record of whether those skills helped, which the people and agents judging
+> the work can see.
 
-Today, adopting a skill usually means installing an artifact into an ambient
-directory and hoping that:
+Skills are the cheapest way to make an agent reliably good at a kind of work,
+and good ones are now everywhere: your own, your team's, and public collections
+with hundreds each. The constraint is no longer supply. It is choosing, from a
+growing pool, the few that matter for this task, getting them to the agent with
+almost no ceremony, and learning from the result.
 
-- the current model notices it at the right time;
-- its instructions still improve the current harness;
-- its dependencies and permissions are acceptable;
-- it composes with everything else the harness can see;
-- the installed version is the version the user intended; and
-- somebody will retest, update, and eventually retire it.
+Spindle's first vision was a lifecycle for installed skills: inspect, try,
+borrow, adopt, verify startup, update, retire. That remains, and it is still how
+a skill should enter a harness's native list. But most skills should never be
+installed. Spindle is now the layer that decides which skill an agent sees, for
+which task, and with what evidence.
 
-Spindle should replace that hope with an evidence-bearing lifecycle:
+## What Spindle is
 
-```text
-discover -> inspect -> try -> borrow -> realize -> activate -> evaluate
-                                                      |
-                                           adopt, distill, or release
-                                                      |
-                                             update, disable, retire
-```
+Spindle is the skill layer for anything that runs agents: an interactive
+harness on a laptop, a fleet of machines, or a runtime that dispatches jobs.
 
-The durable product promise is:
+It has three parts, from always-on to on-demand:
 
-> A user can understand and temporarily use a skill in the environment they
-> already have, know exactly what reached each agent, and adopt it only after it
-> earns ongoing custody.
+| Part | Holds | Reaches the agent |
+| --- | --- | --- |
+| **House** | Rules every agent follows, a small kernel of skills, named project patterns. | Installed into every harness on every machine, and vendored into projects. Always loaded. |
+| **Catalog** | Every other skill, ours and third-party, pinned to exact commits. | Searched and judged per task; handed over as a file to read. Never installed. |
+| **Lifecycle** | The skills that must be in a harness's native list, or need more care. | Inspected, tried, leased, adopted, verified at startup, and retired with custody. |
 
-This broadens Spindle's original composition thesis without discarding it.
-Composition remains the center of runtime correctness; the lifecycle makes that
-correctness available before installation and maintainable afterward.
-
-## The product Spindle is becoming
-
-Spindle is a lifecycle and control plane for behavioral dependencies.
-
-It is not merely:
-
-- an installer;
-- a public registry;
-- a prompt optimizer;
-- a harness-specific plugin manager; or
-- a system that copies every discovered skill into every project.
-
-It joins three planes that are commonly separate:
-
-| Plane | Responsibility |
-| --- | --- |
-| Intent | Explain what outcome a skill is trying to change, when it applies, and what authority it needs. |
-| Runtime | Compose the effective set, resolve exact versions, project one realization per agent, and reconcile harness discovery. |
-| Evidence | Prove what loaded, what model and tools were effective, whether behavior improved, and when the claim became stale. |
-
-The object under management is not just `SKILL.md`. It is a relationship among
-an intent, an immutable package, a current environment, an authority grant, and
-bounded evidence.
-
-## Lifecycle model
-
-Spindle should keep these records distinct:
+And one loop runs through them:
 
 ```text
-SourceRef
-  -> PackageRevision
-  -> IntentCard
-  -> Lease or AdoptionRecord
-  -> SurfaceBinding
-  -> AgentRealization
-  -> ProjectionPlan
-  -> StartupReceipt and ActivationReceipt
-  -> EvaluationClaim
+task -> find candidates -> judge -> hand over by path -> work -> grade -> report
+  ^                                                                      |
+  +------------------- usage prior, evaluations, promotion --------------+
 ```
 
-Each answers a different question:
+Spindle is not:
 
-- **Source reference:** Where did this come from?
-- **Package revision:** Which exact instructions and resources are under review?
-- **Intent card:** What is it trying to change, and why might it fit here?
-- **Lease:** Who may use it temporarily, where, for how long, and with what
-  authority?
-- **Adoption record:** Who accepted maintenance responsibility, at which pin and
-  update policy?
-- **Binding:** Which coherent set should this surface expose?
-- **Realization:** What is the smallest evaluated instruction surface for this
-  actual agent coordinate?
-- **Projection plan:** How should the harness disclose that realization to this
-  agent?
-- **Startup and activation receipts:** What environment did the harness actually
-  expose?
-- **Evaluation claim:** Did the intervention help on this bounded task and
-  runtime distribution?
+- an installer that copies every discovered skill into every project;
+- a marketplace or a registry (it federates other people's sources);
+- a harness, an agent framework, or a job runner; or
+- a prompt optimizer that rewrites skills without evidence.
 
-Installation is therefore not the beginning of the lifecycle. It is one
-possible implementation detail of an adoption record.
+## Why this shape
 
-## Product principles
+### Selection accuracy is the constraint
 
-### Intent before artifact
+A harness shows the model the name and description of every installed skill
+and lets it decide which to open. With ten good skills it chooses well. With two
+hundred from five authors it chooses the wrong one, or none, far more often.
+Token cost matters less than this. Every always-on skill must earn its place
+against that cost, and everything else belongs in a catalog searched with the
+task in hand.
 
-Discovery results should be candidates, not install recommendations. Before a
-skill receives authority, Spindle should explain its intended outcome, trigger
-boundary, behavioral delta, contents, dependencies, context cost, provenance,
-freshness, relevant evidence, and overlap with the current environment.
+### A text match is not a judgment
 
-### Temporary before durable
+Full-text search finds the neighbourhood: skills that share words with the
+task. It cannot tell a skill that would change the work from one that only
+shares vocabulary. Spindle therefore separates recall (search, optionally over
+phrases a small model writes from the task) from judgment (a decision model that
+gives a calibrated probability that loading a skill would materially help).
+Selecting nothing is a valid and frequent answer.
 
-`try` should create one disposable session lease. `borrow` should create a
-renewable, expiring lease. Neither should create an update-bearing dependency.
-`adopt` should be an explicit promotion of a useful lease into maintained desired
-state.
+### Low ceremony or it will not be used
 
-### Desired state over ambient state
+An offered skill is a path to a file. Any harness, sandbox, or job that can read
+files can use it, with no install, reload, lease, or cleanup. One call before a
+job picks the skills; one call after grading records the outcome. Sourcing is
+fail-soft and never gates work.
 
-What happens to be present in a harness discovery directory is observed state,
-not authorization. An adopted lock and active leases define what Spindle expects.
-Startup reconciliation compares that expectation with the full effective
-inventory.
+### Outcomes, not anecdotes
 
-### Own only what Spindle mutates
+Every offer, read, and graded outcome is recorded against the exact skill
+digest. The record tunes future selection, tells an evaluator what guidance the
+producer was given, and shows which skills deserve a real experiment. A skill
+earns promotion, from catalog to pattern to kernel, with evidence; a kernel
+skill that stops earning its place is demoted.
 
-Spindle may repair or remove an obsolete projection only when an ownership
-record proves that Spindle created it. A foreign skill, plugin, hook, real
-directory, or unrecognized symlink is inventoried and checked for conflicts, but
-never silently deleted.
+### Your rules travel
 
-### One package, many agent-local realizations
+An estate has its own principles: how to work, which tools to use, what never to
+do. They should load first in every harness on every machine, survive a fresh
+container, and reach a dispatched job, from one versioned source. Third-party
+skills are guidance under those rules, never over them.
 
-The installed package preserves identity, invariant intent, resources, and an
-evaluated overlay library. Parent agents and subagents resolve independently
-from their observed model, effort, role, harness build, toolset, and policy. No
-session mutates a workspace-global "current" skill.
+### The best skills are somebody else's, pinned
 
-### Harness mechanics are not skill prose
+Public collections improve weekly. Spindle should make them easy to use and safe
+to follow: pinned by commit, exported without running anything, updated only
+through a diff that shows what changed, and filtered to the parts that fit.
 
-Version checks, filesystem reconciliation, model routing, permissions, hook
-protocols, and receipt writing are deterministic adapter responsibilities. Skill
-instructions should contain only the behavioral delta and situated knowledge the
-model needs.
+## Principles
 
-### Evidence is bounded
+These extend the lifecycle principles below; none of those is withdrawn.
 
-"Works" always means for a named package digest, realization, model/harness
-coordinate, task distribution, tool and permission envelope, and evaluation
-budget. A new package or runtime coordinate does not inherit an old claim merely
-because its name is unchanged.
+1. **Keep the always-on list short.** The kernel holds only what most sessions in
+   most projects use. Narrower skills go in patterns; the rest in the catalog.
+2. **Judge, do not just match.** Recall and judgment are separate steps. A
+   shortlist without a judge is labelled as one, and job runtimes do not offer
+   unjudged matches.
+3. **Hand over the least.** A path by default; embedded text only for sandboxes
+   that cannot read, only for high-confidence choices, and only a few.
+4. **Never gate the work.** A missing judge, a timeout, or any sourcing failure
+   means "no skills offered", not a failed job.
+5. **Record what was offered.** Every selection has a receipt with each skill's
+   digest, so a reviewer, a critic agent, or an evaluation can pin exactly what
+   the producer saw.
+6. **Promote and demote with evidence.** The usage record says what to test; a
+   paired evaluation decides what to keep. Popularity is not evidence.
+7. **Rules outrank skills.** House rules load first. A skill never overrides
+   the task, its acceptance criteria, or the rules.
+8. **Nothing third-party executes.** Sources are exported without hooks, scripts,
+   or package managers. Spindle reads skill text.
+9. **Pins, not floating versions.** Upstream work arrives through a reviewed
+   change to a pin, never silently.
+10. **Say what leaves the machine.** Task text reaches the expander and the judge.
+    Both can be turned off, and the default for sensitive work should be local.
 
-### Updates are trials
+## The lifecycle, still
 
-An upstream update is a candidate revision. Spindle should inspect and test it
-beside the incumbent before changing adopted state. Automatic fetching may be a
-policy; automatic promotion should not be the default.
+For skills that must be installed, the July vision holds. In brief:
 
-### Minimalism is deletion under evidence
+- **Intent before artifact.** Candidates are explained (outcome, trigger,
+  contents, authority, cost, overlap) before they get any authority.
+- **Temporary before durable.** `try` is one disposable session, `borrow` an
+  expiring lease, and only `adopt` creates maintained state.
+- **Desired state over ambient state.** What sits in a discovery directory is
+  observed, not authorized. A lock and active leases define what is expected.
+- **Own only what Spindle mutates.** Foreign skills, hooks, and directories are
+  inventoried and never silently removed.
+- **One package, many agent-local realizations.** Parent and child agents resolve
+  independently from their model, role, tools, and policy.
+- **Harness mechanics are not skill prose.** Reconciliation, routing, hooks, and
+  receipts are deterministic adapter work.
+- **Evidence is bounded.** "Works" names a digest, a runtime coordinate, a task
+  distribution, and a budget.
+- **Updates are trials.** A new revision runs beside the incumbent before it
+  replaces it.
+- **Minimalism is deletion under evidence.** As models improve, rebaseline and
+  remove steering that no longer helps. That now applies to the kernel too.
+- **Startup integrity.** Bootstrap before hooks; stable hooks over mutable state;
+  `restart-required` rather than pretending an in-session repair is clean.
 
-As models and harnesses improve, Spindle should rebaseline no-skill behavior and
-remove steering that has become redundant or harmful. Deterministic behavior
-should move to tools or Chip. Rich references may remain progressively disclosed
-even when the always-visible instruction residue becomes tiny or empty.
-
-## Startup integrity
-
-The effective skill environment must be correct before the first task depends on
-it. Spindle needs a startup control loop, not just a bind command somebody might
-remember to run.
-
-### Expected state
-
-A surface lock should resolve all durable and temporary inputs to immutable
-identity:
-
-- adopted source revision and package digest;
-- distribution and package versions;
-- channel and doctrine coordinates;
-- active lease IDs and expiries;
-- selected surface binding and realization rules;
-- expected harness projection paths; and
-- explicit conflict, shadow, or foreign-skill decisions.
-
-A version string alone is insufficient. Editable packages and mutable tags must
-also resolve to content identity.
-
-### Observed state
-
-Each harness adapter should inventory every relevant discovery scope it can
-observe, including:
-
-- repository and ancestor skill directories;
-- user, administrator, system, and plugin scopes;
-- enabled and disabled skills where the harness exposes them;
-- names, paths, source ownership, content digests, and load errors;
-- hooks, plugins, tools, MCP dependencies, and permission posture that change
-  effective behavior; and
-- opaque built-ins or managed state that can be named but not inspected.
-
-The inventory should classify entries as:
-
-| Class | Startup behavior |
-| --- | --- |
-| expected and Spindle-owned | Verify exact target and keep. |
-| stale and Spindle-owned | Reconcile safely before discovery, or require restart if already loaded. |
-| foreign and non-conflicting | Preserve and report as ambient context. |
-| foreign and conflicting | Block strict startup or require an explicit shadow/allow decision. |
-| ambiguous ownership | Preserve, fail closed for mutation, and request repair. |
-
-"Lingering" must therefore mean either stale Spindle-owned state or unexpected
-foreign state. Only the former is eligible for automatic removal.
-
-### Bootstrap before hook
-
-Native startup hooks are necessary but not a universal pre-discovery boundary.
-The portable sequence should be:
-
-```text
-spindle launch / spindle bootstrap
-  1. resolve desired state and active leases
-  2. inspect the effective harness inventory
-  3. reconcile only Spindle-owned projections
-  4. detect foreign collisions and version drift
-  5. write a content-addressed startup plan/receipt
-  6. launch the harness
-
-native SessionStart hook
-  7. observe session id, source, model, permissions, and harness facts
-  8. verify the startup receipt is still current
-  9. inject only a concise success marker or actionable mismatch
- 10. append session-start evidence
-```
-
-If the native hook discovers a change that may already have affected skill
-discovery, it should not pretend that an in-place repair made the session clean.
-It should report `restart-required` or stop the first turn where the harness
-supports that decision. Harnesses with documented live reload may offer a
-verified repair path, but that is an adapter capability, not a portable
-assumption.
-
-### Stable hooks, mutable state
-
-The installed hook definition should be tiny and stable:
-
-```text
-SessionStart -> spindle bootstrap --hook <harness> --event session-start
-SubagentStart -> spindle bootstrap --hook <harness> --event subagent-start
-```
-
-Pins, leases, and expected inventory belong in Spindle state, not generated hook
-configuration. This keeps harness trust attached to a stable command rather than
-forcing users to reapprove a hook whenever desired skills change.
-
-Startup hooks should:
-
-- run quickly and without network access by default;
-- serialize mutation through a per-surface lock;
-- tolerate duplicate or concurrent invocation;
-- emit a short model-visible status and keep full detail in a receipt;
-- rerun on resume, clear, compaction, and subagent start where supported;
-- never print credentials or sensitive paths into model context; and
-- expose `ok`, `warn`, `blocked`, and `restart-required` decisions separately.
-
-Codex currently provides `SessionStart` and `SubagentStart` command hooks, makes
-the active model and permission mode available to hooks, composes hooks from
-multiple active sources, and requires trust for changed non-managed hook
-definitions.[^codex-hooks] Claude Code provides `SessionStart`, `Setup`,
-`SubagentStart`, configuration/instruction lifecycle events, and live change
-detection for existing skill directories; creating a previously absent
-top-level skill directory still requires restart.[^claude-hooks][^claude-skills]
-These are valuable adapter seams, but the Spindle contract must remain correct
-when a harness supports only a pre-launch wrapper and post-start observation.
-
-## User experience
-
-The primary surface should be the harness where the work is already happening,
-backed by the CLI as a deterministic engine:
-
-```bash
-spindle harness setup --harness codex --here --dry-run
-spindle harness setup --harness codex --here
-
-# new Codex session:       $spindle show which skills are active and why
-# new Claude Code session: /spindle try this review skill once
-```
-
-The operator skill must stay minimal. It should query a compact live context and
-action contract rather than reproduce CLI documentation in model context. Its
-job is to translate user intent into the smallest exact lifecycle action, preview
-mutations, and refresh evidence afterward. Operator availability, native hook
-configuration, observed startup, target-skill activation, authorization, and
-behavior remain distinct gates.
-
-Harness routing must follow the active session, not merely the union of inherited
-environment variables: a Claude child launched from Codex legitimately exposes
-both marker sets. Prefer active runtime evidence and fail closed to an explicit
-adapter selection when it is unavailable.
-
-The same lifecycle should remain directly addressable from the CLI:
-
-```bash
-spindle find "review this migration" --here
-spindle inspect github:owner/repo#review --for "this migration"
-spindle try github:owner/repo#review --harness claude --task-file task.md
-spindle borrow github:owner/repo#review --here --until 2h
-
-spindle inventory --effective --here
-spindle why review --here
-spindle health --here
-
-spindle adopt lease-7e42 --scope repo
-spindle update try review
-spindle release lease-7e42
-spindle retire review
-```
-
-Harness startup should normally be invisible when state is correct:
-
-```text
-Spindle: 6 expected skills verified; 1 foreign skill preserved; receipt 82cc…
-```
-
-It should be specific when state is not correct:
-
-```text
-Spindle blocked startup: expected review@sha256:91d…, observed stale owned
-projection sha256:26a…; reconciled on disk, restart required before use.
-Foreign skill `review` at ~/.agents/skills/review was preserved and conflicts by
-name. Run `spindle why review --effective`.
-```
+The record chain, startup contract, and conformance cases are in
+[How it works](https://lavallee.github.io/spindle/how-it-works.html),
+[startup integrity](docs/startup-integrity.md), and
+[runtime realization](docs/runtime-realization.md).
 
 ## Trust and authority
 
-Trying must be easier than installing without becoming a path around consent.
+Trying and sourcing must be easier than installing without becoming a path
+around consent.
 
-- Inspection and structural scanning do not execute bundled scripts.
-- Unknown trials default to instruction-only, read-only authority.
-- Tool, network, credential, and filesystem expansion is shown and granted
-  separately.
-- Hook installation is explicit and respects native harness trust review.
-- Managed policies can prohibit local hooks, remote sources, executable skill
-  resources, or automatic reconciliation.
-- A clean scanner result is evidence, not proof of safety.
+- Inspection, catalog sync, and structural scanning never execute bundled
+  scripts. A clean scan is evidence, not proof of safety.
+- The catalog records static indicators of network, credential, and shell use,
+  and a pin update reports new ones before it is accepted.
+- An offered skill is read, not installed: it gains no tool, network, or
+  filesystem authority the agent did not already have.
+- Unknown trials default to instruction-only, read-only authority. Tool,
+  network, credential, and filesystem expansion is shown and granted separately.
+- Hook installation is explicit and respects the harness's own trust review.
+- Managed policy can prohibit local hooks, remote sources, executable skill
+  resources, automatic reconciliation, or sending task text to a judge.
 - Receipts record denials and mismatches; policy decides whether a run passes.
 
-## What completion looks like
+## Who uses it, and how
 
-Spindle is fulfilling this vision when a user can move from an intent to a
-temporary, correctly loaded skill session in minutes, without polluting durable
-state, and can later answer:
+- **A person at a harness** asks the agent to work. House rules and the kernel
+  are already loaded; the agent runs `spindle find` before unfamiliar or
+  high-stakes work, reads what is offered, and the person or a grader reports
+  the result.
+- **A machine or fleet** runs `spindle house update` on a timer from a dedicated
+  clone of the house, so every harness on it carries the merged rules and kernel.
+- **A project** vendors a pattern into the repository, so worktrees, other
+  machines, and dispatched jobs get the same rules and skills.
+- **A job runtime** calls `spindle brief` before dispatch (prompt block, skill
+  record, read roots), sets `SPINDLE_JOB` so the agent's own lookups are
+  attributed, stores the skill record with the job's receipt, passes it to the
+  reviewer, and calls `spindle report` after grading.
+- **An evaluator or critic agent** sees the producer's skill record beside the
+  work it judges, can attribute a defect to the guidance or to its absence, and
+  reports `helped` or `hurt` for the skills it can tie to the result.
 
-- what the skill was trying to change;
-- which exact revision and realization each agent received;
-- why that revision was present and who owned it;
-- what else the harness could see;
-- which authority was effective;
-- whether the skill materially improved the intended outcome;
-- whether the evidence is still current; and
-- whether the right next action is renew, adopt, update, distill, disable, or
-  retire.
+## What success looks like
 
-The north star is not the number of installed skills. It is useful behavior with
-low context cost, reversible custody, and a legible chain from intent to outcome.
+Spindle is fulfilling this vision when, across an estate of harnesses, machines,
+projects, and dispatched jobs:
+
+- every agent loads the current house rules and kernel without anyone copying
+  files, and a merged change to the house reaches all of them within a day;
+- a new public collection can be pinned, filtered, tried on real queries, and
+  made available in under an hour, and its upstream changes arrive as diffs;
+- for a typical task, the judge offers zero to two skills, and the ones offered
+  are opened and rated useful far more often than not;
+- every graded job names the exact skills it was offered, and evaluators use that
+  record;
+- skill outcomes accumulate fast enough that promotion and demotion are decided
+  by evidence, and the kernel stays small; and
+- installed skills, where they are still needed, keep the lifecycle's guarantees.
+
+The north star is useful agent behavior per unit of attention: the fewest,
+best-chosen instructions, with a legible chain from task to guidance to outcome.
 
 ## Boundaries
 
-Spindle should federate registries rather than require one canonical marketplace.
-It should accept third-party security and evaluation attestations while retaining
-its own composition and runtime evidence. It should not become a general package
-manager for every tool a skill may use, nor should it let a skill select its own
-model or silently expand its own permissions.
-
-The source skill remains portable. The adapter, startup control loop, leases,
-receipts, and evaluation claims are Spindle's value around that source.
+- Spindle federates sources and never becomes the canonical marketplace.
+- It does not execute third-party code to index or hand over a skill.
+- It does not let a skill choose its own model, permissions, or promotion.
+- It does not run jobs or own grading; it gives runtimes and graders the calls
+  and records they need.
+- Organization-specific providers, sinks, and estates live outside the open core
+  and depend on it.
 
 ## Related design notes
 
+- [The house, the catalog, and sourcing on demand](docs/house-and-sourcing.md)
 - [Minimalist skills after the default shifts](docs/minimalist-skills-vision.md)
 - [Skill lifecycle UX](docs/skill-lifecycle-ux.md)
 - [Runtime skill realization](docs/runtime-realization.md)
 - [Behavioral skill evaluations](docs/skill-evaluations.md)
-
-[^codex-hooks]: OpenAI, [Hooks](https://learn.chatgpt.com/docs/hooks), accessed July 31, 2026.
-[^claude-hooks]: Anthropic, [Hooks reference](https://code.claude.com/docs/en/hooks), accessed July 31, 2026.
-[^claude-skills]: Anthropic, [Extend Claude with skills](https://code.claude.com/docs/en/slash-commands), accessed July 31, 2026.
